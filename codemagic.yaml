@@ -1,0 +1,21 @@
+workflows:
+  ios-sfera:
+    name: iOS SFERA workflow
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      vars:
+        XCODE_PROJECT: "SFERA/SFERA.xcodeproj" # update to actual .xcodeproj path
+        XCODE_SCHEME: "SFERA"                  # update to actual scheme name
+    scripts:
+      - name: Build iOS app (unsigned)
+        script: |
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO
+    artifacts:
+      - build/ios/**/*.ipa
