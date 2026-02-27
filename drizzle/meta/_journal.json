@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1770787314201,
+      "tag": "0000_brave_miek",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770840830712,
+      "tag": "0001_dear_dragon_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770850131782,
+      "tag": "0002_add_themes_and_room_theme",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770860000000,
+      "tag": "0003_add_source_provider_telegram",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1770870000000,
+      "tag": "0004_add_content_image_url",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1771380000000,
+      "tag": "0005_add_universe_icon",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1771400000000,
+      "tag": "0006_add_aggregator_jobs",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1771500000000,
+      "tag": "0007_add_dm_attachments",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1771600000000,
+      "tag": "0008_add_group_chats",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1771694440496,
+      "tag": "0009_add_user_sources_and_user_content",
+      "breakpoints": true
+    }
+  ]
+}
