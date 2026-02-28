@@ -62,7 +62,7 @@ struct MessagesTab: View {
                         }
                         ForEach(conversations) { c in
                             NavigationLink {
-                                DMChatScreen(userId: c.userId)
+                                DMChatScreen(userId: c.userId ?? "")
                             } label: {
                                 HStack {
                                     Text(c.userName ?? "Пользователь")
