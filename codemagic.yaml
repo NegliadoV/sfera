@@ -16,6 +16,9 @@ workflows:
             -scheme "$XCODE_SCHEME" \
             -configuration Release \
             -sdk iphoneos \
+            -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO
+          mkdir -p build/ios
+          cp -r build/DerivedData/Build/Products/Release-iphoneos/SFERA.app build/ios/
     artifacts:
-      - build/ios/**/*.ipa
+      - build/ios/**/*.app
