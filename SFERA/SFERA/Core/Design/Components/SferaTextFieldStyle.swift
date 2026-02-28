@@ -2,16 +2,17 @@
 //  SferaTextFieldStyle.swift
 //  SFERA
 //
-//  Text field style matching web design
+//  Text field styling matching web design (ViewModifier for stable API)
 //
 
 import SwiftUI
 
-struct SferaTextFieldStyle: TextFieldStyle {
+/// Applies SFERA styling to a TextField. Use: `TextField(...).modifier(SferaTextFieldModifier(theme: themeManager))`
+struct SferaTextFieldModifier: ViewModifier {
     let theme: ThemeManager
 
-    func _body(configuration: TextFieldStyleConfiguration) -> some View {
-        configuration.label
+    func body(content: Content) -> some View {
+        content
             .padding(DesignTokens.spacingMd)
             .background(theme.bgCard)
             .foregroundColor(theme.textPrimary)

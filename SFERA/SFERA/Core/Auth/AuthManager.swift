@@ -21,7 +21,8 @@ final class AuthManager: ObservableObject {
 
     @Published private(set) var isAuthenticated = false
     @Published private(set) var user: AuthUser?
-    @Published var themeManager: ThemeManager { ThemeManager.shared }
+
+    var themeManager: ThemeManager { ThemeManager.shared }
 
     private(set) var token: String?
 

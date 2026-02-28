@@ -28,7 +28,7 @@ struct SignInView: View {
                             .font(.subheadline)
                             .foregroundColor(themeManager.textSecondary)
                         TextField("", text: $email)
-                            .textFieldStyle(SferaTextFieldStyle(theme: themeManager))
+                            .modifier(SferaTextFieldModifier(theme: themeManager))
                             .textContentType(.emailAddress)
                             .autocapitalization(.none)
                             .keyboardType(.emailAddress)
@@ -39,7 +39,7 @@ struct SignInView: View {
                             .font(.subheadline)
                             .foregroundColor(themeManager.textSecondary)
                         SecureField("", text: $password)
-                            .textFieldStyle(SferaTextFieldStyle(theme: themeManager))
+                            .modifier(SferaTextFieldModifier(theme: themeManager))
                             .textContentType(.password)
                     }
 
@@ -118,7 +118,7 @@ struct RegisterView: View {
                         .font(.subheadline)
                         .foregroundColor(themeManager.textSecondary)
                     TextField("", text: $email)
-                        .textFieldStyle(SferaTextFieldStyle(theme: themeManager))
+                        .modifier(SferaTextFieldModifier(theme: themeManager))
                         .textContentType(.emailAddress)
                         .autocapitalization(.none)
                         .keyboardType(.emailAddress)
@@ -129,7 +129,7 @@ struct RegisterView: View {
                         .font(.subheadline)
                         .foregroundColor(themeManager.textSecondary)
                     SecureField("", text: $password)
-                        .textFieldStyle(SferaTextFieldStyle(theme: themeManager))
+                        .modifier(SferaTextFieldModifier(theme: themeManager))
                         .textContentType(.newPassword)
                 }
 
@@ -138,7 +138,7 @@ struct RegisterView: View {
                         .font(.subheadline)
                         .foregroundColor(themeManager.textSecondary)
                     TextField("", text: $name)
-                        .textFieldStyle(SferaTextFieldStyle(theme: themeManager))
+                        .modifier(SferaTextFieldModifier(theme: themeManager))
                 }
 
                 if let err = errorMessage {
