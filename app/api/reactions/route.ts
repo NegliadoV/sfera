@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import { db, reactions } from '@/lib/db';
 import { eq, and, sql } from 'drizzle-orm';
 
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       .from(reactions)
       .where(and(eq(reactions.targetType, targetType as 'content' | 'comment'), eq(reactions.targetId, targetId)))
       .groupBy(reactions.reactionType);
-    const session = await auth();
+    const session = await getSessionForRequest(req);
     let myReaction: string | null = null;
     if (session?.user?.id) {
       const [mine] = await db
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

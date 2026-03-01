@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import { db, user, userBlocks } from '@/lib/db';
 import { eq, ilike, sql, and, or } from 'drizzle-orm';
 
@@ -10,7 +10,7 @@ const MAX_RESULTS = 20;
 
 /** GET /api/me/contacts/search?query=... — поиск по тегу, имени или email */
 export async function GET(req: NextRequest) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   const me = session?.user?.id;
   if (!me) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

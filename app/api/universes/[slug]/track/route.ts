@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import { db, universeTracking, universes } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
@@ -7,13 +7,13 @@ import { normalizeUniverseSlug } from '@/lib/universe-slug';
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const slug = normalizeUniverseSlug((await params).slug);
   if (!slug) return NextResponse.json({ tracking: false });
 
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) return NextResponse.json({ tracking: false });
 
   try {
@@ -38,13 +38,13 @@ export async function GET(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const slug = normalizeUniverseSlug((await params).slug);
   if (!slug) return NextResponse.json({ error: 'Universe not found' }, { status: 404 });
 
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -69,13 +69,13 @@ export async function DELETE(
 }
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const slug = normalizeUniverseSlug((await params).slug);
   if (!slug) return NextResponse.json({ error: 'Universe not found' }, { status: 404 });
 
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

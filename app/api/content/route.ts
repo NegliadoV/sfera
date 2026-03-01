@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import { db, content, user, comments, contentLinks } from '@/lib/db';
 import { eq, desc, and, sql, inArray } from 'drizzle-orm';
 
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 const CONTENT_TYPES = ['text', 'video', 'podcast', 'article', 'link'] as const;
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

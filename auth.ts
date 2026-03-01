@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
+import GitHub from 'next-auth/providers/github';
 import Credentials from 'next-auth/providers/credentials';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { db } from '@/lib/db';
@@ -12,6 +13,12 @@ const hasGoogleOAuth =
   process.env.AUTH_GOOGLE_ID !== '' &&
   process.env.AUTH_GOOGLE_SECRET != null &&
   process.env.AUTH_GOOGLE_SECRET !== '';
+
+const hasGitHubOAuth =
+  process.env.AUTH_GITHUB_ID != null &&
+  process.env.AUTH_GITHUB_ID !== '' &&
+  process.env.AUTH_GITHUB_SECRET != null &&
+  process.env.AUTH_GITHUB_SECRET !== '';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db, {
@@ -26,6 +33,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           Google({
             clientId: process.env.AUTH_GOOGLE_ID!,
             clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+          }),
+        ]
+      : []),
+    ...(hasGitHubOAuth
+      ? [
+          GitHub({
+            clientId: process.env.AUTH_GITHUB_ID!,
+            clientSecret: process.env.AUTH_GITHUB_SECRET!,
           }),
         ]
       : []),

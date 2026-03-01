@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import { db, universes, universeMembers, user } from '@/lib/db';
 import { desc, eq } from 'drizzle-orm';
 import { normalizeIconForStorage } from '@/lib/utils/icons';
@@ -33,7 +33,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

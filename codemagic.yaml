@@ -6,8 +6,8 @@ workflows:
     environment:
       xcode: latest
       vars:
-        XCODE_PROJECT: "SFERA/SFERA.xcodeproj" # update to actual .xcodeproj path
-        XCODE_SCHEME: "SFERA"                  # update to actual scheme name
+        XCODE_PROJECT: "SFERA/SFERA.xcodeproj"
+        XCODE_SCHEME: "SFERA"
     scripts:
       - name: Build iOS app (unsigned)
         script: |
@@ -22,3 +22,18 @@ workflows:
           cp -r build/DerivedData/Build/Products/Release-iphoneos/SFERA.app build/ios/
     artifacts:
       - build/ios/**/*.app
+
+  # React Native (Expo) — install and typecheck. For full EAS build set EXPO_TOKEN and run: cd mobile && npx eas build --platform all --non-interactive
+  mobile-rn:
+    name: Mobile RN (Expo) check
+    max_build_duration: 15
+    environment:
+      vars:
+        EXPO_PUBLIC_API_URL: "https://sfera.example.com"
+        EXPO_PUBLIC_WS_URL: "wss://sfera.example.com"
+    scripts:
+      - name: Install and typecheck
+        script: |
+          cd mobile
+          npm ci
+          npx tsc --noEmit

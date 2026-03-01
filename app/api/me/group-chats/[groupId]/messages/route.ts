@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import {
   db,
   groupChats,
@@ -15,12 +15,12 @@ export const dynamic = 'force-dynamic';
 
 const MAX_BODY_LENGTH = 8192;
 
-/** GET /api/me/group-chats/[groupId]/messages — сообщения группы */
+/** GET /api/me/group-chats/[groupId]/messages — сообщения группы (JWT или cookie) */
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ groupId: string }> }
 ) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -128,12 +128,12 @@ export async function GET(
   }
 }
 
-/** POST /api/me/group-chats/[groupId]/messages — отправить сообщение */
+/** POST /api/me/group-chats/[groupId]/messages — отправить сообщение (JWT или cookie) */
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ groupId: string }> }
 ) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

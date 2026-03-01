@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSessionForRequest } from '@/lib/session';
 import { db, universes, rooms, roomParticipants, user } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
 import { notifyRoom } from '@/lib/room-notify';
@@ -8,11 +8,11 @@ export const dynamic = 'force-dynamic';
 
 /** POST /api/universes/[slug]/rooms/[roomId]/join — войти в комнату */
 export async function POST(
-  _req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ slug: string; roomId: string }> }
 ) {
   const { slug, roomId } = await params;
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
