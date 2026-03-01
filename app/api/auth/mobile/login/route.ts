@@ -6,6 +6,11 @@ import { verifyPassword } from '@/lib/password';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Вход для мобильного приложения. Общая база с веб-приложением:
+ * пользователи, зарегистрированные на сайте (email/пароль), входят с теми же учётными данными.
+ * JWT возвращается в ответе; cookie-сессия не используется.
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -29,6 +34,12 @@ export async function POST(req: NextRequest) {
       .limit(1);
 
     if (!found) {
+      if (email === 'seed@horizon.local') {
+        return NextResponse.json(
+          { error: 'Seed-пользователь не найден в базе. В корне проекта выполните: npm run db:seed' },
+          { status: 404 }
+        );
+      }
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 

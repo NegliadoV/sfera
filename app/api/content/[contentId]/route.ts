@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import { db, content, user, universes, universeMembers } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ contentId: string }> }
 ) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -80,6 +80,7 @@ export async function GET(
         type: content.type,
         title: content.title,
         url: content.url,
+        imageUrl: content.imageUrl,
         body: content.body,
         createdAt: content.createdAt,
       })

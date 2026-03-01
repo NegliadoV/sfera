@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSessionForRequest } from '@/lib/session';
 import { db, universes, universeTracking } from '@/lib/db';
 import { eq, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 /** Возвращает только сферы, которые пользователь отслеживает или владеет ими */
-export async function GET() {
-  const session = await auth();
+export async function GET(req: NextRequest) {
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

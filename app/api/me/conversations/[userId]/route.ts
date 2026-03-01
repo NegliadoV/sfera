@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import {
   db,
   directMessageConversations,
@@ -12,12 +12,12 @@ import { eq, and, desc, isNull } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-/** GET /api/me/conversations/[userId] — сообщения с пользователем (пагинация) */
+/** GET /api/me/conversations/[userId] — сообщения с пользователем (JWT или cookie) */
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

@@ -8,7 +8,11 @@ export const dynamic = 'force-dynamic';
 const MIN_PASSWORD_LEN = 8;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** POST /api/auth/register — регистрация по email и паролю */
+/**
+ * POST /api/auth/register — регистрация по email и паролю.
+ * Общая база: один и тот же эндпоинт используют и веб, и мобильное приложение.
+ * Зарегистрированный пользователь может входить и на сайте, и в мобильном приложении с одними и теми же данными.
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));

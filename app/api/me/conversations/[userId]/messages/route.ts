@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import { db, directMessages, directMessageConversations, user } from '@/lib/db';
 import { eq, sql } from 'drizzle-orm';
 import { getOrCreateConversation, canSendDm } from '@/lib/dm-utils';
@@ -9,12 +9,12 @@ export const dynamic = 'force-dynamic';
 
 const MAX_BODY_LENGTH = 8192; // 8 KB
 
-/** POST /api/me/conversations/[userId]/messages — отправить сообщение */
+/** POST /api/me/conversations/[userId]/messages — отправить сообщение (JWT или cookie) */
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
