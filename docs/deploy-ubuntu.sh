@@ -123,7 +123,7 @@ if [ ! -f package.json ]; then
   exit 1
 fi
 if [ -f package-lock.json ]; then
-  npm ci
+  npm ci || { echo "npm ci не удался (lock не в sync) — выполняем npm install."; npm install; }
 else
   echo "package-lock.json отсутствует в репозитории — выполняем npm install."
   npm install
