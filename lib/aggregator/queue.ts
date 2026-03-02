@@ -1,26 +1,22 @@
 import { Queue } from 'bullmq';
-import Redis from 'ioredis';
+import { getRedisConnectionOptions } from './redisConnection';
 
-const redisConnection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
-});
+const connection = getRedisConnectionOptions();
 
 // Очередь для агрегации контента по вселенной
 export const aggregateUniverseQueue = new Queue('aggregate-universe', {
-  connection: redisConnection,
+  connection,
   skipVersionCheck: true, // для Redis 3.x (например Windows build)
 });
 
 // Очередь для получения контента из источника
 export const fetchSourceQueue = new Queue('fetch-source', {
-  connection: redisConnection,
+  connection,
   skipVersionCheck: true,
 });
 
 // Очередь для обработки отдельного элемента контента
 export const processContentQueue = new Queue('process-content', {
-  connection: redisConnection,
+  connection,
   skipVersionCheck: true,
 });
-
-export { redisConnection };
