@@ -130,6 +130,8 @@ export const content = pgTable('content', {
   publishedAt: timestamp('published_at', { withTimezone: true }),
   externalAuthor: text('external_author'), // Автор из внешнего источника
   tags: jsonb('tags'), // Массив строк или объект с тегами
+  /** Когда задано — пост закреплён в ленте сферы (отображается сверху) */
+  pinnedAt: timestamp('pinned_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, MouseEvent } from 'react';
 import { useHygiene } from '@/components/HygieneProvider';
 import { ContentPreview } from '@/components/content/ContentPreview';
@@ -16,6 +17,7 @@ interface ContentCardProps {
   authorName?: string | null;
   externalAuthor?: string | null;
   publishedAt?: Date | string | null;
+  pinnedAt?: Date | string | null;
   createdAt: Date | string;
   sourceId?: string | null;
   tags?: string[] | null;
@@ -23,6 +25,8 @@ interface ContentCardProps {
   commentCount?: number;
   slug: string;
   canDelete?: boolean;
+  canEdit?: boolean;
+  canPin?: boolean;
 }
 
 export function ContentCard({
@@ -35,6 +39,7 @@ export function ContentCard({
   authorName,
   externalAuthor,
   publishedAt,
+  pinnedAt,
   createdAt,
   sourceId,
   tags,
@@ -42,10 +47,15 @@ export function ContentCard({
   commentCount,
   slug,
   canDelete = false,
+  canEdit = false,
+  canPin = false,
 }: ContentCardProps) {
   useHygiene();
+  const router = useRouter();
   const [links, setLinks] = useState<Array<{ id: string; linkType: string; toContentId: string; note?: string }>>([]);
   const [showDeletePrompt, setShowDeletePrompt] = useState(false);
+  const [pinning, setPinning] = useState(false);
+  const isPinned = !!pinnedAt;
 
   useEffect(() => {
     if (!hasLinks) return;
@@ -78,6 +88,24 @@ export function ContentCard({
     setShowDeletePrompt(true);
   };
 
+  const handlePinToggle = async (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!canPin || pinning) return;
+    setPinning(true);
+    try {
+      const res = await fetch(`/api/content/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pinned: !isPinned }),
+        credentials: 'include',
+      });
+      if (res.ok) router.refresh();
+    } finally {
+      setPinning(false);
+    }
+  };
+
   return (
     <div
       className="content-card content-card-feed content-card-hover-wrap"
@@ -92,6 +120,11 @@ export function ContentCard({
       <div className="content-card-header">
         <div className="content-card-info">
           <div className="content-card-title-row">
+            {isPinned && (
+              <span className="content-card-pin-icon" title="Закреплён">
+                📌
+              </span>
+            )}
             <Link
               href={`/universes/${slug}/content/${id}`}
               className="content-card-title"
@@ -114,6 +147,25 @@ export function ContentCard({
             )}
           </div>
           <div className="content-card-footer" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+            {canPin && (
+              <button
+                type="button"
+                onClick={handlePinToggle}
+                disabled={pinning}
+                className="platform-btn platform-btn-sm"
+                title={isPinned ? 'Открепить' : 'Закрепить'}
+              >
+                {pinning ? '…' : isPinned ? 'Открепить' : 'Закрепить'}
+              </button>
+            )}
+            {canEdit && (
+              <Link
+                href={`/universes/${slug}/content/${id}?edit=1`}
+                className="platform-btn platform-btn-sm"
+              >
+                Редактировать
+              </Link>
+            )}
             {commentCount !== undefined && commentCount > 0 && (
               <span>{commentCount}</span>
             )}

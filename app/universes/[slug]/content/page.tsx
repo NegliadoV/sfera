@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { auth } from '@/auth';
 import { db, universes, content, user, comments, contentLinks, universeMembers } from '@/lib/db';
-import { eq, asc, sql, and } from 'drizzle-orm';
+import { eq, desc, sql, and } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
 import { AddContentForm } from '../AddContentForm';
 import { ContentCard } from '../ContentCard';
@@ -47,6 +47,7 @@ export default async function ContentFeedPage({
     externalAuthor: string | null;
     createdAt: Date;
     publishedAt: Date | null;
+    pinnedAt: Date | null;
     url: string | null;
     imageUrl: string | null;
     body: string | null;
@@ -97,13 +98,14 @@ export default async function ContentFeedPage({
         externalAuthor: content.externalAuthor,
         createdAt: content.createdAt,
         publishedAt: content.publishedAt,
+        pinnedAt: content.pinnedAt,
         sourceId: content.sourceId,
         tags: content.tags,
       })
       .from(content)
       .leftJoin(user, eq(content.authorId, user.id))
       .where(eq(content.universeId, u.id))
-      .orderBy(asc(content.createdAt))
+      .orderBy(desc(content.pinnedAt), desc(content.createdAt))
       .limit(50);
 
     contentList = await Promise.all(
@@ -131,14 +133,6 @@ export default async function ContentFeedPage({
   }
 
   const name = universeRow?.name ?? FALLBACK[slug]?.name ?? slug.replace(/-/g, ' ');
-  const search = await searchParams;
-  const showList = search?.list === '1' || search?.list === 'true';
-
-  // При переходе на ленту сферы без ?list=1 — редирект на последний (новейший) пост
-  if (!showList && contentList.length > 0) {
-    const newestPost = contentList[contentList.length - 1];
-    redirect(`/universes/${slug}/content/${newestPost.id}`);
-  }
 
   return (
     <div className="platform-page">
@@ -193,11 +187,7 @@ export default async function ContentFeedPage({
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <p className="platform-card-desc" style={{ marginBottom: 8 }}>
-            <Link href={`/universes/${slug}/content?list=1`} style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
-              Вся лента
-            </Link>
-            {' · '}
-            <span>Внизу — последние посты</span>
+            Закреплённые посты отображаются сверху.
           </p>
           {contentList.map((c) => (
             <ContentCard
@@ -211,6 +201,7 @@ export default async function ContentFeedPage({
               authorName={c.authorName}
               externalAuthor={c.externalAuthor}
               publishedAt={c.publishedAt}
+              pinnedAt={c.pinnedAt}
               createdAt={c.createdAt}
               sourceId={c.sourceId}
               tags={c.tags}
@@ -218,6 +209,8 @@ export default async function ContentFeedPage({
               commentCount={c.commentCount}
               slug={slug}
               canDelete={canDelete}
+              canEdit={canDelete}
+              canPin={canDelete}
             />
           ))}
         </div>

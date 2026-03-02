@@ -12,6 +12,8 @@ import { isDirectVideoUrl } from '@/lib/video-url';
 import { ContentLinks } from './ContentLinks';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { DeleteContentButton } from '../DeleteContentButton';
+import { EditContentForm } from './EditContentForm';
+import { PinUnpinButton } from './PinUnpinButton';
 
 type Params = { slug: string; contentId: string };
 
@@ -32,10 +34,11 @@ export default async function UniverseContentPage({
   params: Promise<Params>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  if (searchParams) await searchParams;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const p = await params;
   const slug = normalizeUniverseSlug(p.slug);
   const contentId = p.contentId;
+  const showEditForm = resolvedSearchParams?.edit === '1';
   if (!slug) notFound();
   const session = await auth();
 
@@ -51,6 +54,7 @@ export default async function UniverseContentPage({
       body: content.body,
       imageUrl: content.imageUrl,
       createdAt: content.createdAt,
+      pinnedAt: content.pinnedAt,
       // Фаза 2: метаданные
       sourceId: content.sourceId,
       publishedAt: content.publishedAt,
@@ -158,6 +162,8 @@ export default async function UniverseContentPage({
   }
 
   let canDelete = false;
+  let canEdit = false;
+  let canPin = false;
   if (session?.user?.id) {
     const [universe] = await db
       .select({ ownerId: universes.ownerId })
@@ -179,6 +185,8 @@ export default async function UniverseContentPage({
         .limit(1);
       const isModerator = member?.role === 'moderator' || member?.role === 'owner';
       canDelete = isOwner || isModerator || isSid;
+      canEdit = contentRow.authorId === session.user.id || isModerator || isSid;
+      canPin = isModerator || isSid;
     }
   }
 
@@ -193,13 +201,26 @@ export default async function UniverseContentPage({
       <div className="platform-breadcrumb mb-6">
         <Link href="/">Сферы</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <Link href={`/universes/${slug}`}>Сфера</Link>
+        <Link href={`/universes/${slug}/content`}>Сфера</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <span>{contentRow.title}</span>
       </div>
+      {showEditForm && canEdit && (
+        <EditContentForm
+          contentId={contentId}
+          slug={slug}
+          initialTitle={contentRow.title}
+          initialBody={contentRow.body}
+          initialUrl={contentRow.url}
+          onCancel={() => {}}
+        />
+      )}
       <article className="platform-card mb-8">
         <div>
-          <h1 className="platform-hero-title platform-content-title">
+          <h1 className="platform-hero-title platform-content-title flex items-center gap-2 flex-wrap">
+            {contentRow.pinnedAt && (
+              <span title="Закреплён" className="text-lg">📌</span>
+            )}
             {contentRow.title}
           </h1>
           <div className="platform-card-desc text-sm mb-4 flex flex-wrap items-center gap-2">
@@ -315,6 +336,21 @@ export default async function UniverseContentPage({
       </article>
       {session?.user?.id && (
         <div className="mb-6 flex flex-wrap gap-4 items-center text-sm" style={{ color: 'var(--text-secondary)' }}>
+          {canPin && (
+            <PinUnpinButton
+              contentId={contentId}
+              pinned={!!contentRow.pinnedAt}
+              className="platform-btn platform-btn-sm no-underline"
+            />
+          )}
+          {canEdit && !showEditForm && (
+            <Link
+              href={`/universes/${slug}/content/${contentId}?edit=1`}
+              className="platform-btn platform-btn-sm no-underline"
+            >
+              Редактировать
+            </Link>
+          )}
           {canDelete && (
             <DeleteContentButton
               contentId={contentId}
@@ -351,7 +387,7 @@ export default async function UniverseContentPage({
           </div>
         )}
         <Link
-          href={contentRow.sourceId ? `/universes/${slug}/sources/${contentRow.sourceId}` : `/universes/${slug}/content?list=1`}
+          href={contentRow.sourceId ? `/universes/${slug}/sources/${contentRow.sourceId}` : `/universes/${slug}/content`}
           className="platform-btn platform-btn-sm no-underline mb-4 inline-flex"
         >
           Назад к постам
