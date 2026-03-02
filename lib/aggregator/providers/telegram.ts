@@ -63,6 +63,11 @@ export async function fetchTelegram(channelOrPostUrl: string): Promise<TelegramI
 
   try {
     const items = await fetchRSS(rssUrl);
+    if (items.length === 0 && RSSHUB_BASE.includes('rsshub.app')) {
+      console.warn(
+        `[Telegram Provider] Канал @${channelName}: 0 постов. Публичный rsshub.app часто лимитирует Telegram. Для стабильной работы задайте свой RSSHub в .env: TELEGRAM_RSSHUB_URL=https://ваш-rsshub`
+      );
+    }
     return items.slice(0, CHANNEL_POSTS_LIMIT).map((item) => ({
       title: item.title,
       url: item.url,

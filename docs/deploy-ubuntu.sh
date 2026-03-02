@@ -70,6 +70,24 @@ sudo systemctl enable redis-server
 sudo systemctl start redis-server || true
 
 echo ""
+echo "--- 4.5. RSSHub (для агрегации Telegram) ---"
+if command -v docker >/dev/null 2>&1; then
+  echo "Docker уже установлен."
+else
+  sudo apt install -y docker.io
+  sudo systemctl enable docker
+  sudo systemctl start docker || true
+fi
+if sudo docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q '^rsshub$'; then
+  echo "Контейнер RSSHub уже есть, запускаем..."
+  sudo docker start rsshub 2>/dev/null || true
+else
+  echo "Запуск RSSHub на порту 1200..."
+  sudo docker run -d --name rsshub --restart unless-stopped -p 1200:1200 diygod/rsshub
+fi
+echo "RSSHub: http://127.0.0.1:1200"
+
+echo ""
 echo "--- 5. Пользователь и база PostgreSQL ---"
 sudo -u postgres psql -c "CREATE USER sfera WITH PASSWORD '$DB_PASSWORD';" 2>/dev/null || true
 sudo -u postgres psql -c "CREATE DATABASE sfera OWNER sfera;" 2>/dev/null || true
@@ -139,6 +157,7 @@ NEXTAUTH_URL=http://${EXTERNAL_IP}:3000
 WS_PORT=3002
 NEXT_PUBLIC_WS_URL=http://${EXTERNAL_IP}:3002
 WS_SERVER_URL=http://127.0.0.1:3002
+TELEGRAM_RSSHUB_URL=http://127.0.0.1:1200
 # Опционально: вход через GitHub (создайте OAuth App на github.com/settings/developers)
 # AUTH_GITHUB_ID=
 # AUTH_GITHUB_SECRET=
