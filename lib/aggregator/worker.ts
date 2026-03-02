@@ -1,5 +1,4 @@
 import { Worker } from 'bullmq';
-import Redis from 'ioredis';
 import { db } from '@/lib/db';
 import { sources } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -8,12 +7,11 @@ import { fetchYouTube } from './providers/youtube';
 import { fetchTelegram } from './providers/telegram';
 import { fetchSourceQueue, processContentQueue } from './queue';
 import { processContentItem } from './functions';
+import { getRedisConnectionOptions } from './redisConnection';
 
 const MAX_ITEMS_PER_SOURCE = 15;
 
-const redisConnection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null,
-});
+const connection = getRedisConnectionOptions();
 
 // Воркер для агрегации контента по вселенной
 export const aggregateUniverseWorker = new Worker(
@@ -44,7 +42,7 @@ export const aggregateUniverseWorker = new Worker(
     return { processed: universeSources.length };
   },
   {
-    connection: redisConnection,
+    connection,
     skipVersionCheck: true,
     concurrency: 2, // Максимум 2 вселенные обрабатываются одновременно
     limiter: {
@@ -124,7 +122,7 @@ export const fetchSourceWorker = new Worker(
     return { itemsProcessed: items.length };
   },
   {
-    connection: redisConnection,
+    connection,
     skipVersionCheck: true,
     concurrency: 3, // Максимум 3 источника обрабатываются одновременно
     limiter: {
@@ -154,7 +152,7 @@ export const processContentWorker = new Worker(
     });
   },
   {
-    connection: redisConnection,
+    connection,
     skipVersionCheck: true,
     concurrency: 5, // Максимум 5 элементов контента обрабатываются одновременно
     limiter: {
