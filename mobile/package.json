@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
+    "start:server": "CI=1 expo start",
     "start:tunnel": "expo start --tunnel",
     "start:tunnel-clear": "expo start -c --tunnel",
     "android": "expo start --android",
