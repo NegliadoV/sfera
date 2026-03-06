@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FlatList, RefreshControl, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { FlatList, RefreshControl, TouchableOpacity, Text, StyleSheet, Alert, Modal, Pressable, View } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { mobileLayout, spacing, typography, accentButtonShadow, darkColors, screenLayout } from '@/constants/Theme';
 import { apiRequest } from '@/lib/api';
@@ -14,6 +14,7 @@ export default function UniverseContentScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [pinningId, setPinningId] = useState<string | null>(null);
+  const [menuItem, setMenuItem] = useState<ContentItem | null>(null);
 
   const load = async () => {
     if (!slug) {
@@ -53,34 +54,38 @@ export default function UniverseContentScreen() {
 
   const handleLongPress = (item: ContentItem) => {
     if (!slug) return;
-    const isPinned = !!item.pinnedAt;
-    const shareParams = `shareContent=${encodeURIComponent(item.id)}&shareTitle=${encodeURIComponent(item.title ?? '')}&shareSlug=${encodeURIComponent(slug)}`;
+    setMenuItem(item);
+  };
 
-    Alert.alert(
-      item.title ?? 'Без названия',
-      undefined,
-      [
-        {
-          text: 'Изменить',
-          onPress: () => router.push(`/(tabs)/universes/${slug}/content/${item.id}?edit=1` as any),
-        },
-        {
-          text: isPinned ? 'Открепить' : 'Закрепить',
-          onPress: () => handlePinToggle(item.id, isPinned),
-        },
-        {
-          text: 'Переслать',
-          onPress: () => router.push(`/(tabs)/messages?${shareParams}` as any),
-        },
-        {
-          text: 'Удалить',
-          style: 'destructive',
-          onPress: () => confirmDelete(item.id, item.title),
-        },
-        { text: 'Отмена', style: 'cancel' },
-      ],
-      { cancelable: true }
-    );
+  const closeMenu = () => setMenuItem(null);
+
+  const runEdit = () => {
+    if (!slug || !menuItem) return;
+    closeMenu();
+    router.push(`/(tabs)/universes/${slug}/content/${menuItem.id}?edit=1` as any);
+  };
+
+  const runPinToggle = () => {
+    if (!menuItem) return;
+    const id = menuItem.id;
+    const isPinned = !!menuItem.pinnedAt;
+    closeMenu();
+    handlePinToggle(id, isPinned);
+  };
+
+  const runForward = () => {
+    if (!slug || !menuItem) return;
+    const shareParams = `shareContent=${encodeURIComponent(menuItem.id)}&shareTitle=${encodeURIComponent(menuItem.title ?? '')}&shareSlug=${encodeURIComponent(slug)}`;
+    closeMenu();
+    router.push(`/(tabs)/messages?${shareParams}` as any);
+  };
+
+  const runDelete = () => {
+    if (!menuItem) return;
+    const id = menuItem.id;
+    const title = menuItem.title;
+    closeMenu();
+    confirmDelete(id, title);
   };
 
   const handlePinToggle = async (contentId: string, currentlyPinned: boolean) => {
@@ -162,6 +167,42 @@ export default function UniverseContentScreen() {
         )}
         ListEmptyComponent={<EmptyState message="Нет контента" />}
       />
+
+      <Modal
+        visible={!!menuItem}
+        transparent
+        animationType="fade"
+        onRequestClose={closeMenu}
+      >
+        <Pressable style={styles.menuBackdrop} onPress={closeMenu}>
+          <Pressable style={[styles.menuBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={(e) => e.stopPropagation()}>
+            {menuItem ? (
+              <>
+                <Text style={[styles.menuTitle, { color: colors.textSecondary }]} numberOfLines={1}>
+                  {menuItem.title ?? 'Без названия'}
+                </Text>
+                <TouchableOpacity style={styles.menuRow} onPress={runEdit} activeOpacity={0.7}>
+                  <Text style={[styles.menuRowText, { color: colors.textPrimary }]}>Изменить</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuRow} onPress={runPinToggle} activeOpacity={0.7}>
+                  <Text style={[styles.menuRowText, { color: colors.textPrimary }]}>
+                    {menuItem.pinnedAt ? 'Открепить' : 'Закрепить'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuRow} onPress={runForward} activeOpacity={0.7}>
+                  <Text style={[styles.menuRowText, { color: colors.textPrimary }]}>Переслать</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuRow} onPress={runDelete} activeOpacity={0.7}>
+                  <Text style={[styles.menuRowText, { color: colors.accent }]}>Удалить</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.menuRow, styles.menuRowCancel]} onPress={closeMenu} activeOpacity={0.7}>
+                  <Text style={[styles.menuRowText, { color: colors.textSecondary }]}>Отмена</Text>
+                </TouchableOpacity>
+              </>
+            ) : null}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScreenContainer>
   );
 }
@@ -175,4 +216,31 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
     justifyContent: 'center',
   },
+  menuBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  menuBox: {
+    width: '100%',
+    maxWidth: 320,
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  menuTitle: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontSize: 13,
+  },
+  menuRow: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  menuRowText: { fontSize: 16 },
+  menuRowCancel: { borderTopWidth: 2, borderTopColor: 'rgba(255,255,255,0.12)' },
 });
