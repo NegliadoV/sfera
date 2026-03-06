@@ -15,6 +15,7 @@ export type ContentItem = {
   authorId?: string;
   createdAt?: string;
   updatedAt?: string;
+  pinnedAt?: string | null;
 };
 
 export type DigestItem = {
