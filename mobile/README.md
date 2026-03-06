@@ -61,24 +61,11 @@ npm start
 
 При `npm start` под **root** (например на Linux-сервере) Expo может пытаться установить/запустить React Native DevTools (Electron), и появляется ошибка *«Running as root without --no-sandbox is not supported»*.
 
-**Варианты:**
+**Что делать:**
 
-1. **Запуск без DevTools (часто помогает):**
-   ```bash
-   npm run start:server
-   ```
-   Скрипт задаёт `CI=1`, из‑за чего Expo может не трогать DevTools. QR-код и Metro работают как обычно.
+- **Ошибку можно не исправлять.** Сразу под ней в терминале выводятся **QR-код** и строка `Metro: exp://192.168.x.x:8081` — Metro уже запущен, по QR можно открыть приложение в Expo Go. Сообщение ERROR относится только к установке DevTools и на работу Metro не влияет.
 
-2. **Запуск не от root** (предпочтительно на проде):
-   ```bash
-   sudo useradd -m -s /bin/bash expo
-   sudo su - expo
-   cd /opt/sfera/mobile
-   npm run start:server
-   ```
-   Либо: `sudo -u expo npm run start:server` из каталога `mobile` (предварительно выдать пользователю `expo` доступ к каталогу).
-
-3. Игнорировать сообщение **ERROR** — если в терминале уже появились QR-код и строка `Metro: exp://...`, Metro запущен, приложением можно пользоваться; ошибка касается только установки DevTools.
+- Если хочется убрать ошибку: запускайте Metro **не от root** (создайте пользователя, например `expo`, и запускайте от него: `sudo -u expo npm start` из каталога `mobile`).
 
 ### Туннель не подключается (ngrok took too long to connect)
 
