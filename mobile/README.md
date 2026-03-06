@@ -57,6 +57,29 @@ npm start
 1. В папке `mobile`: `npm run start:tunnel`. Если появится *«ngrok tunnel took too long to connect»*, см. раздел **«Туннель не подключается»** ниже.
 2. После появления QR и ссылки `exp://...` откройте их в Expo Go на iPhone.
 
+### Запуск на сервере под root (ошибка «React Native DevTools» / Electron)
+
+При `npm start` под **root** (например на Linux-сервере) Expo может пытаться установить/запустить React Native DevTools (Electron), и появляется ошибка *«Running as root without --no-sandbox is not supported»*.
+
+**Варианты:**
+
+1. **Запуск без DevTools (часто помогает):**
+   ```bash
+   npm run start:server
+   ```
+   Скрипт задаёт `CI=1`, из‑за чего Expo может не трогать DevTools. QR-код и Metro работают как обычно.
+
+2. **Запуск не от root** (предпочтительно на проде):
+   ```bash
+   sudo useradd -m -s /bin/bash expo
+   sudo su - expo
+   cd /opt/sfera/mobile
+   npm run start:server
+   ```
+   Либо: `sudo -u expo npm run start:server` из каталога `mobile` (предварительно выдать пользователю `expo` доступ к каталогу).
+
+3. Игнорировать сообщение **ERROR** — если в терминале уже появились QR-код и строка `Metro: exp://...`, Metro запущен, приложением можно пользоваться; ошибка касается только установки DevTools.
+
 ### Туннель не подключается (ngrok took too long to connect)
 
 В Expo нельзя увеличить таймаут туннеля. Что помогает:
