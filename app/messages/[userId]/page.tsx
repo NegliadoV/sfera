@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useDMSocket } from '@/hooks/useDMSocket';
@@ -11,6 +11,7 @@ import { YouTubeEmbed } from '@/components/YouTubeEmbed';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { GifPicker } from '@/components/GifPicker';
 import { ImageLightbox } from '@/components/ImageLightbox';
+import { SharedContentLinkPreview, getContentId } from '@/components/SharedContentLinkPreview';
 import { getYouTubeVideoId } from '@/lib/youtube';
 
 type MessageItem = {
@@ -24,29 +25,40 @@ type MessageItem = {
   readAt: string | null;
 };
 
-/** Рендер текста с кликабельными ссылками; YouTube — встроенный плеер */
-function renderBodyWithLinks(text: string) {
-  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/gi;
-  const parts = text.split(urlRegex);
-  return parts.map((part, i) => {
-    if (!part.match(urlRegex)) return part;
-    const ytId = getYouTubeVideoId(part);
-    if (ytId) {
-      return (
-        <div key={i} style={{ margin: '10px 0', minWidth: 320, maxWidth: 560, width: '100%' }}>
-          <a href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline', fontSize: '0.85rem', display: 'block', marginBottom: 8, wordBreak: 'break-all' }}>
+const URL_REGEX = /(https?:\/\/[^\s<>"{}|\\^`[\]]+|\/universes\/[^\s<>"{}|\\^`[\]]+)/gi;
+
+/** Рендер текста с кликабельными ссылками; ссылки на контент — превью карточка; YouTube — встроенный плеер */
+function MessageBodyWithPreviews({ body }: { body: string }) {
+  const parts = body.split(URL_REGEX);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (!part) return null;
+        const isUrl = part.match(URL_REGEX);
+        if (!isUrl) return <span key={i}>{part}</span>;
+        const contentId = getContentId(part);
+        if (contentId) {
+          return <SharedContentLinkPreview key={i} url={part} contentId={contentId} />;
+        }
+        const ytId = getYouTubeVideoId(part);
+        if (ytId) {
+          return (
+            <div key={i} style={{ margin: '10px 0', minWidth: 320, maxWidth: 560, width: '100%' }}>
+              <a href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline', fontSize: '0.85rem', display: 'block', marginBottom: 8, wordBreak: 'break-all' }}>
+                {part}
+              </a>
+              <YouTubeEmbed videoId={ytId} title="YouTube" compact={false} />
+            </div>
+          );
+        }
+        return (
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline', wordBreak: 'break-all' }}>
             {part}
           </a>
-          <YouTubeEmbed videoId={ytId} title="YouTube" compact={false} />
-        </div>
-      );
-    }
-    return (
-      <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
-        {part}
-      </a>
-    );
-  });
+        );
+      })}
+    </>
+  );
 }
 
 const TYPING_DURATION_MS = 3000;
@@ -54,6 +66,12 @@ const TYPING_DURATION_MS = 3000;
 export default function MessageChatPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const shareContent = searchParams.get('shareContent');
+  const shareTitle = searchParams.get('shareTitle');
+  const shareSlug = searchParams.get('shareSlug');
+  const sharePrefilledRef = useRef(false);
+
   const { data: session } = useSession();
   const userId = params?.userId as string;
   const [messages, setMessages] = useState<MessageItem[]>([]);
@@ -290,6 +308,13 @@ export default function MessageChatPage() {
     return () => { cancelled = true; };
   }, [userId, router]);
 
+  useEffect(() => {
+    if (!shareContent || !shareSlug || sharePrefilledRef.current || typeof window === 'undefined') return;
+    sharePrefilledRef.current = true;
+    const contentUrl = `${window.location.origin}/universes/${encodeURIComponent(shareSlug)}/content/${encodeURIComponent(shareContent)}`;
+    setInputValue(contentUrl);
+  }, [shareContent, shareSlug]);
+
   async function handleBlock() {
     if (!userId) return;
     const res = await fetch('/api/me/blocks', {
@@ -334,6 +359,9 @@ export default function MessageChatPage() {
           createdAt: data.createdAt,
           readAt: data.readAt ?? null,
         });
+        if (shareContent && shareSlug) {
+          router.replace(`/messages/${encodeURIComponent(userId)}`, { scroll: false });
+        }
         fetch(`/api/me/conversations/${encodeURIComponent(userId)}/read`, { method: 'PATCH', credentials: 'include' })
           .then((r) => { if (r.ok) window.dispatchEvent(new CustomEvent('messages-badge-refresh')); })
           .catch(() => {});
@@ -629,7 +657,7 @@ export default function MessageChatPage() {
                         </a>
                       );
                     })()}
-                    {m.body && m.body !== '📎' ? renderBodyWithLinks(m.body) : null}
+                    {m.body && m.body !== '📎' ? <MessageBodyWithPreviews body={m.body} /> : null}
                     {!isFromThem && (
                       <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: 4 }}>
                         {m.readAt ? 'Прочитано' : 'Отправлено'}
@@ -784,6 +812,32 @@ export default function MessageChatPage() {
                 <div style={{ fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{replyingTo.body.slice(0, 80)}{replyingTo.body.length > 80 ? '…' : ''}</div>
               </div>
               <button type="button" onClick={() => setReplyingTo(null)} style={{ padding: 4, border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }} aria-label="Отмена">×</button>
+            </div>
+          )}
+          {shareContent && shareSlug && (
+            <div
+              style={{
+                marginBottom: 10,
+                padding: 10,
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-accent)',
+                border: '1px solid var(--border-subtle)',
+              }}
+            >
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 4 }}>
+                Переслать материал
+              </div>
+              <Link
+                href={`/universes/${encodeURIComponent(shareSlug)}/content/${encodeURIComponent(shareContent)}`}
+                style={{
+                  fontWeight: 600,
+                  color: 'var(--accent-primary)',
+                  textDecoration: 'none',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {shareTitle ? decodeURIComponent(shareTitle) : 'Материал'}
+              </Link>
             </div>
           )}
           <form onSubmit={handleSubmit} style={{ flexShrink: 0 }}>
