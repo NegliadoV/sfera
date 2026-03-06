@@ -54,11 +54,27 @@ npm start
 
 **Вариант B — Tunnel (если LAN не подходит):**
 
-1. В папке `mobile`: `npm run start:tunnel`. Если появится *«ngrok tunnel took too long to connect»*, попробуйте:
-   - ещё раз через 1–2 минуты;
-   - с очисткой кэша: `npm run start:tunnel-clear`;
-   - проверить, не блокирует ли файрвол/корпоративная сеть ngrok.
+1. В папке `mobile`: `npm run start:tunnel`. Если появится *«ngrok tunnel took too long to connect»*, см. раздел **«Туннель не подключается»** ниже.
 2. После появления QR и ссылки `exp://...` откройте их в Expo Go на iPhone.
+
+### Туннель не подключается (ngrok took too long to connect)
+
+В Expo нельзя увеличить таймаут туннеля. Что помогает:
+
+1. **Лучший вариант — не использовать tunnel.** Подключите телефон и ПК к **одной Wi‑Fi** и запускайте без `--tunnel`:
+   ```bash
+   cd mobile
+   npm start
+   ```
+   Отсканируйте QR-код из терминала (адрес будет вида `exp://192.168.x.x:8081`). API при этом может указывать на ваш сервер через `.env` (например `EXPO_PUBLIC_API_URL=https://jhonlohanta.xyz`).
+
+2. **Повторить запуск туннеля** — часто срабатывает со 2–3 попытки: `npm run start:tunnel`.
+
+3. **Очистить кэш и снова tunnel:** `npm run start:tunnel-clear`.
+
+4. **Временно отключить антивирус/брандмауэр** на ПК и снова запустить `npm run start:tunnel`.
+
+5. **Установить ngrok отдельно:** скачать с https://ngrok.com/download, запустить `ngrok` и оставить окно открытым, затем в другом терминале: `npm run start:tunnel`.
 
 **Версия Expo Go (SDK 55) на iPhone:** в App Store может быть старая версия. Установите Expo Go для SDK 55 по **приглашению TestFlight** — откройте на iPhone ссылку (отдельный код не нужен): **https://testflight.apple.com/join/GZJxxfUU** → «Accept» → в TestFlight появится установка Expo Go.
 

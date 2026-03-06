@@ -1,6 +1,8 @@
 import { Config } from '@/constants/Config';
 import { getToken } from '@/lib/authStorage';
 
+const API_TIMEOUT_MS = 20000;
+
 type RequestOptions = RequestInit & { skipAuth?: boolean };
 
 export async function apiRequest<T = unknown>(
@@ -17,7 +19,21 @@ export async function apiRequest<T = unknown>(
     const token = await getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
   }
-  const res = await fetch(url, { ...init, headers });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), init.signal ? undefined : API_TIMEOUT_MS);
+  const signal = init.signal ?? controller.signal;
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, headers, signal });
+  } catch (e) {
+    clearTimeout(timeoutId);
+    if (e instanceof Error) {
+      if (e.name === 'AbortError') throw new Error('Нет ответа от сервера. Проверьте интернет и EXPO_PUBLIC_API_URL.');
+      if (e.message?.includes('Network') || e.message?.includes('fetch')) throw new Error('Нет связи с сервером. Проверьте интернет и настройки API.');
+    }
+    throw e;
+  }
+  clearTimeout(timeoutId);
   if (!res.ok) {
     const text = await res.text();
     let message = text || `HTTP ${res.status}`;

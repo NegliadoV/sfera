@@ -129,7 +129,7 @@ export default async function ContentFeedPage({
     );
   } catch (err) {
     console.error('[content/feed]', err);
-    notFound();
+    throw err;
   }
 
   const name = universeRow?.name ?? FALLBACK[slug]?.name ?? slug.replace(/-/g, ' ');

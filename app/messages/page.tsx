@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { CreateGroupModal } from '@/components/CreateGroupModal';
 
 type ConversationItem = {
@@ -27,6 +28,14 @@ type GroupItem = {
 };
 
 export default function MessagesPage() {
+  const searchParams = useSearchParams();
+  const shareContent = searchParams.get('shareContent');
+  const shareTitle = searchParams.get('shareTitle');
+  const shareSlug = searchParams.get('shareSlug');
+  const shareQuery = shareContent && shareSlug
+    ? `?shareContent=${encodeURIComponent(shareContent)}&shareTitle=${encodeURIComponent(shareTitle || '')}&shareSlug=${encodeURIComponent(shareSlug)}`
+    : '';
+
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [groups, setGroups] = useState<GroupItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +65,7 @@ export default function MessagesPage() {
       type: 'dm' as const,
       key: c.userId,
       lastAt: c.lastMessageAt ?? c.lastMessage?.createdAt ?? '',
-      link: `/messages/${encodeURIComponent(c.userId)}`,
+      link: `/messages/${encodeURIComponent(c.userId)}${shareQuery}`,
       title: c.userName ?? 'Участник',
       subtitle: c.lastMessage?.body?.slice(0, 80) ?? '',
       image: c.userImage,
@@ -65,7 +74,7 @@ export default function MessagesPage() {
       type: 'group' as const,
       key: g.id,
       lastAt: g.lastMessageAt ?? g.lastMessage?.createdAt ?? '',
-      link: `/messages/group/${g.id}`,
+      link: `/messages/group/${g.id}${shareQuery}`,
       title: g.name,
       subtitle: g.lastMessage?.body?.slice(0, 80) ?? '',
       image: g.participants[0]?.image ?? null,
@@ -80,6 +89,33 @@ export default function MessagesPage() {
       <p className="platform-card-desc mb-6">
         Личные диалоги и групповые чаты.
       </p>
+
+      {shareContent && shareSlug && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: 12,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--bg-accent)',
+            border: '1px solid var(--border-subtle)',
+          }}
+        >
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 4 }}>
+            Пересылаете материал
+          </div>
+          <Link
+            href={`/universes/${encodeURIComponent(shareSlug)}/content/${encodeURIComponent(shareContent)}`}
+            style={{
+              fontWeight: 600,
+              color: 'var(--accent-primary)',
+              textDecoration: 'none',
+              wordBreak: 'break-word',
+            }}
+          >
+            {shareTitle ? decodeURIComponent(shareTitle) : 'Материал'}
+          </Link>
+        </div>
+      )}
 
       {loading ? (
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Загрузка…</p>

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, MouseEvent } from 'react';
+import { useState, useEffect, useRef, MouseEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useHygiene } from '@/components/HygieneProvider';
 import { ContentPreview } from '@/components/content/ContentPreview';
 import { DeleteContentButton } from './content/DeleteContentButton';
@@ -54,8 +55,13 @@ export function ContentCard({
   const router = useRouter();
   const [links, setLinks] = useState<Array<{ id: string; linkType: string; toContentId: string; note?: string }>>([]);
   const [showDeletePrompt, setShowDeletePrompt] = useState(false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
   const [pinning, setPinning] = useState(false);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
   const isPinned = !!pinnedAt;
+
+  const shareSearch = `?shareContent=${encodeURIComponent(id)}&shareTitle=${encodeURIComponent(title)}&shareSlug=${encodeURIComponent(slug)}`;
 
   useEffect(() => {
     if (!hasLinks) return;
@@ -82,11 +88,29 @@ export function ContentCard({
   const hasPreview = url || imageUrl;
 
   const handleContextMenu = (e: MouseEvent<HTMLDivElement>) => {
-    if (!canDelete) return;
     e.preventDefault();
     e.stopPropagation();
-    setShowDeletePrompt(true);
+    setContextMenuPos({ x: e.clientX, y: e.clientY });
+    setShowContextMenu(true);
   };
+
+  useEffect(() => {
+    if (!showContextMenu) return;
+    const handleClick = (e: Event) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
+        setShowContextMenu(false);
+      }
+    };
+    const handleScroll = () => setShowContextMenu(false);
+    document.addEventListener('click', handleClick, true);
+    document.addEventListener('contextmenu', handleClick, true);
+    window.addEventListener('scroll', handleScroll, true);
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('contextmenu', handleClick, true);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [showContextMenu]);
 
   const handlePinToggle = async (e: MouseEvent) => {
     e.preventDefault();
@@ -147,25 +171,6 @@ export function ContentCard({
             )}
           </div>
           <div className="content-card-footer" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-            {canPin && (
-              <button
-                type="button"
-                onClick={handlePinToggle}
-                disabled={pinning}
-                className="platform-btn platform-btn-sm"
-                title={isPinned ? 'Открепить' : 'Закрепить'}
-              >
-                {pinning ? '…' : isPinned ? 'Открепить' : 'Закрепить'}
-              </button>
-            )}
-            {canEdit && (
-              <Link
-                href={`/universes/${slug}/content/${id}?edit=1`}
-                className="platform-btn platform-btn-sm"
-              >
-                Редактировать
-              </Link>
-            )}
             {commentCount !== undefined && commentCount > 0 && (
               <span>{commentCount}</span>
             )}
@@ -209,6 +214,82 @@ export function ContentCard({
             </p>
           )}
         </div>
+      )}
+      {showContextMenu && typeof document !== 'undefined' && createPortal(
+        <>
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 9998 }}
+            aria-hidden
+            onClick={() => setShowContextMenu(false)}
+          />
+          <div
+            ref={contextMenuRef}
+            role="menu"
+            className="platform-card"
+            style={{
+              position: 'fixed',
+              left: contextMenuPos.x,
+              top: contextMenuPos.y,
+              zIndex: 9999,
+              minWidth: 200,
+              padding: 4,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {canEdit && (
+              <Link
+                href={`/universes/${slug}/content/${id}?edit=1`}
+                className="platform-btn platform-btn-sm no-underline w-full justify-start gap-2"
+                style={{ display: 'flex', marginBottom: 4 }}
+                onClick={() => setShowContextMenu(false)}
+              >
+                <i className="fa-solid fa-pen" aria-hidden />
+                Изменить
+              </Link>
+            )}
+            {canPin && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowContextMenu(false);
+                  handlePinToggle(e);
+                }}
+                disabled={pinning}
+                className="platform-btn platform-btn-sm w-full justify-start gap-2"
+                style={{ display: 'flex', marginBottom: 4 }}
+              >
+                <i className="fa-solid fa-thumbtack" aria-hidden />
+                {pinning ? '…' : isPinned ? 'Открепить' : 'Закрепить'}
+              </button>
+            )}
+            <Link
+              href={`/messages${shareSearch}`}
+              className="platform-btn platform-btn-sm no-underline w-full justify-start gap-2"
+              style={{ display: 'flex', marginBottom: canDelete ? 4 : 0 }}
+              onClick={() => setShowContextMenu(false)}
+            >
+              <i className="fa-solid fa-paper-plane" aria-hidden />
+              Переслать
+            </Link>
+            {canDelete && (
+              <button
+                type="button"
+                className="platform-btn platform-btn-sm w-full justify-start gap-2"
+                style={{ display: 'flex', color: 'var(--text-danger, #e5534b)' }}
+                onClick={() => {
+                  setShowContextMenu(false);
+                  setShowDeletePrompt(true);
+                }}
+              >
+                <i className="fa-solid fa-trash" aria-hidden />
+                Удалить
+              </button>
+            )}
+          </div>
+        </>,
+        document.body
       )}
       {canDelete && showDeletePrompt && (
         <>

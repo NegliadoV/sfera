@@ -9,7 +9,6 @@ interface EditContentFormProps {
   initialTitle: string;
   initialBody: string | null;
   initialUrl: string | null;
-  onCancel: () => void;
 }
 
 export function EditContentForm({
@@ -18,7 +17,6 @@ export function EditContentForm({
   initialTitle,
   initialBody,
   initialUrl,
-  onCancel,
 }: EditContentFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
@@ -108,10 +106,7 @@ export function EditContentForm({
         </button>
         <button
           type="button"
-          onClick={() => {
-            onCancel();
-            router.replace(`/universes/${slug}/content/${contentId}`);
-          }}
+          onClick={() => router.replace(`/universes/${slug}/content/${contentId}`)}
           disabled={saving}
           className="platform-btn platform-btn-sm"
         >

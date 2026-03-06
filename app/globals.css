@@ -2415,6 +2415,7 @@ a.action-btn.primary i {
   min-height: 120px;
   text-decoration: none;
   color: inherit;
+  background: var(--bg-accent);
 }
 
 .content-preview-placeholder-text {

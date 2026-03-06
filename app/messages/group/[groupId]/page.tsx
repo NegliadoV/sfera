@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useGroupSocket } from '@/hooks/useGroupSocket';
@@ -10,7 +10,37 @@ import type { GroupNewMessagePayload } from '@/hooks/useGroupSocket';
 import { YouTubeEmbed } from '@/components/YouTubeEmbed';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { GifPicker } from '@/components/GifPicker';
+import { SharedContentLinkPreview, getContentId } from '@/components/SharedContentLinkPreview';
 import { getYouTubeVideoId } from '@/lib/youtube';
+
+const URL_REGEX = /(https?:\/\/[^\s<>"{}|\\^`[\]]+|\/universes\/[^\s<>"{}|\\^`[\]]+)/gi;
+
+function MessageBodyWithPreviews({ body }: { body: string }) {
+  const parts = body.split(URL_REGEX);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (!part) return null;
+        const isUrl = part.match(URL_REGEX);
+        if (!isUrl) return <span key={i}>{part}</span>;
+        const contentId = getContentId(part);
+        if (contentId) return <SharedContentLinkPreview key={i} url={part} contentId={contentId} />;
+        const ytId = getYouTubeVideoId(part);
+        if (ytId) {
+          return (
+            <div key={i} style={{ margin: '10px 0', minWidth: 320, maxWidth: 560, width: '100%' }}>
+              <a href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline', fontSize: '0.85rem', display: 'block', marginBottom: 8, wordBreak: 'break-all' }}>{part}</a>
+              <YouTubeEmbed videoId={ytId} title="YouTube" compact={false} />
+            </div>
+          );
+        }
+        return (
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline', wordBreak: 'break-all' }}>{part}</a>
+        );
+      })}
+    </>
+  );
+}
 
 type MessageItem = {
   id: string;
@@ -24,33 +54,15 @@ type MessageItem = {
 
 type ParticipantItem = { userId: string; name: string | null; image: string | null };
 
-function renderBodyWithLinks(text: string) {
-  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`[\]]+)/gi;
-  const parts = text.split(urlRegex);
-  return parts.map((part, i) => {
-    if (!part.match(urlRegex)) return part;
-    const ytId = getYouTubeVideoId(part);
-    if (ytId) {
-      return (
-        <div key={i} style={{ margin: '10px 0', minWidth: 320, maxWidth: 560, width: '100%' }}>
-          <a href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline', fontSize: '0.85rem', display: 'block', marginBottom: 8, wordBreak: 'break-all' }}>
-            {part}
-          </a>
-          <YouTubeEmbed videoId={ytId} title="YouTube" compact={false} />
-        </div>
-      );
-    }
-    return (
-      <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
-        {part}
-      </a>
-    );
-  });
-}
-
 export default function GroupChatPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const shareContent = searchParams.get('shareContent');
+  const shareTitle = searchParams.get('shareTitle');
+  const shareSlug = searchParams.get('shareSlug');
+  const sharePrefilledRef = useRef(false);
+
   const { data: session } = useSession();
   const groupId = params?.groupId as string;
   const [messages, setMessages] = useState<MessageItem[]>([]);
@@ -258,6 +270,13 @@ export default function GroupChatPage() {
     return () => { cancelled = true; };
   }, [groupId, router]);
 
+  useEffect(() => {
+    if (!shareContent || !shareSlug || sharePrefilledRef.current || typeof window === 'undefined') return;
+    sharePrefilledRef.current = true;
+    const contentUrl = `${window.location.origin}/universes/${encodeURIComponent(shareSlug)}/content/${encodeURIComponent(shareContent)}`;
+    setInputValue(contentUrl);
+  }, [shareContent, shareSlug]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const body = inputValue.trim();
@@ -290,6 +309,9 @@ export default function GroupChatPage() {
           attachmentType: data.attachmentType ?? null,
           createdAt: data.createdAt,
         });
+        if (shareContent && shareSlug) {
+          router.replace(`/messages/group/${encodeURIComponent(groupId)}`, { scroll: false });
+        }
         window.dispatchEvent(new CustomEvent('messages-badge-refresh'));
       }
     } finally {
@@ -581,7 +603,7 @@ export default function GroupChatPage() {
                       </a>
                     );
                   })()}
-                  {m.body && m.body !== '📎' ? renderBodyWithLinks(m.body) : null}
+                  {m.body && m.body !== '📎' ? <MessageBodyWithPreviews body={m.body} /> : null}
                   </div>
                 </div>
               );
@@ -682,6 +704,15 @@ export default function GroupChatPage() {
                 <div style={{ fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{replyingTo.body.slice(0, 80)}{replyingTo.body.length > 80 ? '…' : ''}</div>
               </div>
               <button type="button" onClick={() => setReplyingTo(null)} style={{ padding: 4, border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }} aria-label="Отмена">×</button>
+            </div>
+          )}
+
+          {shareContent && shareSlug && (
+            <div style={{ marginBottom: 10, padding: 10, borderRadius: 'var(--radius-md)', background: 'var(--bg-accent)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 4 }}>Переслать материал</div>
+              <Link href={`/universes/${encodeURIComponent(shareSlug)}/content/${encodeURIComponent(shareContent)}`} style={{ fontWeight: 600, color: 'var(--accent-primary)', textDecoration: 'none', wordBreak: 'break-word' }}>
+                {shareTitle ? decodeURIComponent(shareTitle) : 'Материал'}
+              </Link>
             </div>
           )}
 

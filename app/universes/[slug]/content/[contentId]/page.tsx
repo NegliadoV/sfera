@@ -9,6 +9,7 @@ import { YouTubeEmbed } from '@/components/YouTubeEmbed';
 import { MarkdownBody } from '@/components/MarkdownBody';
 import { getYouTubeVideoId } from '@/lib/youtube';
 import { isDirectVideoUrl } from '@/lib/video-url';
+import { getProxiedImageSrc } from '@/lib/proxy-image';
 import { ContentLinks } from './ContentLinks';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { DeleteContentButton } from '../DeleteContentButton';
@@ -212,17 +213,28 @@ export default async function UniverseContentPage({
           initialTitle={contentRow.title}
           initialBody={contentRow.body}
           initialUrl={contentRow.url}
-          onCancel={() => {}}
         />
       )}
       <article className="platform-card mb-8">
         <div>
-          <h1 className="platform-hero-title platform-content-title flex items-center gap-2 flex-wrap">
-            {contentRow.pinnedAt && (
-              <span title="Закреплён" className="text-lg">📌</span>
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <h1 className="platform-hero-title platform-content-title flex items-center gap-2 flex-wrap flex-1 min-w-0">
+              {contentRow.pinnedAt && (
+                <span title="Закреплён" className="text-lg">📌</span>
+              )}
+              {contentRow.title}
+            </h1>
+            {canEdit && !showEditForm && (
+              <Link
+                href={`/universes/${slug}/content/${contentId}?edit=1`}
+                className="platform-btn platform-btn-sm no-underline shrink-0 inline-flex items-center gap-2"
+                title="Редактировать"
+              >
+                <i className="fa-solid fa-pen" aria-hidden />
+                Редактировать
+              </Link>
             )}
-            {contentRow.title}
-          </h1>
+          </div>
           <div className="platform-card-desc text-sm mb-4 flex flex-wrap items-center gap-2">
             <span>{displayAuthor}</span>
             {session?.user?.id && contentRow.authorId && contentRow.authorId !== session.user.id && (
@@ -299,6 +311,14 @@ export default async function UniverseContentPage({
                     </a>
                   </video>
                 </div>
+                <a
+                  href={contentRow.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="platform-btn platform-btn-sm mt-2 no-underline inline-flex"
+                >
+                  <i className="fa-solid fa-external-link-alt" /> Открыть видео в новой вкладке
+                </a>
                 </div>
               ) : contentRow.type === 'video' ? (
                 <a
@@ -343,14 +363,6 @@ export default async function UniverseContentPage({
               className="platform-btn platform-btn-sm no-underline"
             />
           )}
-          {canEdit && !showEditForm && (
-            <Link
-              href={`/universes/${slug}/content/${contentId}?edit=1`}
-              className="platform-btn platform-btn-sm no-underline"
-            >
-              Редактировать
-            </Link>
-          )}
           {canDelete && (
             <DeleteContentButton
               contentId={contentId}
@@ -380,7 +392,8 @@ export default async function UniverseContentPage({
         {contentRow.imageUrl && (
           <div className="discussion-post-preview mb-6">
             <ImageLightbox
-              src={contentRow.imageUrl}
+              src={getProxiedImageSrc(contentRow.imageUrl) ?? contentRow.imageUrl}
+              originalSrc={contentRow.imageUrl}
               alt={contentRow.title}
               className="discussion-post-preview-image"
             />

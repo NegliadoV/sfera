@@ -10,7 +10,9 @@ const getApiBase = () => {
 
 const getWsBase = () => {
   if (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_WS_URL) {
-    return process.env.EXPO_PUBLIC_WS_URL.replace(/\/$/, '');
+    const url = process.env.EXPO_PUBLIC_WS_URL.replace(/\/$/, '');
+    // Socket.IO ждёт origin без path; path задаётся в socket.ts как /socket.io
+    return url.replace(/\/socket\.io$/i, '');
   }
   const api = getApiBase();
   return api.replace(/^http/, 'ws');
