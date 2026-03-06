@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 type NotificationItem = {
   id: string;
@@ -12,6 +13,9 @@ type NotificationItem = {
   createdAt: string;
 };
 
+const DROPDOWN_WIDTH = 320;
+const VIEWPORT_PADDING = 8;
+
 export function NotificationsDropdown() {
   const router = useRouter();
   const pathname = usePathname();
@@ -20,6 +24,9 @@ export function NotificationsDropdown() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; maxHeight: number } | null>(null);
 
   const fetchNotifications = async () => {
     try {
@@ -48,13 +55,26 @@ export function NotificationsDropdown() {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const target = e.target as Node;
+      if (ref.current?.contains(target) || dropdownRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!open || !triggerRef.current || typeof window === 'undefined') {
+      setDropdownPosition(null);
+      return;
+    }
+    const rect = triggerRef.current.getBoundingClientRect();
+    const maxLeft = window.innerWidth - DROPDOWN_WIDTH - VIEWPORT_PADDING;
+    const left = Math.min(Math.max(VIEWPORT_PADDING, rect.right - DROPDOWN_WIDTH), maxLeft);
+    const top = rect.bottom + 8;
+    const maxHeight = Math.min(400, window.innerHeight - top - VIEWPORT_PADDING);
+    setDropdownPosition({ top, left, maxHeight });
+  }, [open]);
 
   const markAllAsRead = async () => {
     const res = await fetch('/api/me/notifications', {
@@ -87,6 +107,7 @@ export function NotificationsDropdown() {
   return (
     <div className="relative" ref={ref}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => {
           const willOpen = !open;
@@ -129,14 +150,16 @@ export function NotificationsDropdown() {
           </span>
         )}
       </button>
-      {open && (
+      {open && dropdownPosition && typeof document !== 'undefined' && createPortal(
         <div
+          ref={dropdownRef}
           className="notifications-dropdown"
           style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            marginTop: 8,
+            position: 'fixed',
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            width: DROPDOWN_WIDTH,
+            maxHeight: dropdownPosition.maxHeight,
             overflowY: 'auto',
             background: 'var(--studio-panel-bg)',
             borderRadius: 16,
@@ -200,7 +223,8 @@ export function NotificationsDropdown() {
               ))}
             </ul>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

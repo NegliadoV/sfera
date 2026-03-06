@@ -116,6 +116,7 @@ export async function GET(req: NextRequest) {
         url: content.url,
         body: content.body,
         createdAt: content.createdAt,
+        pinnedAt: content.pinnedAt,
         // Фаза 2: метаданные
         sourceId: content.sourceId,
         publishedAt: content.publishedAt,
