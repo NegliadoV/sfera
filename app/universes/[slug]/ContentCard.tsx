@@ -59,6 +59,9 @@ export function ContentCard({
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
   const [pinning, setPinning] = useState(false);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchPosRef = useRef({ x: 0, y: 0 });
+  const longPressTriggeredRef = useRef(false);
   const isPinned = !!pinnedAt;
 
   const shareSearch = `?shareContent=${encodeURIComponent(id)}&shareTitle=${encodeURIComponent(title)}&shareSlug=${encodeURIComponent(slug)}`;
@@ -92,6 +95,42 @@ export function ContentCard({
     e.stopPropagation();
     setContextMenuPos({ x: e.clientX, y: e.clientY });
     setShowContextMenu(true);
+  };
+
+  const LONG_PRESS_MS = 500;
+
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    longPressTriggeredRef.current = false;
+    clearLongPressTimer();
+    const t = e.touches[0];
+    if (t) {
+      touchPosRef.current = { x: t.clientX, y: t.clientY };
+      longPressTimerRef.current = setTimeout(() => {
+        longPressTimerRef.current = null;
+        longPressTriggeredRef.current = true;
+        setContextMenuPos({ x: touchPosRef.current.x, y: touchPosRef.current.y });
+        setShowContextMenu(true);
+      }, LONG_PRESS_MS);
+    }
+  };
+
+  const handleTouchMove = () => {
+    clearLongPressTimer();
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    clearLongPressTimer();
+    if (longPressTriggeredRef.current) {
+      e.preventDefault();
+      longPressTriggeredRef.current = false;
+    }
   };
 
   useEffect(() => {
@@ -134,6 +173,10 @@ export function ContentCard({
     <div
       className="content-card content-card-feed content-card-hover-wrap"
       onContextMenu={handleContextMenu}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={clearLongPressTimer}
     >
       <Link
         href={`/universes/${slug}/content/${id}#discussion`}
