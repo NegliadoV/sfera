@@ -28,6 +28,7 @@ interface ContentCardProps {
   canDelete?: boolean;
   canEdit?: boolean;
   canPin?: boolean;
+  onOpenModal?: () => void;
 }
 
 export function ContentCard({
@@ -50,6 +51,7 @@ export function ContentCard({
   canDelete = false,
   canEdit = false,
   canPin = false,
+  onOpenModal,
 }: ContentCardProps) {
   useHygiene();
   const router = useRouter();
@@ -163,7 +165,6 @@ export function ContentCard({
         body: JSON.stringify({ pinned: !isPinned }),
         credentials: 'include',
       });
-      if (res.ok) router.refresh();
     } finally {
       setPinning(false);
     }
@@ -171,19 +172,27 @@ export function ContentCard({
 
   return (
     <div
-      className="content-card content-card-feed content-card-hover-wrap"
+      className={`content-card glass-panel content-card-hover-wrap flex flex-col ${
+        (type === 'short' || imageUrl) ? 'row-span-2' : ''
+      }`}
+      style={{ border: 'none', cursor: 'pointer' }}
       onContextMenu={handleContextMenu}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={clearLongPressTimer}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('a, button')) return;
+        if (onOpenModal) onOpenModal();
+      }}
     >
-      <Link
-        href={`/universes/${slug}/content/${id}#discussion`}
-        className="content-card-discussion-btn"
+      <button
+        type="button"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (onOpenModal) onOpenModal(); }}
+        className="content-card-discussion-btn z-10"
       >
-        Перейти к обсуждению
-      </Link>
+        Читать
+      </button>
       <div className="content-card-header">
         <div className="content-card-info">
           <div className="content-card-title-row">
@@ -192,12 +201,18 @@ export function ContentCard({
                 📌
               </span>
             )}
-            <Link
+            <a
               href={`/universes/${slug}/content/${id}`}
-              className="content-card-title"
+              className="content-card-title cursor-pointer"
+              onClick={(e) => { 
+                if (onOpenModal) {
+                  e.preventDefault(); 
+                  onOpenModal(); 
+                }
+              }}
             >
               {title}
-            </Link>
+            </a>
             {type === 'article' && (
               <span className="platform-tag content-card-tag">
                 Статья
@@ -215,7 +230,10 @@ export function ContentCard({
           </div>
           <div className="content-card-footer" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
             {commentCount !== undefined && commentCount > 0 && (
-              <span>{commentCount}</span>
+              <div className="flex items-center gap-1.5 opacity-80" aria-label={`Комментариев: ${commentCount}`}>
+                <i className="fa-solid fa-comment text-[0.8rem]" />
+                <span className="font-medium text-xs">{commentCount}</span>
+              </div>
             )}
             {sourceId && (
               <span>Агрегировано</span>
@@ -236,7 +254,7 @@ export function ContentCard({
         </div>
       </div>
       {(hasPreview || body) && (
-        <div className="content-card-preview-wrap">
+        <div className="content-card-preview-wrap pointer-events-none">
           {hasPreview && (
             <div className="content-card-preview">
               <ContentPreview

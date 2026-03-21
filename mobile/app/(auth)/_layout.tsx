@@ -14,9 +14,9 @@ export default function AuthLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: true,
+        headerShown: false,
         title: 'SFERA',
-        contentStyle: { backgroundColor: colors.bgPrimary },
+        contentStyle: { backgroundColor: 'transparent' },
         headerStyle: headerStyle as any,
         headerTintColor: colors.textSecondary,
         headerShadowVisible: false,

@@ -25,12 +25,15 @@ export default async function SignInPage({
   const hasOAuth = hasGoogleOAuth || hasGitHubOAuth;
 
   return (
-    <div className="platform-page" style={{ maxWidth: 480, margin: '0 auto', paddingTop: '48px' }}>
-      <div className="platform-card">
-        <h1 className="platform-hero-title" style={{ fontSize: '1.75rem', marginBottom: 8 }}>
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full px-4 py-12">
+      <div className="glass-panel w-full max-w-md p-8 sm:p-10 flex flex-col items-center">
+        <h1 
+          className="text-3xl font-bold mb-3 text-center w-full" 
+          style={{ background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}
+        >
           Вход в Ноосферу
         </h1>
-        <p className="platform-hero-desc mb-6">
+        <p className="text-center mb-8" style={{ color: 'var(--text-secondary)' }}>
           {hasOAuth
             ? 'Войдите через Google или GitHub, либо по email и паролю.'
             : 'Войдите по email и паролю или используйте dev-вход.'}
@@ -42,12 +45,12 @@ export default async function SignInPage({
               'use server';
               await signIn('google', { redirectTo: '/universes' });
             }}
-            className="mb-3"
+            className="w-full mb-3"
             target="_top"
           >
-            <button type="submit" className="platform-btn platform-btn-primary w-full justify-center">
-              <i className="fa-brands fa-google" aria-hidden />
-              Войти через Google
+            <button type="submit" className="glass-icon-btn w-full flex items-center justify-center py-3">
+              <i className="fa-brands fa-google mr-3 text-lg" aria-hidden />
+              <span>Войти через Google</span>
             </button>
           </form>
         )}
@@ -57,12 +60,12 @@ export default async function SignInPage({
               'use server';
               await signIn('github', { redirectTo: '/universes' });
             }}
-            className="mb-6"
+            className="w-full mb-8"
             target="_top"
           >
-            <button type="submit" className="platform-btn platform-btn-primary w-full justify-center">
-              <i className="fa-brands fa-github" aria-hidden />
-              Войти через GitHub
+            <button type="submit" className="glass-icon-btn w-full flex items-center justify-center py-3">
+              <i className="fa-brands fa-github mr-3 text-lg" aria-hidden />
+              <span>Войти через GitHub</span>
             </button>
           </form>
         )}
@@ -75,16 +78,17 @@ export default async function SignInPage({
           </p>
         )}
 
-        <p className="mt-6 text-sm platform-card-desc">
+        <p className="mt-8 text-sm" style={{ color: 'var(--text-muted)' }}>
           Нет аккаунта?{' '}
-          <Link href="/auth/register" className="platform-btn" style={{ display: 'inline-flex', padding: '8px 16px', fontSize: '0.9rem' }}>
+          <Link href="/auth/register" className="font-semibold transition-colors duration-200" style={{ color: 'var(--accent-primary)' }}>
             Зарегистрироваться
           </Link>
         </p>
 
-        <div className="mt-8 pt-6" style={{ borderTop: '1px solid var(--studio-panel-border)' }}>
-          <p className="platform-section-heading mb-3">Dev: вход как seed-пользователь</p>
+        <div className="w-full mt-8 pt-6 flex flex-col items-center" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <p className="text-sm font-medium mb-4" style={{ color: 'var(--text-muted)' }}>Dev: вход как seed-пользователь</p>
           <form
+            className="w-full"
             action={async () => {
               'use server';
               await signIn('credentials', {
@@ -94,7 +98,7 @@ export default async function SignInPage({
               });
             }}
           >
-            <button type="submit" className="platform-btn w-full justify-center">
+            <button type="submit" className="glass-icon-btn w-full flex items-center justify-center py-3">
               Войти как seed-пользователь
             </button>
           </form>

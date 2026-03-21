@@ -64,12 +64,17 @@ export async function login(email: string, password: string) {
   return data;
 }
 
-export async function register(email: string, password: string, name?: string) {
-  const data = await apiRequest<{ ok: boolean; user: { id: string; email: string | null; name: string | null } }>(
+export async function register(email: string, password: string, name?: string, userTag?: string) {
+  const data = await apiRequest<{ ok: boolean; user: { id: string; email: string | null; name: string | null; userTag?: string | null } }>(
     '/api/auth/register',
     {
       method: 'POST',
-      body: JSON.stringify({ email: email.trim(), password, name: name?.trim() || undefined }),
+      body: JSON.stringify({
+        email: email.trim(),
+        password,
+        name: name?.trim() || undefined,
+        userTag: userTag?.trim().replace(/^@+/, '') || undefined,
+      }),
       skipAuth: true,
     }
   );

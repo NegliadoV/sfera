@@ -24,7 +24,7 @@ function QuickActions({ slug }: { slug: string }) {
         className="cabinet-quick-action"
         title="Лента контента"
       >
-        <i className="fas fa-align-left" aria-hidden />
+        <i className="fas fa-folder-open" aria-hidden />
       </Link>
       <Link href="/me/content" className="cabinet-quick-action" title="Сборка">
         <i className="fas fa-layer-group" aria-hidden />

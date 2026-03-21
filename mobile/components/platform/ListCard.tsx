@@ -8,22 +8,20 @@ type ListCardProps = {
   title: string;
   subtitle?: string | null;
   onPress?: () => void;
-  /** Принудительно тёмная карточка (на экране «Сборка») */
-  forceDark?: boolean;
 };
 
-export function ListCard({ title, subtitle, onPress, forceDark }: ListCardProps) {
+export function ListCard({ title, subtitle, onPress }: ListCardProps) {
   const content = (
-    <PlatformCard compact forceDark={forceDark}>
-      <PlatformCardTitle forceDark={forceDark}>{title}</PlatformCardTitle>
-      {subtitle ? <PlatformCardDesc forceDark={forceDark}>{subtitle}</PlatformCardDesc> : null}
+    <PlatformCard compact>
+      <PlatformCardTitle>{title}</PlatformCardTitle>
+      {subtitle ? <PlatformCardDesc>{subtitle}</PlatformCardDesc> : null}
     </PlatformCard>
   );
 
   const wrapper = (
-    <View style={{ marginBottom: spacing.sm }}>
+    <View style={{ flex: 1, marginBottom: spacing.lg }}>
       {onPress ? (
-        <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
+        <TouchableOpacity activeOpacity={0.85} onPress={onPress} style={{ flex: 1 }}>
           {content}
         </TouchableOpacity>
       ) : (

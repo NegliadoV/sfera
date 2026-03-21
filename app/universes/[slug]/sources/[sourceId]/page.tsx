@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { db, universes, sources, content, user, comments, contentLinks, universeMembers } from '@/lib/db';
 import { eq, desc, sql, and } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
-import { ContentCard } from '../../ContentCard';
+import { ContentFeedGrid } from '../../ContentFeedGrid';
 import { TrackUniverseButton } from '@/components/content/TrackUniverseButton';
 import { AggregateSourceButton } from './AggregateSourceButton';
 import { DeleteSourceButton } from './DeleteSourceButton';
@@ -170,28 +170,11 @@ export default async function SourceContentPage({
           </Link>.
         </p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {contentList.map((c) => (
-            <ContentCard
-              key={c.id}
-              id={c.id}
-              title={c.title}
-              type={c.type}
-              url={c.url}
-              imageUrl={c.imageUrl}
-              body={c.body}
-              authorName={c.authorName}
-              externalAuthor={c.externalAuthor}
-              publishedAt={c.publishedAt}
-              createdAt={c.createdAt}
-              sourceId={c.sourceId}
-              tags={c.tags}
-              hasLinks={c.hasLinks}
-              commentCount={c.commentCount}
-              slug={slug}
-            />
-          ))}
-        </div>
+        <ContentFeedGrid
+          items={contentList}
+          slug={slug}
+          layout="list"
+        />
       )}
     </div>
   );

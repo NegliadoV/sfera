@@ -4,12 +4,11 @@ import { darkColors } from '@/constants/Theme';
 
 type PlatformCardDescProps = {
   children: React.ReactNode;
-  forceDark?: boolean;
 };
 
-export function PlatformCardDesc({ children, forceDark }: PlatformCardDescProps) {
+export function PlatformCardDesc({ children }: PlatformCardDescProps) {
   const themeColors = useThemeColors();
-  const colors = forceDark ? darkColors : themeColors;
+  const colors = themeColors;
   const color = colors?.studioMetaColor ?? darkColors.studioMetaColor;
 
   return <Text style={[styles.desc, { color }]}>{children ?? ''}</Text>;

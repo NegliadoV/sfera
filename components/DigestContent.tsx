@@ -46,7 +46,7 @@ export function DigestContent() {
       <div className="digest-content">
         <div className="digest-card">
           <div className="digest-icon">
-            <i className="fa-regular fa-sun-haze" aria-hidden />
+            <i className="fa-regular fa-sun" aria-hidden />
           </div>
           <h2>Нет нового контента за последние 24 часа</h2>
           <div className="digest-description">

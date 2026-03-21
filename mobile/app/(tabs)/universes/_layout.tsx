@@ -13,7 +13,7 @@ export default function UniversesLayout() {
   return (
     <Stack
       screenOptions={{
-        contentStyle: { backgroundColor: colors.bgPrimary },
+        contentStyle: { backgroundColor: 'transparent' },
         headerStyle: headerStyle as any,
         headerTintColor: colors.textPrimary,
         animation: 'slide_from_right',

@@ -18,6 +18,8 @@ export async function GET() {
         description: universes.description,
         icon: universes.icon,
         sphereColor: universes.sphereColor,
+        isPrivate: universes.isPrivate,
+        monthlyPrice: universes.monthlyPrice,
         createdAt: universes.createdAt,
       })
       .from(universes)
@@ -46,7 +48,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const body = await req.json();
-    const { slug, name, description, icon } = body as { slug?: string; name?: string; description?: string; icon?: string };
+    const { slug, name, description, icon, isPrivate, monthlyPrice } = body as { slug?: string; name?: string; description?: string; icon?: string, isPrivate?: boolean, monthlyPrice?: number | null };
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json({ error: 'name required' }, { status: 400 });
     }
@@ -71,6 +73,8 @@ export async function POST(req: NextRequest) {
         icon: normalizedIcon,
         sphereColor: String(getRandomSphereColorIndex()),
         ownerId: session.user.id,
+        isPrivate: Boolean(isPrivate),
+        monthlyPrice: typeof monthlyPrice === 'number' ? monthlyPrice : null,
       })
       .returning();
     if (!inserted) {

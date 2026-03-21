@@ -23,6 +23,8 @@ export const user = pgTable('user', {
   passwordHash: text('password_hash'), // для входа по email (nullable: OAuth/seed без пароля)
   /** Личный тег для поиска (@bublik33). lowercase, без @, уникальный. */
   userTag: text('user_tag').unique(),
+  /** Баланс кристаллов SFERA */
+  crystals: integer('crystals').notNull().default(0),
 });
 
 export const account = pgTable(
@@ -93,6 +95,9 @@ export const universes = pgTable('universes', {
   ownerId: text('owner_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
+  // Фаза 6: Монетизация
+  isPrivate: boolean('is_private').notNull().default(false),
+  monthlyPrice: integer('monthly_price'), // Цена в рублях (целое число), null если бесплатно
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -623,4 +628,68 @@ export const userHygieneSettings = pgTable('user_hygiene_settings', {
   digestDelivery: digestDeliveryEnum('digest_delivery').notNull().default('none'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// --- Фаза 6: Монетизация (ЮKassa) ---
+export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'canceled', 'past_due', 'unpaid', 'pending_payment']);
+
+export const universeSubscriptions = pgTable('universe_subscriptions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  universeId: uuid('universe_id')
+    .notNull()
+    .references(() => universes.id, { onDelete: 'cascade' }),
+  status: subscriptionStatusEnum('status').notNull().default('unpaid'),
+  paymentMethodId: text('payment_method_id'), // Для рекуррентных платежей (recurring)
+  currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex('univ_sub_user_universe_idx').on(t.userId, t.universeId),
+]);
+
+// --- Фаза 7: Shorts ---
+export const shorts = pgTable('shorts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  description: text('description'),
+  videoUrl: text('video_url').notNull(),
+  thumbnailUrl: text('thumbnail_url'),
+  authorId: text('author_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  universeId: uuid('universe_id')
+    .references(() => universes.id, { onDelete: 'cascade' }), // Может быть не привязан к конкретной
+  viewsCount: integer('views_count').notNull().default(0),
+  likesCount: integer('likes_count').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const shortsLikes = pgTable(
+  'shorts_likes',
+  {
+    shortId: uuid('short_id')
+      .notNull()
+      .references(() => shorts.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.shortId, t.userId] })]
+);
+
+export const crystalTransactions = pgTable('crystal_transactions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  senderId: text('sender_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  receiverId: text('receiver_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  amount: integer('amount').notNull(),
+  shortId: uuid('short_id').references(() => shorts.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });

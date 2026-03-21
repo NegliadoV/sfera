@@ -6,6 +6,7 @@ import { ThemeSettingsForm } from './ThemeSettingsForm';
 import { PrivacySettingsForm } from './PrivacySettingsForm';
 import { BlocksSettingsForm } from './BlocksSettingsForm';
 import { UserTagSettingsForm } from './UserTagSettingsForm';
+import { SubscriptionsList } from './SubscriptionsList';
 
 export const metadata = {
   title: 'Настройки | SFERA',
@@ -90,6 +91,16 @@ export default async function SettingsPage(
               Пользователи, которых вы заблокировали.
             </div>
             <BlocksSettingsForm />
+          </div>
+          <div className="settings-card" style={{ flex: '1 1 100%' }}>
+            <div className="settings-card-title">
+              <i className="fa-regular fa-credit-card" aria-hidden />
+              <h2>Платные подписки</h2>
+            </div>
+            <div className="settings-card-desc" style={{ marginBottom: 16 }}>
+              Управление подписками на приватные сферы (через ЮKassa).
+            </div>
+            <SubscriptionsList />
           </div>
         </div>
 

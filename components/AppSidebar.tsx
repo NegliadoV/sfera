@@ -8,6 +8,7 @@ import { CreateUniverseDialog } from '@/app/universes/CreateUniverseDialog';
 import { SferaSphereIcon } from '@/components/SferaSphereIcon';
 import { AddUserSourceForm } from '@/components/AddUserSourceForm';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
+import { MiniAppModal } from '@/components/MiniAppModal';
 
 type UniverseRow = { slug: string; name: string; description: string | null; icon: string | null; sphereColor: string | null };
 type Contact = { id: string; name: string | null; email: string | null; image: string | null };
@@ -60,6 +61,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
   const [userSourcesLoading, setUserSourcesLoading] = useState(false);
   const [collectionSearchQuery, setCollectionSearchQuery] = useState('');
   const [collectionAggregating, setCollectionAggregating] = useState(false);
+  const [miniAppOpen, setMiniAppOpen] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchRequests = () => {
@@ -419,7 +421,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
             <div className="sidebar-nav-label">Разделы</div>
             <div style={{ marginBottom: 16 }}>
               {[
-                { href: `/universes/${universeSlug}`, label: 'Контент', icon: 'fa-align-left', active: isContentSection },
+                { href: `/universes/${universeSlug}`, label: 'Контент', icon: 'fa-folder-open', active: isContentSection },
                 { href: `/universes/${universeSlug}/rooms`, label: 'Комнаты просмотра', icon: 'fa-video', active: isRooms },
                 { href: `/universes/${universeSlug}/mind-maps`, label: 'Ментальные карты', icon: 'fa-project-diagram', active: isMindMaps },
               ].map((item) => (
@@ -439,6 +441,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
         <div className="sidebar-nav-label">Общее</div>
         <div>
           {[
+            { href: '/shorts', label: 'Шортс', icon: 'fa-play', active: pathname?.startsWith('/shorts') },
             { href: '/settings', label: 'Настройки', icon: 'fa-gear', active: pathname === '/settings' },
             { href: '/digest', label: 'Дайджест', icon: 'fa-newspaper', active: pathname === '/digest' },
           ].map((item) => (
@@ -451,6 +454,13 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
               {item.label}
             </Link>
           ))}
+          <button
+            onClick={() => setMiniAppOpen(true)}
+            className="sidebar-nav-link w-full text-left"
+          >
+            <i className="fas fa-layer-group" />
+            Приложения (Mini-App)
+          </button>
         </div>
       </nav>
     </aside>
@@ -989,6 +999,14 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
         </div>
       </div>
     )}
+
+      {miniAppOpen && (
+        <MiniAppModal 
+          url="https://pomofocus.io" 
+          title="Таймер Фокуса" 
+          onClose={() => setMiniAppOpen(false)} 
+        />
+      )}
     </>
   );
 }

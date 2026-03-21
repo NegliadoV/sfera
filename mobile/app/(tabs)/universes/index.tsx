@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FlatList, RefreshControl, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, TouchableOpacity, Text, StyleSheet, InteractionManager, View } from 'react-native';
 import { router } from 'expo-router';
 import { fetchUniverses } from '@/lib/universesApi';
 import type { Universe } from '@/types/api';
@@ -27,10 +27,31 @@ export default function UniversesListScreen() {
   };
 
   useEffect(() => {
-    load();
+    const task = InteractionManager.runAfterInteractions(() => {
+      load();
+    });
+    return () => task.cancel();
   }, []);
 
-  if (loading) return <LoadingScreen />;
+  if (loading) {
+    // Лёгкий скелет вместо полного экрана загрузки
+    return (
+      <ScreenContainer>
+        <View style={styles.skeletonContainer}>
+          {[0, 1, 2].map((i) => (
+            <View
+              // eslint-disable-next-line react/no-array-index-key
+              key={i}
+              style={[
+                styles.skeletonCard,
+                { backgroundColor: colors.bgCard, borderColor: colors.borderSubtle },
+              ]}
+            />
+          ))}
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   return (
     <ScreenContainer>
@@ -38,6 +59,8 @@ export default function UniversesListScreen() {
         data={list}
         keyExtractor={(item) => item?.id ?? item?.slug ?? ''}
         contentContainerStyle={screenLayout.listContent}
+        numColumns={2}
+        columnWrapperStyle={{ gap: spacing.sm }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.accent} />
         }
@@ -72,4 +95,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   createBtnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
+  skeletonContainer: {
+    padding: screenLayout.listContent.padding,
+  },
+  skeletonCard: {
+    height: 72,
+    borderRadius: mobileLayout.cardRadius,
+    borderWidth: 1,
+    marginBottom: spacing.sm,
+  },
 });

@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     maxWidth: 480,
     alignSelf: 'center',
     width: '100%',
-    paddingTop: 48,
+    justifyContent: 'center',
     paddingHorizontal: mobileLayout.pagePadding,
     paddingBottom: spacing.xxl,
   },

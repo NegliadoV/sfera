@@ -77,10 +77,10 @@ export const shadows = {
   /** Карточка: глубокая тень как .platform-card */
   card: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.6,
+    shadowRadius: 40,
+    elevation: 16,
   },
   /** Неоновая подсветка акцента (как --neon-glow в globals.css) */
   neonGlow: (accentHex: string) => ({
@@ -108,10 +108,10 @@ export const accentButtonShadow = (accentHex: string) => ({
 });
 
 export const darkColors = {
-  bgPrimary: '#1a1b1d',
-  bgSecondary: '#191a1d',
+  bgPrimary: '#0b0d13',
+  bgSecondary: '#0b0d13',
   bgCard: '#1c1e21',
-  bgHeader: '#131315',
+  bgHeader: '#0b0d13',
   textPrimary: '#e4e6e9',
   textSecondary: '#a8aaaf',
   textMuted: '#7a7d84',
@@ -122,9 +122,9 @@ export const darkColors = {
   borderSubtle: '#232529',
   bgAccent: '#404249',
   // Studio / platform-card, sidebar, panel
-  studioPanelBg: '#25262a',
-  studioPanelBorder: 'rgba(255,255,255,0.06)',
-  studioCardBorder: 'rgba(74,144,226,0.2)',
+  studioPanelBg: 'rgba(255, 255, 255, 0.03)',
+  studioPanelBorder: 'rgba(255, 255, 255, 0.1)',
+  studioCardBorder: 'rgba(255, 255, 255, 0.06)',
   studioMetaColor: '#8a9bb5',
   // Focus, hover
   neonBorder: '#3b5a9e',
@@ -134,26 +134,17 @@ export const darkColors = {
   studioTitleGradientColors: ['#ffffff', '#b0d0ff'] as [string, string],
 };
 
-export const lightColors = {
-  bgPrimary: '#f2f3f5',
-  bgSecondary: '#ffffff',
-  bgCard: '#ffffff',
-  bgHeader: '#f2f3f5',
-  textPrimary: '#1e1f22',
-  textSecondary: '#4e5058',
-  textMuted: '#6d7078',
-  accent: '#2563eb',
-  accentHover: '#1d4ed8',
-  accentMuted: '#60a5fa',
-  border: '#d4d5d9',
-  borderSubtle: '#c7c9ce',
-  bgAccent: '#e3e4e8',
-  studioPanelBg: '#ffffff',
-  studioPanelBorder: 'rgba(0,0,0,0.06)',
-  studioCardBorder: 'rgba(74,144,226,0.2)',
-  studioMetaColor: '#4e5058',
-  neonBorder: '#5b8ae8',
-  hoverColor: '#e3e4e8',
-  hoverAccent: '#d4d5d9',
-  studioTitleGradientColors: ['#1e1f22', '#4a6f8a'] as [string, string],
+/** Токены для таб-бара (переиспользуемые, по DESIGN_SYSTEM.md) */
+export const tabBarTokens = {
+  iconSize: 26,
+  iconStrokeWidth: 1.8,
+  indicatorWidth: 24,
+  rowHeight: 52,
+  springConfig: { damping: 18, stiffness: 180 } as const,
+  /** Отступы (8px grid) */
+  marginHorizontal: spacing.xl,
+  marginBottom: spacing.lg,
+  /** Web: фикс. паддинг снизу; native: insets.bottom + spacing */
+  webPaddingBottom: 20,
 };
+

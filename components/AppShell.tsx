@@ -2,6 +2,8 @@
 
 import type { Session } from 'next-auth';
 import { AppSidebar } from '@/components/AppSidebar';
+import { OmniBar } from '@/components/OmniBar';
+import { Header } from '@/components/Header';
 
 export function AppShell({
   children,
@@ -17,11 +19,24 @@ export function AppShell({
   setMobileMenuOpen?: (open: boolean) => void;
 }) {
   if (!showSidebar) {
-    return <>{children}</>;
+    return (
+      <>
+        <main className="app-main" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
+          <Header session={session} showMenuButton={false} />
+          {children}
+        </main>
+        <OmniBar />
+      </>
+    );
   }
 
   return (
-    <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
+    <>
+    <div className="flex flex-1 relative p-3 md:p-6 gap-3 md:gap-6 overflow-hidden">
+      {/* Background Animated Blobs */}
+      <div className="bg-blob blob-1"></div>
+      <div className="bg-blob blob-2"></div>
+
       {/* Оверлей на мобильном: закрывает меню по тапу */}
       <div
         className="sidebar-overlay"
@@ -35,15 +50,17 @@ export function AppShell({
       />
       {/* Сайдбар: навигация + панель контактов (выдвижная) */}
       <div
-        className="sidebar-drawer"
+        className="sidebar-drawer glass-panel shadow-2xl"
         data-open={mobileMenuOpen}
         style={{
           display: 'flex',
           flexDirection: 'row',
           flexShrink: 0,
-          backgroundColor: 'var(--studio-panel-bg)',
-          borderRight: '1px solid var(--studio-panel-border)',
+          borderRadius: '20px',
+          overflow: 'hidden',
           minWidth: 280,
+          border: '1px solid var(--studio-panel-border)',
+          background: 'var(--studio-panel-bg)',
         }}
       >
         <button
@@ -70,9 +87,11 @@ export function AppShell({
         </button>
         <AppSidebar session={session} />
       </div>
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+      <main className="app-main" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
         {children}
-      </div>
+      </main>
     </div>
+    <OmniBar />
+    </>
   );
 }

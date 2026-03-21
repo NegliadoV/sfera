@@ -65,8 +65,9 @@ export function UniversesDemo() {
         ))}
       </div>
       <div
-        className="platform-card animate-in fade-in duration-300"
-        style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--studio-panel-border)' }}
+        key={active.id}
+        className="animate-in block slide-in-from-bottom-2 fade-in duration-300 rounded-2xl p-6 md:p-8"
+        style={{ background: 'color-mix(in srgb, var(--bg-accent) 40%, transparent)', border: '1px solid var(--border-subtle)' }}
       >
         <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
           <h3 className="platform-card-title mb-0">Сфера: {active.name}</h3>
@@ -85,9 +86,9 @@ export function UniversesDemo() {
         </div>
         <p className="platform-card-desc mb-4">{active.description}</p>
         {active.discussions.length > 0 && (
-          <div className="mt-5">
-            <strong className="platform-card-desc" style={{ color: 'white' }}>Актуальные дискуссии:</strong>
-            <ul className="mt-2 pl-5 list-disc platform-card-desc">
+          <div className="mt-6 border-t pt-4" style={{ borderColor: 'var(--border-subtle)' }}>
+            <strong className="text-sm uppercase tracking-wide" style={{ color: 'var(--text-primary)' }}>Актуальные дискуссии:</strong>
+            <ul className="mt-3 pl-5 list-disc platform-card-desc space-y-1">
               {active.discussions.map((d) => (
                 <li key={d}>{d}</li>
               ))}

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { getTracking, trackUniverse } from '@/lib/universesApi';
 import { useThemeColors } from '@/components/useThemeColors';
-import { darkColors, spacing } from '@/constants/Theme';
+import { darkColors, spacing, accentButtonShadow } from '@/constants/Theme';
+import { BlurView } from 'expo-blur';
 
 type TrackUniverseButtonProps = {
   universeSlug: string;
@@ -47,22 +48,42 @@ export function TrackUniverseButton({
     <TouchableOpacity
       onPress={onPress}
       disabled={pending}
-      style={[styles.btn, { backgroundColor: colors.bgAccent ?? colors.hoverColor, borderColor: colors.border }]}
+      style={[
+        styles.btnWrapper,
+        !tracking && accentButtonShadow(colors.accent)
+      ]}
       activeOpacity={0.8}>
-      <Text style={[styles.text, { color: colors.textPrimary }]}>
-        {tracking ? labelActive : label}
-      </Text>
+      <BlurView
+        intensity={50}
+        tint="dark"
+        experimentalBlurMethod="dimezisBlurView"
+        style={[
+          styles.btn, 
+          { 
+            backgroundColor: tracking ? 'rgba(255,255,255,0.03)' : colors.accent + '20', 
+            borderColor: tracking ? 'rgba(255,255,255,0.06)' : colors.accent + '80'
+          }
+        ]}>
+        <Text style={[styles.text, { color: tracking ? colors.textSecondary : colors.accent }]}>
+          {tracking ? labelActive : label}
+        </Text>
+      </BlurView>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  btn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    borderWidth: 1,
+  btnWrapper: {
+    borderRadius: 12,
     alignSelf: 'flex-start',
+    overflow: 'hidden',
+  },
+  btn: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   text: {
     fontSize: 14,

@@ -36,6 +36,8 @@ export function NotificationsDropdown() {
         setItems(data.items ?? []);
         setUnreadCount(data.unreadCount ?? 0);
       }
+    } catch (e) {
+      console.warn('Failed to fetch notifications:', e);
     } finally {
       setLoading(false);
     }

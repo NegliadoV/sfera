@@ -45,6 +45,32 @@ import { CabinetTrackedUniverseItem } from '@/components/universe/CabinetTracked
 <CabinetTrackedUniverseItem slug="quantum" name="Квантовая физика" ... />
 ```
 
+### Компоненты навигации (`components/navigation/`)
+
+#### AnimatedTabBar
+Кастомный таб-бар с анимированным индикатором (Expo Router Tabs).
+
+```tsx
+import { AnimatedTabBar } from '@/components/navigation';
+
+<Tabs tabBar={(props) => <AnimatedTabBar {...props} tabBarPaddingBottom={32} />} />
+```
+
+#### TabIconWrap
+Обёртка иконки таба с анимацией scale/opacity и неоновой подсветкой активного состояния.
+
+```tsx
+import { TabIconWrap } from '@/components/navigation';
+
+<TabIconWrap focused={isFocused}>
+  <Icon color={iconColor} size={26} />
+</TabIconWrap>
+```
+
+Токены таб-бара: `@/constants/Theme` — `tabBarTokens` (iconSize, indicatorWidth, springConfig, rowHeight и т.д.).
+
+---
+
 ## Утилиты (`lib/utils/`)
 
 ### Иконки (`lib/utils/icons.ts`)

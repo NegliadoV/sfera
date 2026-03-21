@@ -109,7 +109,7 @@ export function HygieneSettingsForm() {
           ))}
         </div>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-          Дайджест: время по вселенным, новый контент, открытые вопросы. Доставка по email — в разработке.
+          Дайджест: анализ вашей активности, новые материалы во вселенных.
         </p>
       </div>
 

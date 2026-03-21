@@ -42,7 +42,7 @@ export function SignInForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
       <div>
         <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
           Email
@@ -55,11 +55,12 @@ export function SignInForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-[var(--radius-md)] border text-sm"
+          className="w-full px-4 py-3 rounded-xl border text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
           style={{
-            backgroundColor: 'var(--bg)',
-            borderColor: 'var(--border-color)',
+            backgroundColor: 'rgba(255,255,255,0.03)',
+            borderColor: 'rgba(255,255,255,0.1)',
             color: 'var(--text-primary)',
+            backdropFilter: 'blur(10px)',
           }}
           placeholder="you@example.com"
         />
@@ -76,11 +77,12 @@ export function SignInForm({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-[var(--radius-md)] border text-sm"
+          className="w-full px-4 py-3 rounded-xl border text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)]"
           style={{
-            backgroundColor: 'var(--bg)',
-            borderColor: 'var(--border-color)',
+            backgroundColor: 'rgba(255,255,255,0.03)',
+            borderColor: 'rgba(255,255,255,0.1)',
             color: 'var(--text-primary)',
+            backdropFilter: 'blur(10px)',
           }}
         />
       </div>
@@ -92,8 +94,8 @@ export function SignInForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full px-6 py-3 rounded-[var(--radius-lg)] font-medium text-white disabled:opacity-50"
-        style={{ backgroundColor: 'var(--accent-blue)' }}
+        className="glass-icon-btn w-full mt-4 flex items-center justify-center py-3.5 text-base font-semibold disabled:opacity-50 transition-all duration-300 hover:scale-[1.02]"
+        style={{ background: 'var(--accent-primary)', boxShadow: '0 8px 32px var(--accent-primary-muted)', border: 'none', color: '#fff' }}
       >
         {loading ? 'Вход…' : 'Войти'}
       </button>

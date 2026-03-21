@@ -2,6 +2,9 @@ import { StyleSheet, Text, useWindowDimensions } from 'react-native';
 import { useThemeColors } from '@/components/useThemeColors';
 import { darkColors } from '@/constants/Theme';
 
+import MaskedView from '@react-native-masked-view/masked-view';
+import { LinearGradient } from 'expo-linear-gradient';
+
 type PlatformHeroTitleProps = {
   children: React.ReactNode;
   /** Optional: use gradient (requires MaskedView + LinearGradient). When false, uses solid textPrimary. */
@@ -13,19 +16,33 @@ export function PlatformHeroTitle({ children, gradient }: PlatformHeroTitleProps
   const { width } = useWindowDimensions();
   const fontSize = width < 768 ? 28 : Math.min(32, 20 + width * 0.02);
 
-  // Gradient text requires expo-linear-gradient + MaskedView; for now use solid color from gradient start
-  const textColor = gradient ? colors.studioTitleGradientColors[0] : colors.textPrimary;
+  const textColor = colors.textPrimary;
+
+  const textStyle = [
+    styles.title,
+    {
+      fontSize,
+    },
+  ];
+
+  if (gradient) {
+    return (
+      <MaskedView
+        maskElement={<Text style={[textStyle, { color: 'black' }]}>{children}</Text>}
+      >
+        <LinearGradient
+          colors={colors.studioTitleGradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <Text style={[textStyle, { opacity: 0 }]}>{children}</Text>
+        </LinearGradient>
+      </MaskedView>
+    );
+  }
 
   return (
-    <Text
-      style={[
-        styles.title,
-        {
-          color: textColor,
-          fontSize,
-        },
-      ]}
-      numberOfLines={3}>
+    <Text style={[textStyle, { color: textColor }]} numberOfLines={3}>
       {children}
     </Text>
   );

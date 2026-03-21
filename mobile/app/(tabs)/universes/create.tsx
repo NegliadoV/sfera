@@ -6,6 +6,7 @@ import { useThemeColors } from '@/components/useThemeColors';
 import { darkColors, mobileLayout, spacing, typography } from '@/constants/Theme';
 import { ScreenContainer } from '@/components/screen';
 import { PlatformButtonPrimary } from '@/components/platform';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CreateUniverseScreen() {
   const colors = useThemeColors() ?? darkColors;
@@ -13,6 +14,8 @@ export default function CreateUniverseScreen() {
   const [description, setDescription] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
+  const [conflictSlug, setConflictSlug] = useState<string | null>(null);
+  const { logout } = useAuth();
 
   const onSubmit = async () => {
     if (!name.trim()) {
@@ -21,14 +24,36 @@ export default function CreateUniverseScreen() {
     }
     setPending(true);
     setError('');
+    setConflictSlug(null);
     try {
-      const created = await createUniverse({ name: name.trim(), description: description.trim() || undefined });
-      const targetSlug = created.slug ?? name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const trimmedName = name.trim();
+      const slugCandidate = trimmedName
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+      const created = await createUniverse({ name: trimmedName, description: description.trim() || undefined });
+      const targetSlug = created.slug ?? slugCandidate;
       router.replace(`/(tabs)/universes/${encodeURIComponent(targetSlug)}` as any);
-    } catch (e: any) {
-      const msg = e?.message || 'Ошибка создания';
-      if (e?.status === 409) {
-        setError('Сфера с таким адресом уже существует.');
+    } catch (err: unknown) {
+      const e = err as { status?: number; message?: string };
+      const status = e?.status;
+      const msg = e?.message || 'Ошибка создания сферы. Попробуйте ещё раз.';
+      if (status === 401) {
+        setError('Сессия истекла. Пожалуйста, войдите заново.');
+        try {
+          await logout();
+        } catch {
+          // ignore
+        }
+        router.replace('/(auth)/login' as any);
+      } else if (status === 409) {
+        setError('Сфера с таким адресом уже существует. Можно перейти к ней или выбрать другое имя.');
+        const trimmedName = name.trim();
+        const slugCandidate = trimmedName
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, '');
+        setConflictSlug(slugCandidate || null);
       } else {
         setError(msg);
       }
@@ -63,7 +88,20 @@ export default function CreateUniverseScreen() {
             editable={!pending}
           />
         </View>
-        {error ? <Text style={[typography.body, { color: colors.accent, marginBottom: spacing.sm }]}>{error}</Text> : null}
+        {error ? (
+          <View style={{ marginBottom: spacing.sm }}>
+            <Text style={[typography.body, { color: colors.accent }]}>{error}</Text>
+            {conflictSlug ? (
+              <TouchableOpacity
+                onPress={() => router.replace(`/(tabs)/universes/${encodeURIComponent(conflictSlug)}` as any)}
+                style={{ marginTop: spacing.xs }}>
+                <Text style={[typography.caption, { color: colors.accent }]}>
+                  Перейти к существующей сфере
+                </Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        ) : null}
         <PlatformButtonPrimary onPress={onSubmit} disabled={pending}>
           {pending ? 'Создание…' : 'Создать сферу'}
         </PlatformButtonPrimary>

@@ -16,20 +16,23 @@ export default async function RegisterPage({
   if (session?.user) redirect('/universes');
 
   return (
-    <div className="platform-page" style={{ maxWidth: 480, margin: '0 auto', paddingTop: '48px' }}>
-      <div className="platform-card">
-        <h1 className="platform-hero-title" style={{ fontSize: '1.75rem', marginBottom: 8 }}>
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full px-4 py-12">
+      <div className="glass-panel w-full max-w-md p-8 sm:p-10 flex flex-col items-center">
+        <h1 
+          className="text-3xl font-bold mb-3 text-center w-full" 
+          style={{ background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}
+        >
           Регистрация
         </h1>
-        <p className="platform-hero-desc mb-6">
-          Создайте аккаунт по email и паролю.
+        <p className="text-center mb-8" style={{ color: 'var(--text-secondary)' }}>
+          Создайте аккаунт, чтобы сохранять свои мысли.
         </p>
 
         <RegisterForm />
 
-        <p className="mt-6 text-sm platform-card-desc">
+        <p className="mt-8 text-sm" style={{ color: 'var(--text-muted)' }}>
           Уже есть аккаунт?{' '}
-          <Link href="/auth/signin" className="platform-btn" style={{ display: 'inline-flex', padding: '8px 16px', fontSize: '0.9rem' }}>
+          <Link href="/auth/signin" className="font-semibold transition-colors duration-200" style={{ color: 'var(--accent-primary)' }}>
             Войти
           </Link>
         </p>

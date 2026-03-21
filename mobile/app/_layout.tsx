@@ -1,17 +1,17 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AppThemeProvider } from '@/contexts/AppThemeContext';
 import { useThemeColors } from '@/components/useThemeColors';
 import { darkColors } from '@/constants/Theme';
+import { AppBackground } from '@/components/platform/AppBackground';
 
 export {
   ErrorBoundary,
@@ -39,7 +39,15 @@ export default function RootLayout() {
   }, [loaded]);
 
   if (!loaded) {
-    return null;
+    return (
+      <View
+        style={[
+          StyleSheet.absoluteFill,
+          { justifyContent: 'center', alignItems: 'center', backgroundColor: darkColors.bgPrimary },
+        ]}>
+        <ActivityIndicator size="large" color={darkColors.accent} />
+      </View>
+    );
   }
 
   return (
@@ -59,7 +67,7 @@ function RootLayoutNav() {
     colors: {
       ...DarkTheme.colors,
       primary: c.accent,
-      background: c.bgPrimary,
+      background: 'transparent',
       card: 'transparent',
       text: c.textPrimary,
       border: c.border,
@@ -71,15 +79,7 @@ function RootLayoutNav() {
     <>
       <StatusBar style="light" />
       <ThemeProvider value={navTheme}>
-        <View style={StyleSheet.absoluteFill}>
-          <LinearGradient
-            colors={gradientColors}
-            locations={[0, 0.5, 1]}
-            style={StyleSheet.absoluteFill}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          />
-        </View>
+        <AppBackground />
         <Stack
           screenOptions={{
             headerShown: false,
