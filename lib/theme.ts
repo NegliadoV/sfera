@@ -37,6 +37,7 @@ export const BACKGROUND_BLUR_PRESETS = [
   { label: 'Лёгкое', value: 12 },
   { label: 'Среднее', value: 24 },
   { label: 'Сильное', value: 36 },
+  { label: 'Ультра (iOS)', value: 48 },
   { label: 'Выкл', value: 0 },
 ] as const;
 
@@ -44,35 +45,43 @@ export const BACKGROUND_BLUR_PRESETS = [
 export const BACKGROUND_OPACITY_PRESETS = [
   { label: 'Сплошной', value: 1 },
   { label: 'Почти сплошной', value: 0.95 },
-  { label: 'Лёгкое стекло', value: 0.92 },
-  { label: 'Стекло', value: 0.82 },
-  { label: 'Сильная прозрачность', value: 0.7 },
+  { label: 'Стекло', value: 0.8 },
+  { label: 'Сильное', value: 0.6 },
+  { label: 'Ультра-стекло', value: 0.35 },
 ] as const;
 
 /** Палитра акцентов в стиле дизайн-систем (согласованные оттенки, контраст) */
-export const ACCENT_PRESETS: { name: string; value: string; hover: string }[] = [
-  { name: 'Синий', value: '#2563eb', hover: '#1d4ed8' },
-  { name: 'Фиолетовый', value: '#8b5cf6', hover: '#7c3aed' },
-  { name: 'Зелёный', value: '#22c55e', hover: '#16a34a' },
-  { name: 'Бирюзовый', value: '#0d9488', hover: '#0f766e' },
-  { name: 'Оранжевый', value: '#f97316', hover: '#ea580c' },
-  { name: 'Розовый', value: '#ec4899', hover: '#db2777' },
-  { name: 'Красный', value: '#ef4444', hover: '#dc2626' },
+export const ACCENT_PRESETS: { name: string; value: string; hover: string; secondary: string }[] = [
+  { name: 'Синий', value: '#2563eb', hover: '#1d4ed8', secondary: '#9333ea' },
+  { name: 'Фиолетовый', value: '#8b5cf6', hover: '#7c3aed', secondary: '#db2777' },
+  { name: 'Зелёный', value: '#22c55e', hover: '#16a34a', secondary: '#0ea5e9' },
+  { name: 'Бирюзовый', value: '#0d9488', hover: '#0f766e', secondary: '#3b82f6' },
+  { name: 'Оранжевый', value: '#f97316', hover: '#ea580c', secondary: '#ef4444' },
+  { name: 'Розовый', value: '#ec4899', hover: '#db2777', secondary: '#8b5cf6' },
+  { name: 'Красный', value: '#ef4444', hover: '#dc2626', secondary: '#f97316' },
 ];
 
 export function getStoredTheme(): ThemeMode {
   return 'dark';
 }
 
-export function getStoredAccent(): { value: string; hover: string } {
-  if (typeof window === 'undefined') return { value: '#2563eb', hover: '#1d4ed8' };
+export function getStoredAccent(): { value: string; hover: string; secondary: string } {
+  const defaultAccent = { value: '#2563eb', hover: '#1d4ed8', secondary: '#9333ea' };
+  if (typeof window === 'undefined') return defaultAccent;
   const raw = window.localStorage.getItem(ACCENT_STORAGE_KEY);
-  if (!raw) return { value: '#2563eb', hover: '#1d4ed8' };
+  if (!raw) return defaultAccent;
   try {
-    const { value, hover } = JSON.parse(raw);
-    if (value && hover) return { value, hover };
+    const parsed = JSON.parse(raw);
+    if (!parsed.value) return defaultAccent;
+    const preset = ACCENT_PRESETS.find(p => p.value === parsed.value);
+    if (preset) return { value: preset.value, hover: preset.hover, secondary: preset.secondary };
+    return { 
+      value: parsed.value, 
+      hover: parsed.hover || defaultAccent.hover, 
+      secondary: parsed.secondary || defaultAccent.secondary 
+    };
   } catch {}
-  return { value: '#2563eb', hover: '#1d4ed8' };
+  return defaultAccent;
 }
 
 export function applyTheme(_mode: ThemeMode) {
@@ -81,24 +90,29 @@ export function applyTheme(_mode: ThemeMode) {
 }
 
 export function applyAccent(value: string, hover: string) {
+  const preset = ACCENT_PRESETS.find(p => p.value === value);
+  const secondary = preset?.secondary || '#9333ea';
+
   document.documentElement.style.setProperty('--accent-primary', value);
   document.documentElement.style.setProperty('--accent-primary-hover', hover);
+  document.documentElement.style.setProperty('--accent-secondary', secondary);
   const muted = value + '99'; /* ~60% opacity for muted */
   document.documentElement.style.setProperty('--accent-primary-muted', muted);
+  
   if (typeof window !== 'undefined') {
-    window.localStorage.setItem(ACCENT_STORAGE_KEY, JSON.stringify({ value, hover }));
+    window.localStorage.setItem(ACCENT_STORAGE_KEY, JSON.stringify({ value, hover, secondary }));
   }
 }
 
 export function getStoredBackgroundOpacity(): number {
-  if (typeof window === 'undefined') return 0.95;
+  if (typeof window === 'undefined') return 0.35;
   const v = window.localStorage.getItem(BACKGROUND_OPACITY_KEY);
   const n = v ? parseFloat(v) : NaN;
-  return Number.isFinite(n) && n >= 0.5 && n <= 1 ? n : 0.95;
+  return Number.isFinite(n) && n >= 0.1 && n <= 1 ? n : 0.35;
 }
 
 export function applyBackgroundOpacity(value: number) {
-  const opacity = Math.max(0.5, Math.min(1, value));
+  const opacity = Math.max(0.1, Math.min(1, value));
   document.documentElement.style.setProperty('--app-bg-opacity', String(opacity));
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(BACKGROUND_OPACITY_KEY, String(opacity));
@@ -106,15 +120,15 @@ export function applyBackgroundOpacity(value: number) {
 }
 
 export function getStoredBackgroundBlur(): number {
-  if (typeof window === 'undefined') return 24;
+  if (typeof window === 'undefined') return 48;
   const v = window.localStorage.getItem(BACKGROUND_BLUR_KEY);
   const n = v ? parseInt(v, 10) : NaN;
-  if (Number.isFinite(n) && (n === 0 || n === 12 || n === 24 || n === 36)) return n;
-  return 24;
+  if (Number.isFinite(n) && (n === 0 || n === 12 || n === 24 || n === 32 || n === 36 || n === 48)) return n;
+  return 48;
 }
 
 export function applyBackgroundBlur(value: number) {
-  const blur = value === 0 ? 0 : value === 12 || value === 24 || value === 36 ? value : 24;
+  const blur = value === 0 ? 0 : value === 12 || value === 24 || value === 32 || value === 36 || value === 48 ? value : 48;
   document.documentElement.style.setProperty('--app-blur', blur === 0 ? '0' : `${blur}px`);
   document.documentElement.setAttribute('data-bg-blur', blur === 0 ? 'none' : 'blur');
   if (typeof window !== 'undefined') {
@@ -163,6 +177,7 @@ export function initTheme() {
   document.documentElement.setAttribute('data-light-style', lightStyle);
   document.documentElement.style.setProperty('--accent-primary', accent.value);
   document.documentElement.style.setProperty('--accent-primary-hover', accent.hover);
+  document.documentElement.style.setProperty('--accent-secondary', accent.secondary);
   document.documentElement.style.setProperty('--accent-primary-muted', accent.value + '99');
   document.documentElement.style.setProperty('--app-bg-opacity', String(bgOpacity));
   document.documentElement.style.setProperty('--app-blur', bgBlur === 0 ? '0' : `${bgBlur}px`);

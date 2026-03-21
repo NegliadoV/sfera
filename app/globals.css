@@ -13,53 +13,53 @@
   --accent-primary-hover: #1d4ed8;
   --accent-primary-muted: #60a5fa;
 
-  /* Тёмная тема (по умолчанию) — на 50% темнее */
-  --bg-primary: color-mix(in srgb, #25262a 50%, black);
-  --bg-secondary: color-mix(in srgb, #323439 50%, black);
-  --bg-sidebar: color-mix(in srgb, #2b2d31 50%, black);
-  --bg-accent: color-mix(in srgb, #404249 50%, black);
-  --bg-card: color-mix(in srgb, #2e3035 50%, black);
-  --bg-header: color-mix(in srgb, #25262a 50%, black);
-  --bg-secondary-rgb: 25, 26, 29;
-  --bg-header-rgb: 19, 19, 21;
+  /* Тёмная тема — "Стекло" без серых оттенков, глубокий сине-черный космос */
+  --bg-primary: #0b0d13;
+  --bg-secondary: #13161f;
+  --bg-sidebar: rgba(255, 255, 255, 0.02);
+  --bg-accent: rgba(255, 255, 255, 0.05);
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-header: rgba(255, 255, 255, 0.02);
+  --bg-secondary-rgb: 19, 22, 31;
+  --bg-header-rgb: 11, 13, 19;
   --text-primary: #e4e6e9;
   --text-secondary: #a8aaaf;
   --text-muted: #7a7d84;
   --text-accent: var(--accent-primary);
-  --border-color: color-mix(in srgb, #43454b 50%, black);
-  --border-subtle: color-mix(in srgb, #383a3f 50%, black);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.06);
   --shadow: 0 20px 36px -8px rgba(0, 0, 0, 0.5);
   --shadow-card: 0 8px 16px rgba(0, 0, 0, 0.3);
-  --hover-color: color-mix(in srgb, #3a3c42 50%, black);
-  --hover-accent: color-mix(in srgb, #4a4d54 50%, black);
+  --hover-color: rgba(255, 255, 255, 0.06);
+  --hover-accent: rgba(255, 255, 255, 0.1);
   --accent-blue: #3b82f6;
   --accent-purple: #8b5cf6;
   --accent-green: #22c55e;
   --accent-orange: #f97316;
   --accent-red: #ef4444;
 
-  /* Единый стиль платформы — фон и блоки реагируют на --app-bg-opacity */
-  --studio-bg-gradient: linear-gradient(160deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
-  --studio-card-bg: color-mix(in srgb, var(--bg-secondary) calc(var(--app-bg-opacity, 0.95) * 100%), transparent);
-  --studio-card-border: rgba(74, 144, 226, 0.2);
-  --studio-card-shadow: 0 35px 75px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(0, 255, 255, 0.06) inset;
-  --studio-header-bg: rgba(5, 8, 12, 0.7);
-  --studio-header-border: rgba(255, 255, 255, 0.05);
+  /* Единый стиль платформы — 100% стекло */
+  --studio-bg-gradient: linear-gradient(160deg, #090a0f 0%, #11141d 50%, #090a0f 100%);
+  --studio-card-bg: rgba(255, 255, 255, 0.03);
+  --studio-card-border: rgba(255, 255, 255, 0.15);
+  --studio-card-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 1px 1px 0 rgba(255, 255, 255, 0.15), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+  --studio-header-bg: rgba(255, 255, 255, 0.04);
+  --studio-header-border: rgba(255, 255, 255, 0.1);
   --studio-title-color: #ffffff;
   --studio-title-gradient: linear-gradient(130deg, #ffffff, #b0d0ff);
-  --studio-meta-color: #8a9bb5;
-  --studio-panel-bg: color-mix(in srgb, var(--bg-secondary) calc(var(--app-bg-opacity, 0.95) * 100%), transparent);
-  --studio-panel-border: rgba(255, 255, 255, 0.04);
-  --studio-video-bg: #05080c;
-  --studio-video-radial: radial-gradient(circle at 30% 40%, #0f1520 0%, #05080c 90%);
-  --studio-participant-bg: rgba(255, 255, 255, 0.02);
-  --studio-participant-hover: color-mix(in srgb, var(--accent-primary) 15%, transparent);
-  --studio-participant-border-hover: color-mix(in srgb, var(--accent-primary) 35%, transparent);
-  --studio-control-bg: rgba(0, 0, 0, 0.5);
-  --studio-control-border: rgba(255, 255, 255, 0.05);
-  --studio-footer-bg: rgba(0, 0, 0, 0.3);
-  --studio-voice-box-bg: rgba(255, 255, 255, 0.02);
-  --studio-voice-box-border: #0f1822;
+  --studio-meta-color: #aebfd6;
+  --studio-panel-bg: rgba(255, 255, 255, 0.03);
+  --studio-panel-border: rgba(255, 255, 255, 0.1);
+  --studio-video-bg: transparent;
+  --studio-video-radial: transparent;
+  --studio-participant-bg: rgba(255, 255, 255, 0.05);
+  --studio-participant-hover: rgba(255, 255, 255, 0.08);
+  --studio-participant-border-hover: rgba(255, 255, 255, 0.2);
+  --studio-control-bg: rgba(255, 255, 255, 0.1);
+  --studio-control-border: rgba(255, 255, 255, 0.15);
+  --studio-footer-bg: rgba(255, 255, 255, 0.05);
+  --studio-voice-box-bg: rgba(255, 255, 255, 0.05);
+  --studio-voice-box-border: rgba(255, 255, 255, 0.1);
   --studio-status-live-bg: rgba(39, 174, 96, 0.2);
   --studio-status-live-color: #2ecc71;
   --studio-status-live-border: rgba(46, 204, 113, 0.3);
@@ -87,9 +87,9 @@
   --transition-slow: 0.3s ease;
 
   /* Прозрачность фона приложения (0.5–1). Задаётся в Настройки → Внешний вид. */
-  --app-bg-opacity: 0.95;
+  --app-bg-opacity: 0.6;
   /* Сила размытия фона (0, 12px, 24px, 36px). 0 = выкл. */
-  --app-blur: 24px;
+  --app-blur: 32px;
   /* Оттенок интерфейса: 0 = нейтральный, 1–360 = hue (Настройки → Цвет интерфейса). */
   --interface-hue: 0;
 
@@ -125,16 +125,16 @@
 
   /* Студийный дизайн — светлая тема */
   --studio-bg-gradient: linear-gradient(145deg, #e8e9ec 0%, #f0f1f3 50%, #f2f3f5 100%);
-  --studio-card-bg: rgba(255, 255, 255, 0.9);
-  --studio-card-border: rgba(74, 144, 226, 0.2);
-  --studio-card-shadow: 0 20px 50px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04) inset;
-  --studio-header-bg: rgba(242, 243, 245, 0.95);
-  --studio-header-border: rgba(0, 0, 0, 0.06);
+  --studio-card-bg: rgba(255, 255, 255, 0.6);
+  --studio-card-border: rgba(255, 255, 255, 0.6);
+  --studio-card-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --studio-header-bg: rgba(242, 243, 245, 0.6);
+  --studio-header-border: rgba(255, 255, 255, 0.5);
   --studio-title-color: #1e1f22;
   --studio-title-gradient: linear-gradient(130deg, #1e1f22, #4a6f8a);
   --studio-meta-color: #4e5058;
-  --studio-panel-bg: rgba(255, 255, 255, 0.85);
-  --studio-panel-border: rgba(0, 0, 0, 0.06);
+  --studio-panel-bg: rgba(255, 255, 255, 0.6);
+  --studio-panel-border: rgba(255, 255, 255, 0.5);
   --studio-video-bg: #1a1d21;
   --studio-video-radial: radial-gradient(circle at 30% 40%, #2a3544 0%, #1a1d21 90%);
   --studio-participant-bg: rgba(0, 0, 0, 0.03);
@@ -207,19 +207,14 @@
 
 /* Подкрашивание интерфейса по выбранному оттенку (тёмная тема), тона на 50% темнее */
 [data-theme="dark"][data-interface-tint="true"] {
-  --bg-primary: color-mix(in srgb, color-mix(in srgb, #25262a 50%, black) 82%, hsl(var(--interface-hue), 20%, 13%) 18%);
-  --bg-secondary: color-mix(in srgb, color-mix(in srgb, #323439 50%, black) 79%, hsl(var(--interface-hue), 18%, 15%) 21%);
-  --bg-sidebar: color-mix(in srgb, color-mix(in srgb, #2b2d31 50%, black) 79%, hsl(var(--interface-hue), 18%, 14%) 21%);
-  --bg-accent: color-mix(in srgb, color-mix(in srgb, #404249 50%, black) 76%, hsl(var(--interface-hue), 16%, 17%) 24%);
-  --bg-card: color-mix(in srgb, color-mix(in srgb, #2e3035 50%, black) 79%, hsl(var(--interface-hue), 18%, 15%) 21%);
-  --bg-header: color-mix(in srgb, color-mix(in srgb, #25262a 50%, black) 82%, hsl(var(--interface-hue), 20%, 13%) 18%);
-  --border-color: color-mix(in srgb, color-mix(in srgb, #43454b 50%, black) 70%, hsl(var(--interface-hue), 15%, 19%) 30%);
-  --border-subtle: color-mix(in srgb, color-mix(in srgb, #383a3f 50%, black) 73%, hsl(var(--interface-hue), 15%, 16%) 27%);
-  --hover-color: color-mix(in srgb, color-mix(in srgb, #3a3c42 50%, black) 76%, hsl(var(--interface-hue), 16%, 17%) 24%);
-  --hover-accent: color-mix(in srgb, color-mix(in srgb, #4a4d54 50%, black) 73%, hsl(var(--interface-hue), 14%, 19%) 27%);
+  --bg-primary: color-mix(in srgb, #0b0d13 85%, hsl(var(--interface-hue), 30%, 12%) 15%);
+  --bg-secondary: color-mix(in srgb, #13161f 82%, hsl(var(--interface-hue), 28%, 15%) 18%);
+  /* Мы НЕ переопределяем --bg-sidebar, hover-color и border-color здесь. 
+     Они теперь используют rgba() из базовой тёмной темы, благодаря чему остаются полностью 
+     прозрачным стеклом, просто ложась поверх цветного --bg-secondary и свещения от blobs! */
 }
 [data-theme="dark"][data-interface-tint="true"] body {
-  background: linear-gradient(160deg, color-mix(in srgb, #111213 85%, hsl(var(--interface-hue), 22%, 11%) 15%) 0%, color-mix(in srgb, #151617 82%, hsl(var(--interface-hue), 20%, 13%) 18%) 50%, color-mix(in srgb, #131316 85%, hsl(var(--interface-hue), 20%, 12%) 15%) 100%);
+  background: linear-gradient(160deg, color-mix(in srgb, #0b0d13 85%, hsl(var(--interface-hue), 30%, 12%) 15%) 0%, color-mix(in srgb, #13161f 82%, hsl(var(--interface-hue), 28%, 15%) 18%) 50%, color-mix(in srgb, #0b0d13 85%, hsl(var(--interface-hue), 30%, 12%) 15%) 100%);
 }
 
 /* Подкрашивание интерфейса (светлая тема, база — мягкая), оттенок усилен ~50% */
@@ -237,6 +232,42 @@
 }
 [data-theme="light"][data-interface-tint="true"] body {
   background: linear-gradient(160deg, color-mix(in srgb, #e8e9ec 88%, hsl(var(--interface-hue), 22%, 95%) 12%) 0%, color-mix(in srgb, #f0f1f3 91%, hsl(var(--interface-hue), 25%, 97%) 9%) 50%, color-mix(in srgb, #f2f3f5 88%, hsl(var(--interface-hue), 25%, 96%) 12%) 100%);
+}
+
+/* Background Blobs Animation */
+@keyframes blob-float {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.bg-blob {
+  position: absolute;
+  filter: blur(120px);
+  border-radius: 50%;
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
+  animation: blob-float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blob-1 {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: var(--accent-primary);
+  animation-delay: 0s;
+}
+
+.blob-2 {
+  bottom: -20%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: var(--accent-secondary, var(--accent-purple));
+  animation-delay: -5s;
 }
 
 @theme inline {
@@ -309,10 +340,10 @@ a.header-auth-link:hover {
 .glass-icon-btn {
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  background: color-mix(in srgb, var(--bg-secondary) 85%, rgba(255, 255, 255, 0.1));
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 [data-theme="light"] .glass-icon-btn {
   background: color-mix(in srgb, white 70%, transparent);
@@ -320,9 +351,10 @@ a.header-auth-link:hover {
   box-shadow: var(--shadow-card), inset 0 1px 0 color-mix(in srgb, white 80%, transparent);
 }
 .glass-icon-btn:hover {
-  background: var(--hover-color);
-  border-color: var(--border-color);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
   box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
 }
 [data-theme="light"] .glass-icon-btn:hover {
   background: var(--hover-color);
@@ -347,12 +379,12 @@ a.header-auth-link:hover {
 
 /* Стеклянный хедер и контейнер — в тёмной теме единый стиль платформы (room) */
 .app-container-glass {
-  background: color-mix(in srgb, var(--bg-secondary) calc(var(--app-bg-opacity, 0.95) * 100%), transparent) !important;
+  background: color-mix(in srgb, var(--bg-secondary) calc(var(--app-bg-opacity, 0.6) * 100%), transparent) !important;
   box-shadow: 0 20px 36px -8px rgba(0, 0, 0, 0.25), var(--neon-glow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 [data-bg-blur="blur"] .app-container-glass {
-  backdrop-filter: blur(var(--app-blur, 24px)) saturate(1.1);
-  -webkit-backdrop-filter: blur(var(--app-blur, 24px)) saturate(1.1);
+  backdrop-filter: blur(var(--app-blur, 32px)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--app-blur, 32px)) saturate(1.5);
 }
 [data-bg-blur="none"] .app-container-glass {
   backdrop-filter: none;
@@ -360,7 +392,7 @@ a.header-auth-link:hover {
 }
 
 [data-theme="dark"] .app-container-glass.studio-card {
-  background: color-mix(in srgb, var(--bg-secondary) calc(var(--app-bg-opacity, 0.95) * 100%), transparent) !important;
+  background: color-mix(in srgb, var(--bg-secondary) calc(var(--app-bg-opacity, 0.6) * 100%), transparent) !important;
   border: 1px solid var(--studio-card-border);
   box-shadow: var(--studio-card-shadow);
   background-image: var(--studio-radial-overlay) !important;
@@ -386,16 +418,35 @@ a.header-auth-link:hover {
   min-width: 0;
   min-height: 0;
 }
-.app-shell-unified > header {
-  flex-shrink: 0;
-  background: transparent !important;
-  border-bottom: 1px solid var(--studio-panel-border, rgba(255, 255, 255, 0.06));
-  box-shadow: none;
-  border-radius: 0;
+
+
+/* Zen Mode (Абсолютный Фокус) */
+body[data-zen="true"] .sidebar-nav-section,
+body[data-zen="true"] .sidebar-contacts-drawer {
+  width: 0 !important;
+  min-width: 0 !important;
+  opacity: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
 }
-.app-shell-unified > header.header-glass {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+
+body[data-zen="true"] .app-shell-unified > header {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  margin-top: -100px !important;
+}
+
+.sidebar-nav-section {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 768px) {
+  .app-shell-unified > header {
+    margin: 12px 12px 0 12px;
+    border-radius: 16px;
+  }
 }
 
 /* ========== Единые элементы платформы (стиль комнат) ========== */
@@ -612,13 +663,11 @@ a.header-auth-link:hover {
   border-right: 1px solid var(--studio-panel-border) !important;
 }
 
-/* Десктоп: сайдбар растягивается на всю высоту и прилипает к экрану */
+/* Десктоп: сайдбар занимает всю высоту доступного контейнера */
 @media (min-width: 769px) {
   .sidebar-drawer {
-    position: sticky !important;
-    top: 0;
-    align-self: stretch;
-    height: 100vh;
+    height: 100%;
+    overflow-y: auto;
   }
 }
 
@@ -3594,9 +3643,9 @@ select:focus-visible,
 }
 
 .settings-color-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   margin: 20px 0 30px;
 }
 
@@ -3604,7 +3653,7 @@ select:focus-visible,
   background: var(--bg-accent);
   border: 1px solid var(--border-subtle);
   border-radius: 40px;
-  padding: 14px 8px;
+  padding: 12px 24px;
   text-align: center;
   color: var(--text-primary);
   font-weight: 500;
@@ -3612,6 +3661,8 @@ select:focus-visible,
   cursor: pointer;
   backdrop-filter: blur(5px);
   font-size: 1rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .settings-color-option:hover {
@@ -3656,6 +3707,8 @@ select:focus-visible,
   cursor: pointer;
   transition: 0.15s;
   font-size: 1rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .settings-glass-btn:hover {
@@ -5063,4 +5116,266 @@ a.sources-circle:hover,
 
 .platform-textarea-error {
   border-color: var(--accent-red);
+}
+
+/* Glassmorphism 2.0 Panels */
+.glass-panel {
+  background: var(--studio-panel-bg);
+  backdrop-filter: blur(var(--app-blur, 32px));
+  -webkit-backdrop-filter: blur(var(--app-blur, 32px));
+  border: 1px solid var(--studio-panel-border);
+  box-shadow: var(--studio-card-shadow);
+  border-radius: var(--radius-xl);
+}
+
+/* Customization Settings Page */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 16px 0;
+}
+
+.settings-card {
+  background: var(--studio-panel-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--studio-panel-border);
+  border-radius: 24px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.settings-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  border-color: color-mix(in srgb, var(--accent-primary) 40%, var(--studio-panel-border));
+}
+
+.settings-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.settings-card-title i {
+  color: var(--accent-primary);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: color-mix(in srgb, var(--accent-primary) 15%, transparent);
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.settings-card-title h2 {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.settings-card-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.settings-color-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--studio-meta-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.settings-color-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.settings-color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.settings-color-option {
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: var(--studio-participant-bg);
+  border: 1px solid var(--studio-participant-border-hover);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.settings-color-option:hover {
+  background: var(--studio-participant-hover);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.settings-color-option.active {
+  background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent-primary) 40%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.settings-glass-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.settings-glass-btn {
+  padding: 10px 18px;
+  border-radius: 40px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: var(--studio-participant-bg);
+  border: 1px solid var(--studio-participant-border-hover);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.settings-glass-btn:hover {
+  background: var(--studio-participant-hover);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.settings-glass-btn.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary-hover);
+  color: #fff;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent-primary) 50%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.settings-transparency-section {
+  margin-top: 24px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 10%, rgba(255, 255, 255, 0.05));
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.settings-transparency-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.settings-opacity-slider {
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: color-mix(in srgb, var(--accent-primary) 20%, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  outline: none;
+  transition: background 0.2s;
+}
+
+.settings-opacity-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.settings-opacity-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent-primary) 60%, transparent);
+}
+
+.settings-blur-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.settings-note-muted {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--studio-panel-border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.settings-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  margin-top: 24px;
+  background: color-mix(in srgb, var(--accent-primary) 5%, var(--studio-panel-bg));
+  border: 1px solid var(--studio-panel-border);
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.settings-save-note {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-save-icon {
+  color: #10b981;
+}
+
+.settings-save-badge {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(16, 185, 129, 0.15);
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
 }

@@ -5,7 +5,7 @@ import { db, universes, content, user, comments, contentLinks, universeMembers }
 import { eq, desc, sql, and } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
 import { AddContentForm } from '../AddContentForm';
-import { ContentCard } from '../ContentCard';
+import { ContentFeedGrid } from '../ContentFeedGrid';
 import { TrackUniverseButton } from '@/components/content/TrackUniverseButton';
 
 export const dynamic = 'force-dynamic';
@@ -111,7 +111,7 @@ export default async function ContentFeedPage({
     contentList = await Promise.all(
       list.map(async (item) => {
         const [commentCountResult] = await db
-          .select({ count: sql<number>`count(*)::int` })
+          .select({ count: sql<number>`count(id)::int` })
           .from(comments)
           .where(eq(comments.contentId, item.id));
         const [hasLinksResult] = await db
@@ -185,35 +185,13 @@ export default async function ContentFeedPage({
           )}
         </p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <p className="platform-card-desc" style={{ marginBottom: 8 }}>
-            Закреплённые посты отображаются сверху.
-          </p>
-          {contentList.map((c) => (
-            <ContentCard
-              key={c.id}
-              id={c.id}
-              title={c.title}
-              type={c.type}
-              url={c.url}
-              imageUrl={c.imageUrl}
-              body={c.body}
-              authorName={c.authorName}
-              externalAuthor={c.externalAuthor}
-              publishedAt={c.publishedAt}
-              pinnedAt={c.pinnedAt}
-              createdAt={c.createdAt}
-              sourceId={c.sourceId}
-              tags={c.tags}
-              hasLinks={c.hasLinks}
-              commentCount={c.commentCount}
-              slug={slug}
-              canDelete={canDelete}
-              canEdit={canDelete}
-              canPin={canDelete}
-            />
-          ))}
-        </div>
+        <ContentFeedGrid
+          items={contentList}
+          slug={slug}
+          canDelete={canDelete}
+          canEdit={canDelete}
+          canPin={canDelete}
+        />
       )}
     </div>
   );

@@ -1,9 +1,25 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import {
+  ReactFlow,
+  ReactFlowProvider,
+  Background,
+  Controls,
+  applyNodeChanges,
+  applyEdgeChanges,
+  addEdge as xyAddEdge,
+  NodeChange,
+  EdgeChange,
+  Connection,
+  Edge,
+  Node as FlowNode,
+  Handle,
+  Position,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 
-type NodeType = { id: string; type: string; label: string; contentId: string | null; commentId: string | null };
+type NodeType = { id: string; type: string; label: string; contentId: string | null; commentId: string | null; position: any };
 type EdgeType = { id: string; fromNodeId: string; toNodeId: string };
 
 type MapData = {
@@ -19,236 +35,213 @@ const NODE_TYPE_LABEL: Record<string, string> = {
   discussion: 'Дискуссия',
 };
 
-export function MindMapEditor({
-  slug,
-  mapId,
-  initialMap,
-  canEdit,
-}: {
-  slug: string;
-  mapId: string;
-  initialMap: MapData;
-  canEdit: boolean;
-}) {
-  const [nodes, setNodes] = useState(initialMap.nodes);
-  const [edges, setEdges] = useState(initialMap.edges);
+// --- Кастомный узел "Улика" ---
+function EvidenceNode({ data }: { data: any }) {
+  return (
+    <div 
+      className="relative p-4 shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/10 w-48 transform transition-transform"
+      style={{ 
+        backgroundColor: '#e6dfd1', // Цвет старой бумаги
+        color: '#1a1a1a', 
+        fontFamily: 'var(--font-mono)',
+        transform: `rotate(${data.rotation || 0}deg)`,
+      }}
+    >
+      {/* Пин (булавка) */}
+      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full shadow-lg border border-red-900 z-10" style={{ background: 'radial-gradient(circle at 30% 30%, #ef4444, #991b1b)' }}>
+        <div className="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-white/60"></div>
+      </div>
+      
+      {/* Фото-лента или скотч (декор) */}
+      <div className="absolute -top-2 right-[-10%] w-12 h-6 bg-white/20 backdrop-blur-sm shadow-sm rotate-[15deg]"></div>
+
+      <div className="text-[10px] font-bold mb-2 opacity-50 uppercase tracking-widest border-b border-black/10 pb-1">
+        {data.typeLabel}
+      </div>
+      <div className="text-sm font-semibold leading-snug">
+        {data.label}
+      </div>
+
+      <Handle type="target" position={Position.Top} className="opacity-0 w-8 h-8 -top-4" />
+      <Handle type="source" position={Position.Bottom} className="opacity-0 w-8 h-8 -bottom-4" />
+    </div>
+  );
+}
+
+const nodeTypes = {
+  evidence: EvidenceNode,
+};
+
+function FlowEditor({ slug, mapId, initialMap, canEdit }: { slug: string; mapId: string; initialMap: MapData; canEdit: boolean }) {
+  // Инициализация графа React Flow
+  const initialNodes: FlowNode[] = initialMap.nodes.map((n, i) => ({
+    id: n.id,
+    type: 'evidence',
+    position: n.position || { x: 100 + (i * 200) % 800, y: 100 + Math.floor(i / 4) * 150 },
+    data: { 
+      label: n.label, 
+      typeLabel: NODE_TYPE_LABEL[n.type] ?? n.type,
+      rotation: (Math.random() - 0.5) * 6, // Случайный наклон от -3 до 3 градусов
+    },
+    draggable: canEdit,
+  }));
+
+  const initialFlowEdges: Edge[] = initialMap.edges.map(e => ({
+    id: e.id,
+    source: e.fromNodeId,
+    target: e.toNodeId,
+    type: 'default',
+    animated: false,
+    style: { 
+      stroke: '#dc2626', // Красная нить
+      strokeWidth: 4, 
+      filter: 'drop-shadow(0px 8px 4px rgba(0,0,0,0.6))', 
+      strokeLinecap: 'round' 
+    },
+  }));
+
+  const [nodes, setNodes] = useState<FlowNode[]>(initialNodes);
+  const [edges, setEdges] = useState<Edge[]>(initialFlowEdges);
+  const [pending, setPending] = useState('');
+  
+  // UI стейт для создания через панель
   const [nodeLabel, setNodeLabel] = useState('');
   const [nodeType, setNodeType] = useState<'source' | 'thesis' | 'discussion'>('thesis');
-  const [fromId, setFromId] = useState('');
-  const [toId, setToId] = useState('');
-  const [pending, setPending] = useState('');
-  const [error, setError] = useState<string | null>(null);
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    []
+  );
+
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    []
+  );
+
+  // Сохранение позиции при перетаскивании
+  const onNodeDragStop = useCallback(async (event: React.MouseEvent, node: FlowNode) => {
+    if (!canEdit) return;
+    try {
+      await fetch(`/api/universes/${slug}/mind-maps/${mapId}/nodes/${node.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ position: node.position })
+      });
+    } catch (e) {
+      console.error("Failed to save position", e);
+    }
+  }, [slug, mapId, canEdit]);
+
+  const onConnect = useCallback(
+    async (params: Connection) => {
+      if (!canEdit) return;
+      setEdges((eds) => xyAddEdge({ 
+        ...params, 
+        style: { stroke: '#dc2626', strokeWidth: 4, filter: 'drop-shadow(0px 8px 4px rgba(0,0,0,0.6))' } 
+      }, eds));
+      try {
+        await fetch(`/api/universes/${slug}/mind-maps/${mapId}/edges`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fromNodeId: params.source, toNodeId: params.target }),
+        });
+      } catch (e) {
+        console.error("Failed to save edge", e);
+      }
+    },
+    [slug, mapId, canEdit]
+  );
 
   async function addNode(e: React.FormEvent) {
     e.preventDefault();
-    if (!nodeLabel.trim()) return;
+    if (!nodeLabel.trim() || !canEdit) return;
     setPending('node');
-    setError(null);
     try {
       const res = await fetch(`/api/universes/${slug}/mind-maps/${mapId}/nodes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ label: nodeLabel.trim(), type: nodeType }),
+        body: JSON.stringify({ 
+          label: nodeLabel.trim(), 
+          type: nodeType,
+          position: { x: window.innerWidth / 2 - 100, y: window.innerHeight / 2 - 100 } 
+        }),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error ?? `Ошибка ${res.status}`);
+      if (res.ok) {
+        const n = await res.json();
+        const newNode: FlowNode = {
+          id: n.id,
+          type: 'evidence',
+          position: n.position || { x: 300, y: 300 },
+          data: { label: n.label, typeLabel: NODE_TYPE_LABEL[n.type], rotation: (Math.random() - 0.5) * 6 },
+          draggable: true,
+        };
+        setNodes((nds) => [...nds, newNode]);
+        setNodeLabel('');
       }
-      const node = await res.json();
-      setNodes((prev) => [...prev, { ...node, position: null }]);
-      setNodeLabel('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка');
     } finally {
       setPending('');
     }
   }
-
-  async function addEdge(e: React.FormEvent) {
-    e.preventDefault();
-    if (!fromId || !toId || fromId === toId) return;
-    setPending('edge');
-    setError(null);
-    try {
-      const res = await fetch(`/api/universes/${slug}/mind-maps/${mapId}/edges`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ fromNodeId: fromId, toNodeId: toId }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error ?? `Ошибка ${res.status}`);
-      }
-      const edge = await res.json();
-      setEdges((prev) => [...prev, edge]);
-      setFromId('');
-      setToId('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка');
-    } finally {
-      setPending('');
-    }
-  }
-
-  const getNodeLabel = (id: string) => nodes.find((n) => n.id === id)?.label ?? id.slice(0, 8);
 
   return (
-    <div className="space-y-8">
-      {error && (
-        <p className="text-sm" style={{ color: 'var(--accent-red)' }}>
-          {error}
-        </p>
-      )}
+    <div className="rounded-2xl overflow-hidden glass-panel relative shadow-2xl border-none" style={{ width: '100%', minWidth: '100%', flexGrow: 1, alignSelf: 'stretch', height: '80vh', minHeight: 600, display: 'flex' }}>
+      
+      {/* Декоративное освещение доски */}
+      <div className="absolute inset-0 pointer-events-none z-10" style={{ boxShadow: 'inset 0 0 100px rgba(0,0,0,0.8)' }}></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[50vh] pointer-events-none z-10 opacity-30" style={{ background: 'radial-gradient(ellipse at top, #ffffff, transparent)' }}></div>
 
-      <section>
-        <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-          Узлы ({nodes.length})
-        </h3>
-        <ul className="list-none p-0 m-0 flex flex-wrap gap-2">
-          {nodes.map((n) => (
-            <li
-              key={n.id}
-              className="px-3 py-1.5 rounded-[var(--radius-md)] text-sm border"
-              style={{
-                backgroundColor: 'var(--bg-accent)',
-                borderColor: 'var(--border-color)',
-                color: 'var(--text-secondary)',
-              }}
-            >
-              <span className="text-xs opacity-80">{NODE_TYPE_LABEL[n.type] ?? n.type}:</span>{' '}
-              {n.label}
-              {n.contentId && (
-                <Link
-                  href={`/universes/${slug}/content/${n.contentId}`}
-                  className="ml-2 text-xs underline"
-                  style={{ color: 'var(--accent-blue)' }}
-                >
-                  контент
-                </Link>
-              )}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onNodeDragStop={onNodeDragStop}
+        onConnect={onConnect}
+        nodeTypes={nodeTypes}
+        fitView
+      >
+        <Background gap={30} size={1.5} color="rgba(255,255,255,0.2)" style={{ backgroundColor: 'transparent' }} />
+        <Controls className="glass-panel border-none shadow-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '10px' }} />
+      </ReactFlow>
 
-      <section>
-        <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-          Связи ({edges.length})
-        </h3>
-        <ul className="list-none p-0 m-0 space-y-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
-          {edges.map((e) => (
-            <li key={e.id}>
-              {getNodeLabel(e.fromNodeId)} → {getNodeLabel(e.toNodeId)}
-            </li>
-          ))}
-        </ul>
-      </section>
-
+      {/* Панель добавления (floating widget) */}
       {canEdit && (
-        <>
-          <section className="pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
-            <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Добавить узел
-            </h3>
-            <form onSubmit={addNode} className="flex flex-wrap gap-2 items-center">
-              <input
-                type="text"
-                value={nodeLabel}
-                onChange={(e) => setNodeLabel(e.target.value)}
-                placeholder="Подпись узла"
-                className="px-3 py-2 rounded-[var(--radius-md)] border text-sm min-w-[180px]"
-                style={{
-                  backgroundColor: 'var(--bg)',
-                  borderColor: 'var(--border-color)',
-                  color: 'var(--text-primary)',
-                }}
-                disabled={pending !== ''}
-              />
-              <select
-                value={nodeType}
-                onChange={(e) => setNodeType(e.target.value as 'source' | 'thesis' | 'discussion')}
-                className="px-3 py-2 rounded-[var(--radius-md)] border text-sm"
-                style={{
-                  backgroundColor: 'var(--bg)',
-                  borderColor: 'var(--border-color)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                <option value="thesis">Тезис</option>
-                <option value="source">Источник</option>
-                <option value="discussion">Дискуссия</option>
-              </select>
-              <button
-                type="submit"
-                disabled={pending !== '' || !nodeLabel.trim()}
-                className="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium disabled:opacity-50"
-                style={{ backgroundColor: 'var(--accent-blue)', color: 'white' }}
-              >
-                {pending === 'node' ? '…' : 'Добавить'}
-              </button>
-            </form>
-          </section>
-
-          <section>
-            <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Добавить связь
-            </h3>
-            <form onSubmit={addEdge} className="flex flex-wrap gap-2 items-center">
-              <select
-                value={fromId}
-                onChange={(e) => setFromId(e.target.value)}
-                className="px-3 py-2 rounded-[var(--radius-md)] border text-sm min-w-[160px]"
-                style={{
-                  backgroundColor: 'var(--bg)',
-                  borderColor: 'var(--border-color)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                <option value="">От узла</option>
-                {nodes.map((n) => (
-                  <option key={n.id} value={n.id}>
-                    {n.label.slice(0, 40)}
-                  </option>
-                ))}
-              </select>
-              <span style={{ color: 'var(--text-secondary)' }}>→</span>
-              <select
-                value={toId}
-                onChange={(e) => setToId(e.target.value)}
-                className="px-3 py-2 rounded-[var(--radius-md)] border text-sm min-w-[160px]"
-                style={{
-                  backgroundColor: 'var(--bg)',
-                  borderColor: 'var(--border-color)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                <option value="">К узлу</option>
-                {nodes.map((n) => (
-                  <option key={n.id} value={n.id}>
-                    {n.label.slice(0, 40)}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="submit"
-                disabled={pending !== '' || !fromId || !toId || fromId === toId}
-                className="px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium disabled:opacity-50"
-                style={{ backgroundColor: 'var(--accent-green)', color: 'white' }}
-              >
-                {pending === 'edge' ? '…' : 'Связать'}
-              </button>
-            </form>
-          </section>
-        </>
-      )}
-
-      {!canEdit && (
-        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Редактировать карту может только создатель.
-        </p>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 glass-panel shadow-2xl p-4 rounded-3xl flex items-center gap-3 border-white/10" style={{ backdropFilter: 'blur(30px)' }}>
+          <form onSubmit={addNode} className="flex gap-2">
+            <input
+              type="text"
+              value={nodeLabel}
+              onChange={(e) => setNodeLabel(e.target.value)}
+              placeholder="Новая зацепка..."
+              className="px-4 py-2 rounded-2xl bg-black/30 border border-white/10 text-white outline-none focus:border-[var(--accent-primary)] transition min-w-[200px]"
+            />
+            <select
+              value={nodeType}
+              onChange={(e) => setNodeType(e.target.value as any)}
+              className="px-4 py-2 rounded-2xl bg-black/30 border border-white/10 text-white outline-none cursor-pointer"
+            >
+              <option value="thesis">Тезис</option>
+              <option value="source">Документ</option>
+              <option value="discussion">Связь/Дискуссия</option>
+            </select>
+            <button
+              type="submit"
+              disabled={pending !== '' || !nodeLabel.trim()}
+              className="px-6 py-2 rounded-2xl bg-[var(--accent-primary)] text-white font-bold hover:scale-105 transition-transform disabled:opacity-50"
+            >
+              {pending === 'node' ? '...' : <i className="fa-solid fa-plus" />}
+            </button>
+          </form>
+        </div>
       )}
     </div>
+  );
+}
+
+export function MindMapEditor(props: any) {
+  return (
+    <ReactFlowProvider>
+      <FlowEditor {...props} />
+    </ReactFlowProvider>
   );
 }

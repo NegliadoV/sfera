@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"npm run next-dev\" \"npm run ws\"",
+    "next-dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -24,12 +25,14 @@
     "db:clean-seed": "tsx scripts/clean-and-seed-universes.ts",
     "worker": "tsx scripts/worker-db.ts",
     "worker:redis": "tsx scripts/worker.ts",
+    "worker:digest": "tsx scripts/worker-digest.ts",
     "clear-worker-cache": "tsx scripts/clear-worker-cache.ts",
     "ws": "tsx scripts/ws-server.ts",
     "check-redis": "node scripts/check-redis.js"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
+    "@xyflow/react": "^12.10.1",
     "bullmq": "^5.68.0",
     "dotenv": "^17.2.4",
     "drizzle-orm": "^0.45.1",
@@ -37,6 +40,7 @@
     "jose": "^6.1.3",
     "next": "16.1.6",
     "next-auth": "^5.0.0-beta.30",
+    "nodemailer": "^7.0.13",
     "postgres": "^3.4.8",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -48,8 +52,10 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^7.0.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.9",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",

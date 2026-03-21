@@ -12,7 +12,7 @@ type AuthState = {
 
 type AuthContextValue = AuthState & {
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name?: string) => Promise<void>;
+  register: (email: string, password: string, name?: string, userTag?: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -60,8 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser({ id: u.id, email: u.email ?? null, name: u.name ?? null, image: u.image ?? null });
   }, []);
 
-  const register = useCallback(async (email: string, password: string, name?: string) => {
-    await apiRegister(email, password, name);
+  const register = useCallback(async (email: string, password: string, name?: string, userTag?: string) => {
+    await apiRegister(email, password, name, userTag);
     const { token: t, user: u } = await apiLogin(email, password);
     await authStorage.setToken(t);
     await authStorage.setStoredUser({

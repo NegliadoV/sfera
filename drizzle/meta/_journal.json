@@ -71,6 +71,20 @@
       "when": 1771694440496,
       "tag": "0009_add_user_sources_and_user_content",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1774052783124,
+      "tag": "0010_furry_squadron_sinister",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1774054150367,
+      "tag": "0011_classy_natasha_romanoff",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,7 @@ import { apiRequest } from '@/lib/api';
 import type { ContentItem } from '@/types/api';
 import { useThemeColors } from '@/components/useThemeColors';
 import { ScreenContainer, LoadingScreen, EmptyState } from '@/components/screen';
+import { ShortsViewerModal } from '@/components/platform/ShortsViewerModal';
 
 export default function UniverseContentScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -15,6 +16,7 @@ export default function UniverseContentScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [pinningId, setPinningId] = useState<string | null>(null);
   const [menuItem, setMenuItem] = useState<ContentItem | null>(null);
+  const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
 
   const load = async () => {
     if (!slug) {
@@ -148,10 +150,10 @@ export default function UniverseContentScreen() {
             <Text style={styles.addBtnText}>Добавить материал</Text>
           </TouchableOpacity>
         }
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => router.push(`/(tabs)/universes/${slug}/content/${item.id}`)}
+            onPress={() => setActiveModalIndex(index)}
             onLongPress={() => handleLongPress(item)}
             delayLongPress={400}
             style={[styles.bubble, screenLayout.contentBlock, { backgroundColor: colors.bgCard, borderColor: colors.studioCardBorder ?? colors.border, minHeight: mobileLayout.minTouchTarget }]}>
@@ -203,6 +205,13 @@ export default function UniverseContentScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      <ShortsViewerModal 
+        items={items} 
+        initialIndex={activeModalIndex} 
+        onClose={() => setActiveModalIndex(null)} 
+        slug={slug ?? ''} 
+      />
     </ScreenContainer>
   );
 }

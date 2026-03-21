@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, InteractionManager } from 'react-native';
 import { router } from 'expo-router';
 import { fetchConversations, fetchGroupChats } from '@/lib/messagesApi';
 import type { ConversationItem, GroupChatItem } from '@/types/api';
@@ -42,7 +42,10 @@ export default function MessagesListScreen() {
   };
 
   useEffect(() => {
-    load();
+    const task = InteractionManager.runAfterInteractions(() => {
+      load();
+    });
+    return () => task.cancel();
   }, []);
 
   const list: ConvoItem[] = [

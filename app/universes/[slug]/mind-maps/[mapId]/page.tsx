@@ -67,6 +67,10 @@ export default async function MindMapPage({
         style={{
           backgroundColor: 'var(--card-bg)',
           borderColor: 'var(--border-color)',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'stretch'
         }}
       >
         <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>

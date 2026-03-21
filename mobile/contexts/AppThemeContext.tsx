@@ -30,12 +30,9 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [savedTheme, savedAccent] = await Promise.all([
-        getStoredTheme(),
-        getStoredAccent(),
-      ]);
+      const savedAccent = await getStoredAccent();
       if (!cancelled) {
-        setThemeModeState(savedTheme);
+        setThemeModeState('dark');
         setAccentState(savedAccent);
         setIsLoaded(true);
       }

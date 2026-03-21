@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, user } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { hashPassword } from '@/lib/password';
+import { normalizeAndValidateUserTag } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,13 +11,18 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * POST /api/auth/register — регистрация по email и паролю.
+ * Обязательно указывается ник (@ник) — латиница, цифры, подчёркивание, 3–30 символов.
  * Общая база: один и тот же эндпоинт используют и веб, и мобильное приложение.
- * Зарегистрированный пользователь может входить и на сайте, и в мобильном приложении с одними и теми же данными.
  */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { email, password, name } = body as { email?: string; password?: string; name?: string };
+    const { email, password, name, userTag: rawUserTag } = body as {
+      email?: string;
+      password?: string;
+      name?: string;
+      userTag?: string;
+    };
 
     const emailStr = typeof email === 'string' ? email.trim().toLowerCase() : '';
     if (!emailStr) {
@@ -24,6 +30,14 @@ export async function POST(req: NextRequest) {
     }
     if (!EMAIL_REGEX.test(emailStr)) {
       return NextResponse.json({ error: 'Некорректный email' }, { status: 400 });
+    }
+
+    const validatedTag = normalizeAndValidateUserTag(rawUserTag);
+    if (!validatedTag) {
+      return NextResponse.json(
+        { error: 'Укажите ник: латиница, цифры или подчёркивание, от 3 до 30 символов (например: mynick или my_nick)' },
+        { status: 400 }
+      );
     }
 
     const passwordStr = typeof password === 'string' ? password : '';
@@ -34,9 +48,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const [existing] = await db.select({ id: user.id }).from(user).where(eq(user.email, emailStr)).limit(1);
-    if (existing) {
+    const [existingEmail] = await db.select({ id: user.id }).from(user).where(eq(user.email, emailStr)).limit(1);
+    if (existingEmail) {
       return NextResponse.json({ error: 'Пользователь с таким email уже зарегистрирован' }, { status: 409 });
+    }
+
+    const [existingTag] = await db.select({ id: user.id }).from(user).where(eq(user.userTag, validatedTag)).limit(1);
+    if (existingTag) {
+      return NextResponse.json({ error: 'Такой ник уже занят. Выберите другой.' }, { status: 409 });
     }
 
     const passwordHash = await hashPassword(passwordStr);
@@ -46,12 +65,13 @@ export async function POST(req: NextRequest) {
         email: emailStr,
         name: typeof name === 'string' && name.trim() ? name.trim() : emailStr.split('@')[0],
         passwordHash,
+        userTag: validatedTag,
       })
-      .returning({ id: user.id, email: user.email, name: user.name });
+      .returning({ id: user.id, email: user.email, name: user.name, userTag: user.userTag });
 
     return NextResponse.json({
       ok: true,
-      user: { id: newUser.id, email: newUser.email, name: newUser.name },
+      user: { id: newUser.id, email: newUser.email, name: newUser.name, userTag: newUser.userTag },
     });
   } catch (e) {
     console.error('POST /api/auth/register', e);

@@ -44,7 +44,7 @@ export function DigestPreview() {
     return (
       <>
         <div className="cabinet-digest-placeholder">
-          <i className="fa-regular fa-messages" style={{ fontSize: '2.2rem', opacity: 0.5, marginBottom: '14px', display: 'block' }} aria-hidden />
+          <i className="fa-regular fa-comments" style={{ fontSize: '2.2rem', opacity: 0.5, marginBottom: '14px', display: 'block' }} aria-hidden />
           <p style={{ marginBottom: '8px' }}>Новый контент за 24 часа</p>
           <span style={{ fontSize: '0.85rem' }}>Пока пусто</span>
         </div>

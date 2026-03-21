@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, Alert, ScrollView, View, Text, TextInput } from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity, Alert, ScrollView, View, Text, TextInput } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeColors } from '@/components/useThemeColors';
 import { useAppTheme } from '@/contexts/AppThemeContext';
 import { router } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { darkColors, mobileLayout, spacing, radius } from '@/constants/Theme';
+import { darkColors, mobileLayout, spacing, tabBarTokens } from '@/constants/Theme';
 import { PlatformCard, PlatformSectionHeading, PlatformButton } from '@/components/platform';
 import { getUserTag, updateUserTag } from '@/lib/meApi';
 
 export default function SettingsScreen() {
   const colors = useThemeColors() ?? darkColors;
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = tabBarTokens.rowHeight + tabBarTokens.marginBottom +
+    (Platform.OS === 'web' ? 20 : Math.max(insets.bottom, 12) + tabBarTokens.webPaddingBottom);
   const { themeMode, setThemeMode, accent, setAccent, accentPresets } = useAppTheme();
   const { user, logout } = useAuth();
   const [userTag, setUserTag] = useState('');
@@ -46,7 +50,7 @@ export default function SettingsScreen() {
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: 'transparent' }]}
-      contentContainerStyle={styles.scrollContent}>
+      contentContainerStyle={[styles.scrollContent, { paddingBottom: spacing.xxl + tabBarHeight }]}>
       <Text style={[styles.title, { color: colors.textPrimary }]}>Настройки</Text>
       {user?.email && (
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{user.email}</Text>
@@ -80,36 +84,10 @@ export default function SettingsScreen() {
       <PlatformCard compact style={styles.section}>
         <PlatformSectionHeading>Внешний вид</PlatformSectionHeading>
         <Text style={[styles.hint, { color: colors.textMuted }]}>
-          Тема и акцентный цвет. Сохраняется на устройстве.
+          Акцентный цвет. Сохраняется на устройстве.
         </Text>
 
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Тема</Text>
-        <View style={styles.themeRow}>
-          <TouchableOpacity
-            style={[
-              styles.themeOption,
-              { borderColor: colors.border, backgroundColor: themeMode === 'dark' ? colors.bgAccent : 'transparent' },
-              themeMode === 'dark' && styles.themeOptionActive,
-            ]}
-            onPress={() => setThemeMode('dark')}>
-            <Text style={[styles.themeOptionText, { color: themeMode === 'dark' ? colors.textPrimary : colors.textMuted }]}>
-              Тёмная
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.themeOption,
-              { borderColor: colors.border, backgroundColor: themeMode === 'light' ? colors.bgAccent : 'transparent' },
-              themeMode === 'light' && styles.themeOptionActive,
-            ]}
-            onPress={() => setThemeMode('light')}>
-            <Text style={[styles.themeOptionText, { color: themeMode === 'light' ? colors.textPrimary : colors.textMuted }]}>
-              Светлая
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={[styles.label, { color: colors.textSecondary, marginTop: spacing.lg }]}>Акцентный цвет</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>Акцентный цвет</Text>
         <View style={styles.accentRow}>
           {accentPresets.map((preset) => {
             const isActive = accent.value.toLowerCase() === preset.value.toLowerCase();
@@ -139,7 +117,6 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: {
     padding: mobileLayout.pagePadding,
-    paddingBottom: spacing.xxl,
   },
   title: {
     fontSize: 22,

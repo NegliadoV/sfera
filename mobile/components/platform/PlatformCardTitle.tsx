@@ -6,12 +6,11 @@ import { darkColors } from '@/constants/Theme';
 type PlatformCardTitleProps = {
   children: React.ReactNode;
   icon?: React.ReactNode;
-  forceDark?: boolean;
 };
 
-export function PlatformCardTitle({ children, icon, forceDark }: PlatformCardTitleProps) {
+export function PlatformCardTitle({ children, icon }: PlatformCardTitleProps) {
   const themeColors = useThemeColors();
-  const colors = forceDark ? darkColors : themeColors;
+  const colors = themeColors;
   const textColor = colors?.textPrimary ?? darkColors.textPrimary;
   const accentColor = colors?.accent ?? darkColors.accent;
   const iconWithAccent =

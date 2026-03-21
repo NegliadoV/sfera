@@ -7,6 +7,8 @@ export function CreateUniverseForm() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [icon, setIcon] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [monthlyPrice, setMonthlyPrice] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const [conflictSlug, setConflictSlug] = useState<string | null>(null);
@@ -55,6 +57,8 @@ export function CreateUniverseForm() {
           name: name.trim(),
           description: description.trim() || undefined,
           icon: normalizedIcon || undefined,
+          isPrivate,
+          monthlyPrice: isPrivate && monthlyPrice.trim() ? parseInt(monthlyPrice, 10) : null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -164,6 +168,40 @@ export function CreateUniverseForm() {
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="universes-field-full">
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
+            <input
+              type="checkbox"
+              checked={isPrivate}
+              onChange={(e) => setIsPrivate(e.target.checked)}
+              style={{ width: 18, height: 18, cursor: 'pointer' }}
+            />
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Сделать сферу закрытой (по подписке)</span>
+          </label>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: 4, marginLeft: 28 }}>
+            Доступ к сфере будет только у подписчиков после оплаты через ЮKassa.
+          </div>
+          
+          {isPrivate && (
+            <div style={{ marginTop: 12, marginLeft: 28 }}>
+              <div className="universes-field-label" style={{ marginBottom: 6 }}>
+                <i className="fa-solid fa-ruble-sign" aria-hidden /> СТОИМОСТЬ В МЕСЯЦ (RUB)
+              </div>
+              <div className="universes-input-wrapper">
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={monthlyPrice}
+                  onChange={(e) => setMonthlyPrice(e.target.value)}
+                  placeholder="Например: 500"
+                  required={isPrivate}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <button

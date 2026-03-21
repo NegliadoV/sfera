@@ -29,7 +29,7 @@ export async function fetchMessagesBadge(): Promise<{ total: number }> {
   }
 }
 
-export type ContactUser = { id: string; name?: string | null; email?: string | null; image?: string | null };
+export type ContactUser = { id: string; name?: string | null; email?: string | null; image?: string | null; userTag?: string | null };
 
 export async function fetchContacts(): Promise<ContactUser[]> {
   try {

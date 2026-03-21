@@ -7,7 +7,7 @@ import { fetchMyUniverses } from '@/lib/universesApi';
 import { useThemeColors } from '@/components/useThemeColors';
 import { darkColors, mobileLayout, spacing, screenLayout, typography } from '@/constants/Theme';
 import { ScreenContainer, LoadingScreen, EmptyState } from '@/components/screen';
-import { ListCard } from '@/components/platform';
+import { ListCard, PlatformCard } from '@/components/platform';
 
 type UserContentRow = {
   id: string;
@@ -57,14 +57,14 @@ export default function MeScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.accent} />
         }>
-        <View style={[styles.profile, screenLayout.contentBlock, { backgroundColor: colors.bgCard, borderColor: colors.studioCardBorder ?? colors.border }]}>
+        <PlatformCard style={[styles.profile, screenLayout.contentBlock]} neon>
           <Text style={[styles.name, { color: colors.textPrimary }]}>
             {user?.name || user?.email || 'Профиль'}
           </Text>
           {user?.email ? (
             <Text style={[styles.email, { color: colors.textSecondary }]}>{user.email}</Text>
           ) : null}
-        </View>
+        </PlatformCard>
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Мои сферы</Text>
         <View style={styles.list}>
           {myUniverses.length === 0 ? (
@@ -97,9 +97,9 @@ export default function MeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { paddingBottom: spacing.xxl },
-  profile: { marginBottom: spacing.md },
-  name: { ...typography.titleLarge },
-  email: { ...typography.bodySmall, marginTop: spacing.xs },
-  sectionTitle: { ...typography.title, marginHorizontal: 0, marginTop: spacing.lg, marginBottom: spacing.sm },
+  profile: { marginBottom: spacing.xl, marginTop: spacing.lg, paddingVertical: 40, alignItems: 'center' },
+  name: { ...typography.titleLarge, fontSize: 32, fontWeight: '700', textAlign: 'center' },
+  email: { ...typography.body, fontSize: 16, marginTop: spacing.sm, textAlign: 'center', opacity: 0.8 },
+  sectionTitle: { ...typography.title, marginHorizontal: 0, marginTop: spacing.xxl, marginBottom: spacing.lg, fontSize: 24, fontWeight: '700' },
   list: { paddingHorizontal: 0 },
 });

@@ -11,6 +11,7 @@ type PlatformInputProps = {
   secureTextEntry?: boolean;
   editable?: boolean;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  autoCorrect?: boolean;
   keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
 };
 
@@ -22,6 +23,7 @@ export function PlatformInput({
   secureTextEntry,
   editable = true,
   autoCapitalize,
+  autoCorrect,
   keyboardType,
 }: PlatformInputProps) {
   const colors = useThemeColors() ?? darkColors;
@@ -38,15 +40,16 @@ export function PlatformInput({
         secureTextEntry={secureTextEntry}
         editable={editable}
         autoCapitalize={autoCapitalize}
+        autoCorrect={autoCorrect}
         keyboardType={keyboardType}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         style={[
           styles.input,
           {
-            backgroundColor: colors.bgAccent ?? colors.bgSecondary,
+            backgroundColor: colors.studioPanelBg ?? 'rgba(255,255,255,0.03)',
             color: colors.textPrimary,
-            borderColor: focused ? colors.neonBorder : colors.border,
+            borderColor: focused ? colors.neonBorder : (colors.studioPanelBorder ?? 'rgba(255,255,255,0.1)'),
             borderWidth: 1,
             borderRadius: radius.sm,
             paddingVertical: 12,
