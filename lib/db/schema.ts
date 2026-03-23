@@ -130,6 +130,8 @@ export const content = pgTable('content', {
   url: text('url'),
   body: text('body'),
   imageUrl: text('image_url'), // URL изображения (обложка, превью) из источника
+  // Фаза 4: Gamification & Knowledge Economy
+  savesCount: integer('saves_count').notNull().default(0),
   // Фаза 2: метаданные агрегации
   sourceId: uuid('source_id').references(() => sources.id, { onDelete: 'set null' }),
   publishedAt: timestamp('published_at', { withTimezone: true }),
@@ -294,6 +296,31 @@ export const universeTracking = pgTable(
   ]
 );
 
+// --- Фаза 4: Интерактивные Опросы (Polls) ---
+
+export const contentPolls = pgTable('content_polls', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  contentId: uuid('content_id')
+    .notNull()
+    .references(() => content.id, { onDelete: 'cascade' }),
+  options: jsonb('options').notNull(), // Array<{ id: string, text: string }>
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const contentPollVotes = pgTable('content_poll_votes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  pollId: uuid('poll_id')
+    .notNull()
+    .references(() => contentPolls.id, { onDelete: 'cascade' }),
+  optionId: text('option_id').notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex('poll_votes_user_idx').on(t.pollId, t.userId), // 1 голос на юзера в опросе
+]);
+
 /** Уведомления пользователя (новый пост в отслеживаемой сфере) */
 export const notifications = pgTable('notifications', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -306,6 +333,7 @@ export const notifications = pgTable('notifications', {
   contentId: uuid('content_id')
     .notNull()
     .references(() => content.id, { onDelete: 'cascade' }),
+  type: text('type').notNull().default('new_post'),
   readAt: timestamp('read_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -414,7 +442,6 @@ export const mindMapNodeTypeEnum = pgEnum('mind_map_node_type', ['source', 'thes
 export const mindMaps = pgTable('mind_maps', {
   id: uuid('id').primaryKey().defaultRandom(),
   universeId: uuid('universe_id')
-    .notNull()
     .references(() => universes.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   createdById: text('created_by_id')
@@ -434,6 +461,7 @@ export const mindMapNodes = pgTable('mind_map_nodes', {
   contentId: uuid('content_id').references(() => content.id, { onDelete: 'set null' }),
   commentId: uuid('comment_id').references(() => comments.id, { onDelete: 'set null' }),
   position: jsonb('position'), // { x: number, y: number } для визуального редактора
+  data: jsonb('data'), // for ReactFlow arbitrary data (like bgColor)
   createdById: text('created_by_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
@@ -693,3 +721,35 @@ export const crystalTransactions = pgTable('crystal_transactions', {
   shortId: uuid('short_id').references(() => shorts.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+// --- Фаза 8: Глобальные Комнаты (WebRTC / LiveKit) ---
+export const spaceTypeEnum = pgEnum('space_type', ['audio', 'video']);
+
+export const liveSpaces = pgTable('live_spaces', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  description: text('description'),
+  type: spaceTypeEnum('type').notNull().default('audio'),
+  creatorId: text('creator_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  /** Если комната создана внутри сферы - привязываем её к сфере. Если null - это глобальная комната. */
+  universeId: uuid('universe_id')
+    .references(() => universes.id, { onDelete: 'cascade' }),
+  isPrivate: boolean('is_private').notNull().default(false),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  endedAt: timestamp('ended_at', { withTimezone: true }),
+});
+
+export const liveSpaceParticipants = pgTable('live_space_participants', {
+  spaceId: uuid('space_id')
+    .notNull()
+    .references(() => liveSpaces.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  role: text('role').notNull().default('speaker'), // 'speaker', 'listener', 'admin'
+  joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow().notNull(),
+  leftAt: timestamp('left_at', { withTimezone: true }),
+}, (t) => [primaryKey({ columns: [t.spaceId, t.userId] })]);

@@ -19,7 +19,7 @@ export default async function HomePage(
           <span className="text-sm font-semibold tracking-wide uppercase">Новый уровень осмысления</span>
         </div>
         
-        <h1 className="platform-hero-title text-5xl md:text-7xl font-extrabold tracking-tight mb-6 animate-in slide-in-from-bottom-6 duration-700 delay-100" style={{ lineHeight: 1.15 }}>
+        <h1 className="platform-hero-title font-extrabold tracking-tight mb-6 animate-in slide-in-from-bottom-6 duration-700 delay-100" style={{ lineHeight: 1.15 }}>
           Платформа для <br />
           <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #60a5fa 0%, #c084fc 100%)' }}>
             глубокого познания
@@ -30,12 +30,12 @@ export default async function HomePage(
           SFERA — инструмент для мышления и осмысленного диалога. Помогаем строить понимание и находить единомышленников для глубокого обмена идеями вне информационного шума.
         </p>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 animate-in slide-in-from-bottom-10 duration-700 delay-300">
-          <Link href="/universes" className="platform-btn platform-btn-primary no-underline text-lg px-8 py-4 shadow-2xl hover:scale-105 transition-transform" style={{ borderRadius: '50px' }}>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-5 animate-in slide-in-from-bottom-10 duration-700 delay-300 w-full sm:w-auto px-2 sm:px-0">
+          <Link href="/universes" className="platform-btn platform-btn-primary no-underline text-base sm:text-lg px-6 py-3 sm:px-8 sm:py-4 shadow-2xl hover:scale-105 transition-transform flex-1 justify-center whitespace-normal text-center h-auto min-h-[50px] leading-tight" style={{ borderRadius: '50px' }}>
             <i className="fa-solid fa-compass" aria-hidden />
-            Исследовать сферы знаний
+            Исследовать сферы
           </Link>
-          <Link href="/about" className="platform-btn no-underline text-lg px-8 py-4 glass-icon-btn hover:scale-105 transition-transform" style={{ borderRadius: '50px' }}>
+          <Link href="/about" className="platform-btn no-underline text-base sm:text-lg px-6 py-3 sm:px-8 sm:py-4 glass-icon-btn hover:scale-105 transition-transform flex-1 justify-center whitespace-normal text-center h-auto min-h-[50px] leading-tight" style={{ borderRadius: '50px' }}>
             Узнать больше
           </Link>
         </div>

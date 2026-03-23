@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { auth } from '@/auth';
+import { getSessionForServerComponent } from '@/lib/session';
 import { db, universes, rooms, user, themes } from '@/lib/db';
 import { eq, desc, asc } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
@@ -55,7 +55,7 @@ export default async function UniverseRoomsPage({
     .where(eq(themes.universeId, u.id))
     .orderBy(asc(themes.name));
 
-  const session = await auth();
+  const session = await getSessionForServerComponent();
 
   return (
     <div className="platform-page">

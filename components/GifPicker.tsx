@@ -15,12 +15,15 @@ export function GifPicker({ onPick, children }: { onPick: (url: string) => void;
   const ref = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
+  const popupRef = useRef<HTMLDivElement>(null);
+
   useLayoutEffect(() => {
     if (open && btnRef.current && typeof document !== 'undefined') {
       const rect = btnRef.current.getBoundingClientRect();
+      const dropdownWidth = 340;
       setPos({
         bottom: window.innerHeight - rect.top + 8,
-        left: Math.min(rect.left, window.innerWidth - 336),
+        left: Math.max(16, Math.min(rect.left - dropdownWidth + 40, window.innerWidth - dropdownWidth - 16)),
       });
     }
   }, [open]);
@@ -54,7 +57,8 @@ export function GifPicker({ onPick, children }: { onPick: (url: string) => void;
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current?.contains(e.target as Node) || popupRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -86,15 +90,13 @@ export function GifPicker({ onPick, children }: { onPick: (url: string) => void;
       </button>
       {open && typeof document !== 'undefined' && createPortal(
         <div
+          ref={popupRef}
+          className="chat-popup-glass"
           style={{
             position: 'fixed',
             bottom: pos.bottom,
             left: pos.left,
             padding: 12,
-            background: 'var(--bg-primary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 12,
-            boxShadow: 'var(--shadow-lg)',
             zIndex: 9999,
             width: 320,
             maxHeight: Math.min(320, window.innerHeight - 120),
@@ -113,8 +115,8 @@ export function GifPicker({ onPick, children }: { onPick: (url: string) => void;
               width: '100%',
               padding: '10px 14px',
               borderRadius: 8,
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-primary)',
+              border: '1px solid var(--border-subtle)',
+              background: 'rgba(0,0,0,0.2)',
               color: 'var(--text-primary)',
               fontSize: '0.9rem',
             }}

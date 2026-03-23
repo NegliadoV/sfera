@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { auth } from '@/auth';
+import { getSessionForServerComponent } from '@/lib/session';
 import { db, universes, mindMaps, user, mindMapNodes } from '@/lib/db';
 import { eq, desc, sql } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
@@ -52,7 +52,7 @@ export default async function UniverseMindMapsPage({
     })
   );
 
-  const session = await auth();
+  const session = await getSessionForServerComponent();
 
   return (
     <div className="platform-page">

@@ -15,9 +15,21 @@ export function AddContentForm({ universeId }: Props) {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [body, setBody] = useState('');
+  const [hasPoll, setHasPoll] = useState(false);
+  const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
   const [pending, setPending] = useState(false);
   const [parsePending, setParsePending] = useState(false);
   const [error, setError] = useState('');
+
+  const handleAddOption = () => {
+    if (pollOptions.length < 4) setPollOptions([...pollOptions, '']);
+  };
+
+  const handleOptionChange = (index: number, val: string) => {
+    const newOptions = [...pollOptions];
+    newOptions[index] = val;
+    setPollOptions(newOptions);
+  };
 
   const handleParseTelegram = async () => {
     const raw = url.trim() || '';
@@ -47,6 +59,38 @@ export function AddContentForm({ universeId }: Props) {
     }
   };
 
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (!file) continue;
+        e.preventDefault();
+        
+        const placeholder = `![Загрузка...]()\n`;
+        const start = e.currentTarget.selectionStart;
+        const end = e.currentTarget.selectionEnd;
+        setBody(prev => prev.substring(0, start) + placeholder + prev.substring(end));
+        
+        const fd = new FormData();
+        fd.append('file', file);
+        try {
+          const res = await fetch('/api/me/chat-upload', { method: 'POST', credentials: 'include', body: fd });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            setBody((prev) => prev.replace(placeholder, `![Скриншот](${data.url})\n`));
+          } else {
+            setBody((prev) => prev.replace(placeholder, `*[Ошибка загрузки]*\n`));
+          }
+        } catch {
+          setBody((prev) => prev.replace(placeholder, `*[Ошибка загрузки]*\n`));
+        }
+        break;
+      }
+    }
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
@@ -68,6 +112,7 @@ export function AddContentForm({ universeId }: Props) {
           title: title.trim(),
           url: (contentType === 'link' || contentType === 'telegram') ? (url.trim() || undefined) : undefined,
           body: body.trim() || undefined,
+          pollOptions: hasPoll ? pollOptions.filter(o => o.trim()) : undefined,
         }),
       });
       if (!res.ok) {
@@ -78,6 +123,8 @@ export function AddContentForm({ universeId }: Props) {
       setTitle('');
       setUrl('');
       setBody('');
+      setHasPoll(false);
+      setPollOptions(['', '']);
       setIsOpen(false);
       router.refresh();
     } finally {
@@ -145,6 +192,8 @@ export function AddContentForm({ universeId }: Props) {
               setTitle('');
               setUrl('');
               setBody('');
+              setHasPoll(false);
+              setPollOptions(['', '']);
             }}
             className="add-content-form-close-btn"
             aria-label="Закрыть форму"
@@ -214,11 +263,12 @@ export function AddContentForm({ universeId }: Props) {
                 className="add-content-form-textarea"
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
+                onPaste={handlePaste}
                 placeholder=" "
                 rows={2}
               />
               <label htmlFor="add-content-desc" className="add-content-form-float-label">
-                {contentType === 'telegram' ? 'Описание (подставится из канала)' : 'Краткое описание (необязательно)'}
+                {contentType === 'telegram' ? 'Описание (поддерживает Markdown)' : 'Описание (необязательно, поддерживает Markdown)'}
               </label>
             </div>
           </div>
@@ -237,6 +287,7 @@ export function AddContentForm({ universeId }: Props) {
                   className="add-content-form-textarea add-content-form-textarea-editor"
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
+                  onPaste={handlePaste}
                   placeholder="Напишите статью в Markdown…"
                   rows={16}
                   required
@@ -257,6 +308,42 @@ export function AddContentForm({ universeId }: Props) {
             </div>
           </div>
         )}
+
+
+        <div className="add-content-form-field" style={{ minWidth: '100%' }}>
+           <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 500, color: 'var(--text-primary)' }}>
+             <input type="checkbox" checked={hasPoll} onChange={(e) => setHasPoll(e.target.checked)} className="form-checkbox h-5 w-5 text-[var(--accent-primary)] rounded bg-white/5 border-white/20" />
+             <i className="fa-solid fa-chart-pie text-[var(--accent-primary)]"></i> Прикрепить опрос
+           </label>
+
+           {hasPoll && (
+             <div className="mt-4 flex flex-col gap-3 p-4 rounded-xl bg-[color-mix(in_srgb,var(--accent-primary)_5%,transparent)] border border-[color-mix(in_srgb,var(--accent-primary)_20%,transparent)]">
+               {pollOptions.map((opt, idx) => (
+                 <div key={idx} className="flex gap-2 w-full">
+                   <input
+                     type="text"
+                     placeholder={`Опция ${idx + 1}`}
+                     value={opt}
+                     onChange={(e) => handleOptionChange(idx, e.target.value)}
+                     className="add-content-form-input w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                     required={idx < 2} // first two options are required
+                     maxLength={100}
+                   />
+                   {idx > 1 && (
+                     <button type="button" onClick={() => setPollOptions(pollOptions.filter((_, i) => i !== idx))} className="shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20">
+                       <i className="fa-solid fa-trash"></i>
+                     </button>
+                   )}
+                 </div>
+               ))}
+               {pollOptions.length < 4 && (
+                 <button type="button" onClick={handleAddOption} className="text-sm font-medium px-4 py-2 mt-2 rounded-lg border border-[var(--accent-primary)] text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-white transition self-start">
+                   <i className="fa-solid fa-plus mr-2"></i> Добавить опцию (max 4)
+                 </button>
+               )}
+             </div>
+           )}
+        </div>
 
         {error && <div className="add-content-form-error">{error}</div>}
 

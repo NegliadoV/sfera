@@ -139,6 +139,38 @@ export function DiscussionBlock({
     }
   }, [currentUser, emitTypingStart]);
 
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (!file) continue;
+        e.preventDefault();
+        
+        const placeholder = `![Загрузка...]()\n`;
+        const start = e.currentTarget.selectionStart;
+        const end = e.currentTarget.selectionEnd;
+        setBody(prev => prev.substring(0, start) + placeholder + prev.substring(end));
+        
+        const fd = new FormData();
+        fd.append('file', file);
+        try {
+          const res = await fetch('/api/me/chat-upload', { method: 'POST', credentials: 'include', body: fd });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            setBody((prev) => prev.replace(placeholder, `![Скриншот](${data.url})\n`));
+          } else {
+            setBody((prev) => prev.replace(placeholder, `*[Ошибка загрузки]*\n`));
+          }
+        } catch {
+          setBody((prev) => prev.replace(placeholder, `*[Ошибка загрузки]*\n`));
+        }
+        break;
+      }
+    }
+  };
+
   const handleBlur = useCallback(() => {
     emitTypingStop();
   }, [emitTypingStop]);
@@ -253,6 +285,7 @@ export function DiscussionBlock({
               setBody(e.target.value);
               handleTyping();
             }}
+            onPaste={handlePaste}
             onFocus={emitTypingStart}
             onBlur={handleBlur}
             placeholder="Ваш комментарий..."

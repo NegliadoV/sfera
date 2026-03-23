@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { auth } from '@/auth';
-import { db, content, user, comments, reactions, contentLinks, sources, universes, universeMembers } from '@/lib/db';
+import { db, content, user, comments, reactions, contentLinks, sources, universes, universeMembers, contentPolls, contentPollVotes } from '@/lib/db';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
 import { eq, and, sql, or, inArray } from 'drizzle-orm';
 import { DiscussionBlock } from '@/components/DiscussionBlock';
@@ -11,6 +11,7 @@ import { getYouTubeVideoId } from '@/lib/youtube';
 import { isDirectVideoUrl } from '@/lib/video-url';
 import { getProxiedImageSrc } from '@/lib/proxy-image';
 import { ContentLinks } from './ContentLinks';
+import { ContentPoll } from '@/components/ContentPoll';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { DeleteContentButton } from '../DeleteContentButton';
 import { EditContentForm } from './EditContentForm';
@@ -162,6 +163,24 @@ export default async function UniverseContentPage({
     }
   }
 
+  // Получаем опрос, если есть
+  const [pollData] = await db
+    .select({
+      id: contentPolls.id,
+      options: contentPolls.options,
+    })
+    .from(contentPolls)
+    .where(eq(contentPolls.contentId, contentId))
+    .limit(1);
+
+  let initialPollVotes: any[] = [];
+  if (pollData) {
+    initialPollVotes = await db
+      .select()
+      .from(contentPollVotes)
+      .where(eq(contentPollVotes.pollId, pollData.id));
+  }
+
   let canDelete = false;
   let canEdit = false;
   let canPin = false;
@@ -197,6 +216,31 @@ export default async function UniverseContentPage({
   // Проверяем и приводим теги к правильному типу
   const tagsArray = Array.isArray(contentRow.tags) ? (contentRow.tags as string[]) : null;
 
+  const normalizeForComparison = (str: string) => {
+    if (!str) return '';
+    return str
+      .replace(/<[^>]+>/g, ' ') // Strip HTML tags
+      .replace(/&[a-z0-9#]+;/gi, ' ') // Strip HTML entities like &nbsp;
+      .replace(/[^\p{L}\p{N}]+/gu, '') // Keep ONLY letters and numbers, remove all spaces/punctuation
+      .toLowerCase();
+  };
+
+  const normTitle = normalizeForComparison(contentRow.title || '');
+  const normBody = normalizeForComparison(contentRow.body || '');
+  const titleNoEllipsis = (contentRow.title || '').replace(/[\.…]+$/, '');
+  const normTitleNoEllipsis = normalizeForComparison(titleNoEllipsis);
+
+  // If the normalized title is very short (e.g. "План"), it might accidentally match 
+  // a body starting with "Планирование". So we require length > 15 for prefix match,
+  // or an exact match regardless of length.
+  const isDuplicate = Boolean(
+    normTitle && normBody && (
+      normTitle === normBody ||
+      (normTitleNoEllipsis.length > 15 && normBody.startsWith(normTitleNoEllipsis)) ||
+      (normTitle.length > 15 && normBody.startsWith(normTitle))
+    )
+  );
+
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
@@ -218,12 +262,20 @@ export default async function UniverseContentPage({
       <article className="platform-card mb-8">
         <div>
           <div className="flex items-start justify-between gap-4 mb-2">
-            <h1 className="platform-hero-title platform-content-title flex items-center gap-2 flex-wrap flex-1 min-w-0">
-              {contentRow.pinnedAt && (
-                <span title="Закреплён" className="text-lg">📌</span>
-              )}
-              {contentRow.title}
-            </h1>
+            {!isDuplicate ? (
+              <h1 className="platform-hero-title platform-content-title flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                {contentRow.pinnedAt && (
+                  <span title="Закреплён" className="text-lg">📌</span>
+                )}
+                {contentRow.title}
+              </h1>
+            ) : (
+              <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                {contentRow.pinnedAt && (
+                  <span title="Закреплён" className="text-lg">📌</span>
+                )}
+              </div>
+            )}
             {canEdit && !showEditForm && (
               <Link
                 href={`/universes/${slug}/content/${contentId}?edit=1`}
@@ -343,14 +395,16 @@ export default async function UniverseContentPage({
           )}
           {contentRow.body && (
             <div className="mb-4">
-              {contentRow.type === 'article' ? (
-                <MarkdownBody content={contentRow.body} />
-              ) : (
-                <div className="whitespace-pre-wrap" style={{ color: 'var(--text-primary)' }}>
-                  {contentRow.body}
-                </div>
-              )}
+              <MarkdownBody content={contentRow.body} />
             </div>
+          )}
+          {pollData && (
+            <ContentPoll
+              pollId={pollData.id}
+              options={pollData.options as any}
+              initialVotes={initialPollVotes}
+              pollAuthorId={contentRow.authorId ?? undefined}
+            />
           )}
         </div>
       </article>
@@ -371,18 +425,6 @@ export default async function UniverseContentPage({
               className="platform-btn platform-btn-sm no-underline"
             />
           )}
-          <Link
-            href={`/universes/${slug}/rooms?contentId=${contentId}&title=${encodeURIComponent(contentRow.title)}`}
-            className="platform-btn platform-btn-sm no-underline"
-          >
-            <i className="fa-solid fa-video" /> Создать комнату для просмотра
-          </Link>
-          <Link
-            href={`/universes/${slug}/mind-maps?addContent=${contentId}&contentTitle=${encodeURIComponent(contentRow.title)}`}
-            className="platform-btn platform-btn-sm no-underline"
-          >
-            <i className="fa-solid fa-diagram-project" /> В ментальную карту
-          </Link>
         </div>
       )}
       {links.length > 0 && (

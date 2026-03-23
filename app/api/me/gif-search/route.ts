@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
 /** GET /api/me/gif-search?q=... — поиск GIF через GIPHY */
 export async function GET(req: NextRequest) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

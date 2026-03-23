@@ -15,6 +15,10 @@ export async function GET(req: NextRequest) {
   const userId = session.user.id;
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
+  const { searchParams } = new URL(req.url);
+  const limit = Math.min(Number(searchParams.get('limit')) || 20, 50);
+  const offset = Number(searchParams.get('offset')) || 0;
+
   try {
     // ID сфер: владелец, участник, отслеживаемые
     const owned = await db
@@ -55,6 +59,11 @@ export async function GET(req: NextRequest) {
         universeName: universes.name,
         publishedAt: content.publishedAt,
         createdAt: content.createdAt,
+        type: content.type,
+        url: content.url,
+        body: content.body,
+        imageUrl: content.imageUrl,
+        externalAuthor: content.externalAuthor,
       })
       .from(content)
       .innerJoin(universes, eq(content.universeId, universes.id))
@@ -65,7 +74,8 @@ export async function GET(req: NextRequest) {
         )
       )
       .orderBy(desc(content.createdAt))
-      .limit(50);
+      .limit(limit)
+      .offset(offset);
 
     const byUniverse: Record<string, { name: string; slug: string; count: number }> = {};
     for (const item of items) {
@@ -84,6 +94,11 @@ export async function GET(req: NextRequest) {
         universeName: i.universeName,
         publishedAt: i.publishedAt?.toISOString() ?? null,
         createdAt: i.createdAt.toISOString(),
+        type: i.type,
+        url: i.url,
+        body: i.body,
+        imageUrl: i.imageUrl,
+        externalAuthor: i.externalAuthor,
       })),
       total: items.length,
       byUniverse: Object.values(byUniverse),

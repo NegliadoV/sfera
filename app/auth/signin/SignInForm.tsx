@@ -33,7 +33,18 @@ export function SignInForm({
       }
       // После успешного входа редиректим на callbackUrl или на страницу вселенных
       if (res?.ok || res?.url) {
-        window.location.href = res?.url || callbackUrl || '/';
+        let dest = '/universes';
+        try {
+          if (callbackUrl) {
+            const urlObj = new URL(callbackUrl, window.location.origin);
+            if (urlObj.pathname !== '/') {
+              dest = callbackUrl;
+            }
+          }
+        } catch {
+          // Игнорируем ошибки парсинга URL, оставляем fallback
+        }
+        window.location.href = dest;
       }
     } catch {
       setError('Ошибка входа');
@@ -55,7 +66,7 @@ export function SignInForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-xl border text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-xl border text-base sm:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
           style={{
             backgroundColor: 'rgba(255,255,255,0.03)',
             borderColor: 'rgba(255,255,255,0.1)',
@@ -77,7 +88,7 @@ export function SignInForm({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-xl border text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)]"
+          className="w-full px-4 py-3 rounded-xl border text-base sm:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)]"
           style={{
             backgroundColor: 'rgba(255,255,255,0.03)',
             borderColor: 'rgba(255,255,255,0.1)',

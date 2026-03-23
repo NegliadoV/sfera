@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import {
   db,
   contactRequests,
@@ -16,8 +16,8 @@ function canonicalPair(a: string, b: string): [string, string] {
 }
 
 /** GET /api/me/contacts/requests — входящие и исходящие запросы */
-export async function GET() {
-  const session = await auth();
+export async function GET(req: NextRequest) {
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -74,7 +74,7 @@ export async function GET() {
 
 /** POST /api/me/contacts/requests — отправить запрос в друзья */
 export async function POST(req: NextRequest) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

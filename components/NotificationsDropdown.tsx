@@ -9,6 +9,7 @@ type NotificationItem = {
   contentId: string;
   slug: string;
   title: string;
+  type: string;
   read: boolean;
   createdAt: string;
 };
@@ -216,7 +217,13 @@ export function NotificationsDropdown() {
                       e.currentTarget.style.background = n.read ? 'transparent' : 'rgba(59, 130, 246, 0.06)';
                     }}
                   >
-                    <span style={{ fontWeight: 500, fontSize: '0.9rem' }}>Новый пост</span>
+                    <span style={{ fontWeight: 500, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {n.type === 'save' ? (
+                        <><i className="fa-solid fa-project-diagram text-[var(--accent-primary)]"></i> Сохранено в Карту</>
+                      ) : (
+                        <><i className="fa-solid fa-bell text-blue-400"></i> Новый пост</>
+                      )}
+                    </span>
                     <div style={{ marginTop: 4, fontSize: '0.85rem', opacity: 0.9 }}>
                       {n.title.length > 60 ? `${n.title.slice(0, 60)}…` : n.title}
                     </div>

@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
         universeId: notifications.universeId,
         slug: universes.slug,
         title: content.title,
+        type: notifications.type,
         readAt: notifications.readAt,
         createdAt: notifications.createdAt,
       })
@@ -36,6 +37,7 @@ export async function GET(req: NextRequest) {
         contentId: n.contentId,
         slug: n.slug,
         title: n.title,
+        type: n.type,
         read: !!n.readAt,
         createdAt: n.createdAt,
       })),

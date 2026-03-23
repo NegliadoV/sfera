@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import { db, userBlocks, user } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 /** GET /api/me/blocks */
-export async function GET() {
-  const session = await auth();
+export async function GET(req: NextRequest) {
+  const session = await getSessionForRequest(req);
   const me = session?.user?.id;
   if (!me) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
@@ -21,7 +21,7 @@ export async function GET() {
 
 /** POST /api/me/blocks */
 export async function POST(req: NextRequest) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   const me = session?.user?.id;
   if (!me) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {

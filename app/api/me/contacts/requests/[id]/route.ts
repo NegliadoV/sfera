@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
 import { db, contactRequests, contacts } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
 
@@ -15,7 +15,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
