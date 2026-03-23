@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { auth } from '@/auth';
+import { getSessionForServerComponent } from '@/lib/session';
 import { db, universes, rooms, roomRounds, roomParticipants, user, themes } from '@/lib/db';
 import { eq, and, asc } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
@@ -70,7 +70,7 @@ export default async function RoomPage({
       .orderBy(asc(roomParticipants.joinedAt)),
   ]);
 
-  const session = await auth();
+  const session = await getSessionForServerComponent();
   const currentUserId = session?.user?.id ?? null;
   const isParticipant = participants.some((p) => p.userId === currentUserId);
   const isCreator = room.createdById === currentUserId;

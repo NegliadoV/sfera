@@ -24,6 +24,7 @@ interface ContentCardProps {
   tags?: string[] | null;
   hasLinks?: boolean;
   commentCount?: number;
+  savesCount?: number;
   slug: string;
   canDelete?: boolean;
   canEdit?: boolean;
@@ -47,6 +48,7 @@ export function ContentCard({
   tags,
   hasLinks,
   commentCount,
+  savesCount,
   slug,
   canDelete = false,
   canEdit = false,
@@ -91,6 +93,31 @@ export function ContentCard({
   const displayDate = publishedAt ? new Date(publishedAt) : new Date(createdAt);
 
   const hasPreview = url || imageUrl;
+
+  const normalizeForComparison = (str: string) => {
+    if (!str) return '';
+    return str
+      .replace(/<[^>]+>/g, ' ') // Strip HTML tags
+      .replace(/&[a-z0-9#]+;/gi, ' ') // Strip HTML entities like &nbsp;
+      .replace(/[^\p{L}\p{N}]+/gu, '') // Keep ONLY letters and numbers, remove all spaces/punctuation
+      .toLowerCase();
+  };
+
+  const normTitle = normalizeForComparison(title || '');
+  const normBody = normalizeForComparison(body || '');
+  const titleNoEllipsis = (title || '').replace(/[\.…]+$/, '');
+  const normTitleNoEllipsis = normalizeForComparison(titleNoEllipsis);
+
+  // If the normalized title is very short (e.g. "План"), it might accidentally match 
+  // a body starting with "Планирование". So we require length > 15 for prefix match,
+  // or an exact match regardless of length.
+  const isDuplicate = Boolean(
+    normTitle && normBody && (
+      normTitle === normBody ||
+      (normTitleNoEllipsis.length > 15 && normBody.startsWith(normTitleNoEllipsis)) ||
+      (normTitle.length > 15 && normBody.startsWith(normTitle))
+    )
+  );
 
   const handleContextMenu = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -193,32 +220,47 @@ export function ContentCard({
       >
         Читать
       </button>
-      <div className="content-card-header">
+      <div className="content-card-header flex-none w-full">
         <div className="content-card-info">
-          <div className="content-card-title-row">
-            {isPinned && (
-              <span className="content-card-pin-icon" title="Закреплён">
-                📌
-              </span>
-            )}
-            <a
-              href={`/universes/${slug}/content/${id}`}
-              className="content-card-title cursor-pointer"
-              onClick={(e) => { 
-                if (onOpenModal) {
-                  e.preventDefault(); 
-                  onOpenModal(); 
-                }
-              }}
-            >
-              {title}
-            </a>
-            {type === 'article' && (
-              <span className="platform-tag content-card-tag">
-                Статья
-              </span>
-            )}
-          </div>
+          {!isDuplicate ? (
+            <div className="content-card-title-row">
+              {isPinned && (
+                <span className="content-card-pin-icon" title="Закреплён">
+                  📌
+                </span>
+              )}
+              <a
+                href={`/universes/${slug}/content/${id}`}
+                className="content-card-title cursor-pointer"
+                onClick={(e) => { 
+                  if (onOpenModal) {
+                    e.preventDefault(); 
+                    onOpenModal(); 
+                  }
+                }}
+              >
+                {title}
+              </a>
+              {type === 'article' && (
+                <span className="platform-tag content-card-tag">
+                  Статья
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="content-card-title-row" style={{ minHeight: 'auto', marginBottom: 4 }}>
+              {isPinned && (
+                <span className="content-card-pin-icon" title="Закреплён">
+                  📌
+                </span>
+              )}
+              {type === 'article' && (
+                <span className="platform-tag content-card-tag">
+                  Статья
+                </span>
+              )}
+            </div>
+          )}
           <div className="content-card-meta">
             {displayAuthor}
             {tags && Array.isArray(tags) && tags.length > 0 && (
@@ -233,6 +275,12 @@ export function ContentCard({
               <div className="flex items-center gap-1.5 opacity-80" aria-label={`Комментариев: ${commentCount}`}>
                 <i className="fa-solid fa-comment text-[0.8rem]" />
                 <span className="font-medium text-xs">{commentCount}</span>
+              </div>
+            )}
+            {savesCount !== undefined && savesCount > 0 && (
+              <div className="flex items-center gap-1.5 opacity-90 text-[var(--accent-primary)] drop-shadow-[0_0_8px_rgba(var(--accent-primary-rgb,139,92,246),0.5)]" title={`Сохранено в Карты: ${savesCount}`}>
+                <i className="fa-solid fa-project-diagram text-[0.8rem]" />
+                <span className="font-bold text-xs">{savesCount}</span>
               </div>
             )}
             {sourceId && (
@@ -267,11 +315,44 @@ export function ContentCard({
             </div>
           )}
           {body && (
-            <p className="content-card-body">
-              {(() => {
-                const text = body.replace(/<[^>]+>/g, '').trim();
-                return text.length > 200 ? `${text.slice(0, 200)}…` : text;
-              })()}
+            <p className="content-card-body pointer-events-auto">
+              {isDuplicate ? (
+                <a
+                  href={`/universes/${slug}/content/${id}`}
+                  className="w-full block"
+                  style={{ color: 'inherit', textDecoration: 'none' }}
+                  onClick={(e) => { 
+                    if (onOpenModal) {
+                      e.preventDefault(); 
+                      onOpenModal(); 
+                    }
+                  }}
+                >
+                  {(() => {
+                    const text = body
+                      .replace(/<[^>]+>/g, '')
+                      .replace(/(\*\*|__)(.*?)\1/g, '$2')
+                      .replace(/(\*|_)(.*?)\1/g, '$2')
+                      .replace(/#+\s/g, '')
+                      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+                      .replace(/`{1,3}[^`\n]*`{1,3}/g, '')
+                      .trim();
+                    return text.length > 200 ? `${text.slice(0, 200)}…` : text;
+                  })()}
+                </a>
+              ) : (
+                (() => {
+                  const text = body
+                    .replace(/<[^>]+>/g, '')
+                    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+                    .replace(/(\*|_)(.*?)\1/g, '$2')
+                    .replace(/#+\s/g, '')
+                    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+                    .replace(/`{1,3}[^`\n]*`{1,3}/g, '')
+                    .trim();
+                  return text.length > 200 ? `${text.slice(0, 200)}…` : text;
+                })()
+              )}
             </p>
           )}
         </div>
@@ -328,12 +409,40 @@ export function ContentCard({
             <Link
               href={`/messages${shareSearch}`}
               className="platform-btn platform-btn-sm no-underline w-full justify-start gap-2"
-              style={{ display: 'flex', marginBottom: canDelete ? 4 : 0 }}
+              style={{ display: 'flex', marginBottom: 4 }}
               onClick={() => setShowContextMenu(false)}
             >
               <i className="fa-solid fa-paper-plane" aria-hidden />
               Переслать
             </Link>
+            <button
+              type="button"
+              className="platform-btn platform-btn-sm w-full justify-start gap-2"
+              style={{ display: 'flex', marginBottom: 4 }}
+              onClick={(e) => {
+                e.preventDefault();
+                setShowContextMenu(false);
+                // Create a full URL assuming window.location.origin
+                const link = `${window.location.origin}/universes/${slug}/content/${id}`;
+                navigator.clipboard.writeText(link);
+              }}
+            >
+              <i className="fa-solid fa-link" aria-hidden />
+              Ск/Ссылка
+            </button>
+            <button
+              type="button"
+              className="platform-btn platform-btn-sm w-full justify-start gap-2"
+              style={{ display: 'flex', marginBottom: canDelete ? 4 : 0 }}
+              onClick={(e) => {
+                e.preventDefault();
+                setShowContextMenu(false);
+                navigator.clipboard.writeText(id);
+              }}
+            >
+              <i className="fa-solid fa-fingerprint" aria-hidden />
+              Ск/ID (для Карты)
+            </button>
             {canDelete && (
               <button
                 type="button"

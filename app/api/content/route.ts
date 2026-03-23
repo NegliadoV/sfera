@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionForRequest } from '@/lib/session';
-import { db, content, user, comments, contentLinks } from '@/lib/db';
+import { db, content, user, comments, contentLinks, contentPolls, contentPollVotes } from '@/lib/db';
 import { eq, desc, and, sql, inArray } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -14,12 +14,14 @@ export async function POST(req: NextRequest) {
   }
   try {
     const body = await req.json();
-    const { universeId, type, title, url, body: text } = body as {
+    const { universeId, type, title, url, body: text, imageUrl, pollOptions } = body as {
       universeId: string;
       type?: string;
       title: string;
       url?: string;
       body?: string;
+      imageUrl?: string;
+      pollOptions?: string[];
     };
     if (!universeId || !title || typeof title !== 'string' || !title.trim()) {
       return NextResponse.json({ error: 'universeId and title required' }, { status: 400 });
@@ -37,8 +39,23 @@ export async function POST(req: NextRequest) {
         title: title.trim(),
         url: typeof url === 'string' ? url : null,
         body: typeof text === 'string' ? text : null,
+        imageUrl: typeof imageUrl === 'string' ? imageUrl : null,
       })
       .returning();
+
+    if (pollOptions && Array.isArray(pollOptions) && pollOptions.length > 0) {
+      const formattedOptions = pollOptions.filter(o => o.trim()).map((opt) => ({
+        id: crypto.randomUUID(),
+        text: opt.trim(),
+      }));
+      if (formattedOptions.length > 0) {
+        await db.insert(contentPolls).values({
+          contentId: inserted.id,
+          options: formattedOptions,
+        });
+      }
+    }
+
     return NextResponse.json(inserted);
   } catch (e) {
     console.error('POST /api/content', e);
@@ -144,10 +161,25 @@ export async function GET(req: NextRequest) {
           .where(eq(contentLinks.fromContentId, item.id))
           .limit(1);
 
+        const [pollData] = await db
+          .select({ id: contentPolls.id, options: contentPolls.options })
+          .from(contentPolls)
+          .where(eq(contentPolls.contentId, item.id))
+          .limit(1);
+
+        let initialPollVotes: any[] = [];
+        if (pollData) {
+          initialPollVotes = await db
+            .select()
+            .from(contentPollVotes)
+            .where(eq(contentPollVotes.pollId, pollData.id));
+        }
+
         return {
           ...item,
           commentCount: commentCountResult?.count || 0,
           hasLinks: !!hasLinksResult,
+          poll: pollData ? { ...pollData, votes: initialPollVotes } : null,
         };
       })
     );

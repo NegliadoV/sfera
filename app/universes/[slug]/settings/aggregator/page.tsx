@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { auth } from '@/auth';
+import { getSessionForServerComponent } from '@/lib/session';
 import { db, universes } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import Link from 'next/link';
@@ -15,7 +15,7 @@ export default async function AggregatorSettingsPage({
   const slug = normalizeUniverseSlug((await params).slug);
   if (!slug) notFound();
 
-  const session = await auth();
+  const session = await getSessionForServerComponent();
 
   let universe;
   try {

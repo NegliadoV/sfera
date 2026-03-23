@@ -83,7 +83,7 @@ export default function ShortsUploadPage() {
             placeholder="О чем это видео?" 
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="w-full bg-[var(--bg-accent)] border border-[var(--border-color)] p-4 rounded-xl focus:outline-none focus:border-[var(--accent-primary)] transition-colors"
+            className="w-full bg-[var(--bg-accent)] border border-[var(--border-color)] p-4 rounded-xl focus:outline-none text-base sm:text-sm focus:border-[var(--accent-primary)] transition-colors"
             required
           />
         </div>
@@ -96,7 +96,7 @@ export default function ShortsUploadPage() {
             placeholder="Добавьте полезные ссылки, таймкоды или пояснения" 
             value={description}
             onChange={e => setDescription(e.target.value)}
-            className="w-full bg-[var(--bg-accent)] border border-[var(--border-color)] p-4 rounded-xl focus:outline-none focus:border-[var(--accent-primary)] transition-colors min-h-[120px]"
+            className="w-full bg-[var(--bg-accent)] border border-[var(--border-color)] p-4 rounded-xl focus:outline-none text-base sm:text-sm focus:border-[var(--accent-primary)] transition-colors min-h-[120px]"
           />
         </div>
 

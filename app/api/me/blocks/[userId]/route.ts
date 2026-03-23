@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextResponse, NextRequest } from 'next/server';
+import { getSessionForRequest } from '@/lib/session';
 import { db, userBlocks } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 /** DELETE /api/me/blocks/[userId] */
-export async function DELETE(_req: Request, { params }: { params: Promise<{ userId: string }> }) {
-  const session = await auth();
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
+  const session = await getSessionForRequest(_req);
   const me = session?.user?.id;
   if (!me) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { userId } = await params;

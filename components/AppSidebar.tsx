@@ -8,6 +8,7 @@ import { CreateUniverseDialog } from '@/app/universes/CreateUniverseDialog';
 import { SferaSphereIcon } from '@/components/SferaSphereIcon';
 import { AddUserSourceForm } from '@/components/AddUserSourceForm';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
+import { CrystalBalance } from '@/components/CrystalBalance';
 import { MiniAppModal } from '@/components/MiniAppModal';
 
 type UniverseRow = { slug: string; name: string; description: string | null; icon: string | null; sphereColor: string | null };
@@ -248,9 +249,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
     ? pathname.split('/')[2]
     : null;
   const isUniverseRoot = Boolean(universeSlug && pathname === `/universes/${universeSlug}`);
-  const isRooms = Boolean(pathname?.includes('/rooms'));
-  const isMindMaps = Boolean(pathname?.includes('/mind-maps'));
-  const isContentSection = isUniverseRoot && !isRooms && !isMindMaps;
+  const isContentSection = Boolean(universeSlug);
   return (
     <>
       {/* Навигация */}
@@ -268,6 +267,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
       >
         {session?.user && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <CrystalBalance />
             <NotificationsDropdown />
             <Link
               href="/me"
@@ -422,8 +422,6 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
             <div style={{ marginBottom: 16 }}>
               {[
                 { href: `/universes/${universeSlug}`, label: 'Контент', icon: 'fa-folder-open', active: isContentSection },
-                { href: `/universes/${universeSlug}/rooms`, label: 'Комнаты просмотра', icon: 'fa-video', active: isRooms },
-                { href: `/universes/${universeSlug}/mind-maps`, label: 'Ментальные карты', icon: 'fa-project-diagram', active: isMindMaps },
               ].map((item) => (
                 <Link
                   key={item.href}
@@ -441,7 +439,10 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
         <div className="sidebar-nav-label">Общее</div>
         <div>
           {[
+            { href: '/explore', label: 'Лента (В тренде)', icon: 'fa-fire', active: pathname === '/explore' },
+            { href: '/rooms', label: 'Комнаты', icon: 'fa-microphone-alt', active: pathname === '/rooms' },
             { href: '/shorts', label: 'Шортс', icon: 'fa-play', active: pathname?.startsWith('/shorts') },
+            { href: '/me/mind-maps', label: 'Мои карты', icon: 'fa-project-diagram', active: pathname?.startsWith('/me/mind-maps') },
             { href: '/settings', label: 'Настройки', icon: 'fa-gear', active: pathname === '/settings' },
             { href: '/digest', label: 'Дайджест', icon: 'fa-newspaper', active: pathname === '/digest' },
           ].map((item) => (

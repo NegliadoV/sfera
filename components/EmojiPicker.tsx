@@ -23,13 +23,15 @@ export function EmojiPicker({ onPick, children }: { onPick: (emoji: string) => v
   const ref = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
+  const popupRef = useRef<HTMLDivElement>(null);
+
   useLayoutEffect(() => {
     if (open && btnRef.current && typeof document !== 'undefined') {
       const rect = btnRef.current.getBoundingClientRect();
-      const dropdownWidth = 320;
+      const dropdownWidth = 340;
       setPos({
         bottom: window.innerHeight - rect.top + 8,
-        left: Math.max(0, Math.min(rect.left, window.innerWidth - dropdownWidth)),
+        left: Math.max(16, Math.min(rect.left - dropdownWidth + 40, window.innerWidth - dropdownWidth - 16)),
       });
     }
   }, [open]);
@@ -37,7 +39,8 @@ export function EmojiPicker({ onPick, children }: { onPick: (emoji: string) => v
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current?.contains(e.target as Node) || popupRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -68,16 +71,15 @@ export function EmojiPicker({ onPick, children }: { onPick: (emoji: string) => v
       </button>
       {open && typeof document !== 'undefined' && createPortal(
         <div
+          ref={popupRef}
+          className="chat-popup-glass"
           style={{
             position: 'fixed',
             bottom: pos.bottom,
             left: pos.left,
             padding: 8,
-            background: 'var(--bg-primary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 12,
-            boxShadow: 'var(--shadow-lg)',
             zIndex: 9999,
+            maxWidth: 'calc(100vw - 32px)',
             maxHeight: 200,
             overflowY: 'auto',
             overflowX: 'hidden',

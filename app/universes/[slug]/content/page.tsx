@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { auth } from '@/auth';
-import { db, universes, content, user, comments, contentLinks, universeMembers } from '@/lib/db';
+import { db, universes, content, user, comments, contentLinks, universeMembers, contentPolls } from '@/lib/db';
 import { eq, desc, sql, and } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
 import { AddContentForm } from '../AddContentForm';
@@ -55,6 +55,8 @@ export default async function ContentFeedPage({
     tags: string[] | null;
     hasLinks: boolean;
     commentCount: number;
+    savesCount: number;
+    pollData?: { id: string; options: any } | null;
   }> = [];
   let canDelete = false;
 
@@ -101,6 +103,7 @@ export default async function ContentFeedPage({
         pinnedAt: content.pinnedAt,
         sourceId: content.sourceId,
         tags: content.tags,
+        savesCount: content.savesCount,
       })
       .from(content)
       .leftJoin(user, eq(content.authorId, user.id))
@@ -111,7 +114,7 @@ export default async function ContentFeedPage({
     contentList = await Promise.all(
       list.map(async (item) => {
         const [commentCountResult] = await db
-          .select({ count: sql<number>`count(id)::int` })
+          .select({ count: sql<number>`count(*)::int` })
           .from(comments)
           .where(eq(comments.contentId, item.id));
         const [hasLinksResult] = await db
@@ -119,11 +122,22 @@ export default async function ContentFeedPage({
           .from(contentLinks)
           .where(eq(contentLinks.fromContentId, item.id))
           .limit(1);
+
+        const [pollData] = await db
+          .select({
+            id: contentPolls.id,
+            options: contentPolls.options,
+          })
+          .from(contentPolls)
+          .where(eq(contentPolls.contentId, item.id))
+          .limit(1);
+
         return {
           ...item,
           commentCount: commentCountResult?.count || 0,
           hasLinks: !!hasLinksResult,
           tags: Array.isArray(item.tags) ? (item.tags as string[]) : null,
+          pollData: pollData || null,
         };
       })
     );

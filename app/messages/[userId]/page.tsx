@@ -500,31 +500,37 @@ export default function MessageChatPage() {
     e.target.value = '';
   }
 
+  async function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (!file) continue;
+        const fd = new FormData();
+        fd.append('file', file);
+        try {
+          const res = await fetch('/api/me/chat-upload', { method: 'POST', credentials: 'include', body: fd });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            setAttachment({
+              url: data.url,
+              type: data.type,
+              filename: file.name || 'Скриншот',
+            });
+          }
+        } catch { /* ignore */ }
+        e.preventDefault();
+        break;
+      }
+    }
+  }
+
   if (!userId) return null;
 
   return (
-    <div
-      className="platform-card platform-card-chat"
-      style={{
-        width: '100%',
-        flex: 1,
-        minHeight: '50vh',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          marginBottom: 16,
-          paddingBottom: 12,
-          borderBottom: '1px solid var(--border-subtle)',
-          flexShrink: 0,
-        }}
-      >
+    <div className="chat-container-glass">
+      <div className="chat-header-glass">
         <Link
           href="/messages"
           style={{
@@ -557,21 +563,9 @@ export default function MessageChatPage() {
         <p style={{ color: 'var(--text-secondary)', padding: 24 }}>Загрузка…</p>
       ) : (
         <>
-          <div
+            <div
             ref={listRef}
-            style={{
-              flex: 1,
-              minHeight: 0,
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              padding: 16,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12,
-              background: 'var(--bg-secondary)',
-              borderRadius: 'var(--radius-md)',
-              marginBottom: 16,
-            }}
+            className="chat-messages-area"
           >
             {messages.length === 0 && !otherTyping ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', padding: 24 }}>
@@ -592,15 +586,7 @@ export default function MessageChatPage() {
                     }}
                   >
                     <div
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: 12,
-                        background: isFromThem ? 'var(--bg-accent)' : 'var(--accent-primary)',
-                        color: isFromThem ? 'var(--text-primary)' : 'white',
-                        fontSize: '0.9rem',
-                        outline: selectedIds.has(m.id) ? '2px solid var(--accent-primary)' : undefined,
-                        outlineOffset: 2,
-                      }}
+                      className={`chat-message-bubble ${isFromThem ? 'chat-bubble-them' : 'chat-bubble-me'} ${selectedIds.has(m.id) ? 'chat-message-selected' : ''}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -671,7 +657,7 @@ export default function MessageChatPage() {
             {contextMenu && typeof document !== 'undefined' && createPortal(
               <div
                 role="menu"
-                className="message-context-menu"
+                className="message-context-menu chat-popup-glass"
                 style={{
                   position: 'fixed',
                   left: contextMenu.x,
@@ -679,10 +665,6 @@ export default function MessageChatPage() {
                   zIndex: 99999,
                   minWidth: 200,
                   padding: 4,
-                  borderRadius: 8,
-                  background: 'var(--bg-primary)',
-                  border: '1px solid var(--border-color)',
-                  boxShadow: 'var(--shadow-lg)',
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -840,9 +822,9 @@ export default function MessageChatPage() {
               </Link>
             </div>
           )}
-          <form onSubmit={handleSubmit} style={{ flexShrink: 0 }}>
+          <form onSubmit={handleSubmit} style={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
             {attachment && (
-              <div style={{ marginBottom: 8, position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8, padding: 8, background: 'var(--bg-accent)', borderRadius: 8 }}>
+              <div style={{ marginBottom: 8, position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 8, padding: 8, background: 'var(--bg-accent)', borderRadius: 8, margin: '0 20px 8px' }}>
                 {attachment.type === 'image' ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={attachment.url} alt="" style={{ maxWidth: 120, maxHeight: 120, borderRadius: 8, objectFit: 'cover' }} />
@@ -873,7 +855,7 @@ export default function MessageChatPage() {
                 </button>
               </div>
             )}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', minWidth: 0 }}>
+            <div className="chat-input-glass">
               <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
               <div style={{ position: 'relative' }}>
                 <button
@@ -899,16 +881,12 @@ export default function MessageChatPage() {
                 </button>
                 {plusOpen && (
                   <div
-                    className="chat-attachments-menu"
+                    className="chat-attachments-menu chat-popup-glass"
                     style={{
                       position: 'absolute',
                       bottom: '110%',
                       left: 0,
                       padding: 8,
-                      borderRadius: 10,
-                      background: 'var(--bg-primary)',
-                      border: '1px solid var(--border-color)',
-                      boxShadow: 'var(--shadow-lg)',
                       display: 'flex',
                       flexDirection: 'row',
                       gap: 8,
@@ -1014,6 +992,7 @@ export default function MessageChatPage() {
                 <input
                   type="text"
                   value={inputValue}
+                  onPaste={handlePaste}
                   onChange={(e) => {
                     setInputValue(e.target.value);
                     emitTyping();
@@ -1031,15 +1010,7 @@ export default function MessageChatPage() {
                   placeholder="Сообщение…"
                   maxLength={8192}
                   disabled={sending}
-                  style={{
-                    width: '100%',
-                    padding: '12px 44px 12px 16px',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.95rem',
-                  }}
+                  className="chat-input-glass-field"
                 />
                 <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
                   <EmojiPicker onPick={(emoji) => setInputValue((v) => v + emoji)}>

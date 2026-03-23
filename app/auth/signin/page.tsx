@@ -17,7 +17,17 @@ export default async function SignInPage({
   if (session?.user) redirect('/universes');
 
   const params = await searchParams;
-  const callbackUrl = params?.callbackUrl ?? '/';
+  const rawCallback = params?.callbackUrl;
+  let callbackUrl = '/universes';
+  try {
+    if (rawCallback) {
+      // Игнорируем базовый домен, проверяем только путь
+      if (new URL(rawCallback, 'http://localhost').pathname !== '/') {
+        callbackUrl = rawCallback;
+      }
+    }
+  } catch {}
+
   const hasGoogleOAuth =
     Boolean(process.env.AUTH_GOOGLE_ID) && Boolean(process.env.AUTH_GOOGLE_SECRET);
   const hasGitHubOAuth =
@@ -26,7 +36,7 @@ export default async function SignInPage({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full px-4 py-12">
-      <div className="glass-panel w-full max-w-md p-8 sm:p-10 flex flex-col items-center">
+      <div className="glass-panel w-full max-w-md p-6 sm:p-10 flex flex-col items-center">
         <h1 
           className="text-3xl font-bold mb-3 text-center w-full" 
           style={{ background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}

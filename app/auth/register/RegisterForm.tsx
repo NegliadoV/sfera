@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 const USER_TAG_HINT = 'Латиница, цифры или подчёркивание, 3–30 символов. По нему вас смогут найти в друзья.';
 
@@ -35,7 +36,18 @@ export function RegisterForm() {
         setLoading(false);
         return;
       }
-      router.push(`/auth/signin?registered=1&email=${encodeURIComponent(email.trim().toLowerCase())}`);
+      
+      const signRes = await signIn('credentials', {
+        email: email.trim().toLowerCase(),
+        password,
+        redirect: false,
+      });
+
+      if (signRes?.ok) {
+        window.location.href = '/universes';
+      } else {
+        router.push(`/auth/signin?registered=1&email=${encodeURIComponent(email.trim().toLowerCase())}`);
+      }
       return;
     } catch {
       setError('Ошибка регистрации');
@@ -60,7 +72,7 @@ export function RegisterForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-xl border text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-xl border text-base sm:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
           style={{
             backgroundColor: 'rgba(255,255,255,0.03)',
             borderColor: 'rgba(255,255,255,0.1)',
@@ -82,7 +94,7 @@ export function RegisterForm() {
           value={userTag}
           onChange={(e) => setUserTag(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-xl border text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-xl border text-base sm:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
           style={{
             backgroundColor: 'rgba(255,255,255,0.03)',
             borderColor: 'rgba(255,255,255,0.1)',
@@ -108,7 +120,7 @@ export function RegisterForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={8}
-          className="w-full px-4 py-3 rounded-xl border text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-xl border text-base sm:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
           style={{
             backgroundColor: 'rgba(255,255,255,0.03)',
             borderColor: 'rgba(255,255,255,0.1)',
@@ -129,7 +141,7 @@ export function RegisterForm() {
           autoComplete="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl border text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-xl border text-base sm:text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary-muted)] placeholder-gray-500"
           style={{
             backgroundColor: 'rgba(255,255,255,0.03)',
             borderColor: 'rgba(255,255,255,0.1)',

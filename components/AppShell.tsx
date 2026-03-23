@@ -4,6 +4,7 @@ import type { Session } from 'next-auth';
 import { AppSidebar } from '@/components/AppSidebar';
 import { OmniBar } from '@/components/OmniBar';
 import { Header } from '@/components/Header';
+import { MobileTabBar } from '@/components/MobileTabBar';
 
 export function AppShell({
   children,
@@ -25,6 +26,7 @@ export function AppShell({
           <Header session={session} showMenuButton={false} />
           {children}
         </main>
+        <MobileTabBar />
         <OmniBar />
       </>
     );
@@ -48,12 +50,10 @@ export function AppShell({
         aria-label="Закрыть меню"
         style={{ cursor: 'pointer' }}
       />
-      {/* Сайдбар: навигация + панель контактов (выдвижная) */}
       <div
-        className="sidebar-drawer glass-panel shadow-2xl"
+        className="sidebar-drawer glass-panel shadow-2xl hidden md:flex"
         data-open={mobileMenuOpen}
         style={{
-          display: 'flex',
           flexDirection: 'row',
           flexShrink: 0,
           borderRadius: '20px',
@@ -63,34 +63,19 @@ export function AppShell({
           background: 'var(--studio-panel-bg)',
         }}
       >
-        <button
-          type="button"
-          className="sidebar-close-btn"
-          onClick={() => setMobileMenuOpen?.(false)}
-          aria-label="Закрыть меню"
-          style={{
-            display: 'none',
-            alignSelf: 'flex-end',
-            margin: '12px 12px 0 0',
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            border: '1px solid var(--border-color)',
-            background: 'var(--bg-accent)',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <i className="fas fa-times"></i>
-        </button>
         <AppSidebar session={session} />
       </div>
       <main className="app-main" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
+        <Header 
+          session={session} 
+          showMenuButton={false} 
+        />
         {children}
+        {/* Надежный нижний отступ для мобильных, чтобы таб-бар не перекрывал контент */}
+        <div className="h-[100px] shrink-0 w-full block md:hidden pointer-events-none"></div>
       </main>
     </div>
+    <MobileTabBar />
     <OmniBar />
     </>
   );

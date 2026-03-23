@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { auth } from '@/auth';
+import { getSessionForServerComponent } from '@/lib/session';
 import { db, universes, mindMaps, mindMapNodes, mindMapEdges } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
@@ -35,7 +35,7 @@ export default async function MindMapPage({
     db.select().from(mindMapEdges).where(eq(mindMapEdges.mindMapId, map.id)),
   ]);
 
-  const session = await auth();
+  const session = await getSessionForServerComponent();
   const canEdit = session?.user?.id === map.createdById;
 
   const mapData = {

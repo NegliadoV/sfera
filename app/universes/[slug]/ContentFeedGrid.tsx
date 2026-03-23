@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { MarkdownBody } from '@/components/MarkdownBody';
+import { ContentPoll } from '@/components/ContentPoll';
 import { ContentCard } from './ContentCard';
 
 export function ContentFeedGrid({ items, slug, canDelete = false, canEdit = false, canPin = false, layout = 'grid' }: {
@@ -15,6 +17,7 @@ export function ContentFeedGrid({ items, slug, canDelete = false, canEdit = fals
   layout?: 'grid' | 'list';
 }) {
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
+  const [isAddingToMap, setIsAddingToMap] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -40,24 +43,62 @@ export function ContentFeedGrid({ items, slug, canDelete = false, canEdit = fals
     }
   }, [activeModalIndex]);
 
+  const handleAddToMap = async (item: any) => {
+    setIsAddingToMap(item.id);
+    try {
+      const res = await fetch('/api/me/mind-maps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: `Конспект: ${item.title}` })
+      });
+      if (res.ok) {
+        const map = await res.json();
+        
+        const newNode = {
+          id: crypto.randomUUID(),
+          type: 'post',
+          position: { x: 250, y: 150 },
+          data: { contentId: item.id, bgColor: 'rgba(20, 20, 25, 0.8)' }
+        };
+        
+        await fetch(`/api/me/mind-maps/${map.id}/sync`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nodes: [newNode], edges: [] })
+        });
+        
+        // Track the save event for gamification!
+        await fetch(`/api/content/${item.id}/save`, { method: 'POST' });
+
+        router.push(`/me/mind-maps/${map.id}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Не удалось создать Карту");
+    } finally {
+      setIsAddingToMap(null);
+    }
+  };
+
   return (
     <>
-      <div className={layout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 auto-rows-auto" : "flex flex-col gap-2"}>
-        {layout === 'grid' && (
-          <div className="col-span-full platform-card-desc mb-2">
-            Закреплённые посты отображаются сверху.
-          </div>
-        )}
+      {layout === 'grid' && (
+        <div className="platform-card-desc mb-4">
+          Закреплённые посты отображаются сверху.
+        </div>
+      )}
+      <div className={layout === 'grid' ? "columns-1 md:columns-2 xl:columns-3 gap-4 md:gap-6" : "flex flex-col gap-2 items-start"}>
         {items.map((c, idx) => (
-          <ContentCard
-            key={c.id}
-            {...c}
-            slug={slug}
-            canDelete={canDelete}
-            canEdit={canEdit}
-            canPin={canPin}
-            onOpenModal={() => setActiveModalIndex(idx)}
-          />
+          <div key={c.id} className="break-inside-avoid mb-4 md:mb-6">
+            <ContentCard
+              {...c}
+              slug={c.universeSlug || slug}
+              canDelete={canDelete}
+              canEdit={canEdit}
+              canPin={canPin}
+              onOpenModal={() => setActiveModalIndex(idx)}
+            />
+          </div>
         ))}
       </div>
 
@@ -100,9 +141,16 @@ export function ContentFeedGrid({ items, slug, canDelete = false, canEdit = fals
                        )}
 
                        {item.body && (
-                         <div className="text-white/90 prose prose-invert prose-lg max-w-none leading-relaxed drop-shadow-sm mb-8" dangerouslySetInnerHTML={{ __html: item.body }} />
+                         <div className="text-white/90 prose prose-invert prose-lg max-w-none leading-relaxed drop-shadow-sm mb-8">
+                           <MarkdownBody content={item.body} />
+                         </div>
                        )}
-                       
+
+                       {item.pollData && (
+                         <div className="w-full max-w-[640px] mb-8">
+                           <ContentPoll pollId={item.pollData.id} options={item.pollData.options as any} />
+                         </div>
+                       )}
                        {item.url && (
                          <a href={item.url} target="_blank" rel="noreferrer" className="text-[var(--accent-primary)] hover:underline break-all p-4 rounded-xl bg-white/5 border border-white/10 inline-block mb-12">
                             {item.url}
@@ -110,11 +158,24 @@ export function ContentFeedGrid({ items, slug, canDelete = false, canEdit = fals
                        )}
 
                        {/* Discussion Button */}
-                       <div className="w-full mt-4 flex justify-center pb-24">
-                          <Link href={`/universes/${slug}/content/${item.id}#discussion`} onClick={() => setActiveModalIndex(null)} className="w-full max-w-sm shadow-[0_0_30px_rgba(var(--accent-primary-rgb, 139,92,246), 0.4)] px-6 py-4 rounded-2xl bg-[var(--accent-primary)] hover:brightness-110 text-white text-center font-bold transition flex items-center justify-center gap-3">
+                       <div className="w-full mt-4 flex flex-col md:flex-row justify-center gap-4 pb-24">
+                          <Link href={`/universes/${item.universeSlug || slug}/content/${item.id}#discussion`} onClick={() => setActiveModalIndex(null)} className="w-full max-w-xs shadow-[0_0_30px_rgba(var(--accent-primary-rgb, 139,92,246), 0.4)] px-6 py-4 rounded-2xl bg-[var(--accent-primary)] hover:brightness-110 text-white text-center font-bold transition flex items-center justify-center gap-3">
                              <i className="fa-solid fa-comments text-lg"></i>
-                             Перейти к обсуждению
+                             Обсуждение
                           </Link>
+                          
+                          <button 
+                            onClick={() => handleAddToMap(item)} 
+                            disabled={isAddingToMap === item.id}
+                            className={`w-full max-w-xs shadow-[0_0_30px_rgba(33,150,243,0.4)] px-6 py-4 rounded-2xl bg-[#2196f3] hover:brightness-110 text-white text-center font-bold transition flex items-center justify-center gap-3 ${isAddingToMap === item.id ? 'opacity-70 cursor-not-allowed' : ''}`}
+                          >
+                             {isAddingToMap === item.id ? (
+                               <i className="fa-solid fa-spinner fa-spin text-lg"></i>
+                             ) : (
+                               <i className="fa-solid fa-project-diagram text-lg"></i>
+                             )}
+                             В Личную Карту
+                          </button>
                        </div>
                     </div>
                  </div>

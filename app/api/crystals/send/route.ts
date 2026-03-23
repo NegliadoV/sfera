@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { user, crystalTransactions } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { auth } from '@/auth';
+import { getSessionForRequest } from '@/lib/session';
+import { NextRequest } from 'next/server';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
+    const session = await getSessionForRequest(req);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

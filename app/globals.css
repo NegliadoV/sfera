@@ -457,14 +457,15 @@ body[data-zen="true"] .app-shell-unified > header {
 }
 @media (max-width: 768px) {
   .platform-page {
-    padding: 16px max(16px, env(safe-area-inset-left)) 24px max(16px, env(safe-area-inset-right));
+    padding: 16px max(12px, env(safe-area-inset-left)) 24px max(12px, env(safe-area-inset-right));
+    overflow-x: hidden;
   }
 }
 
 .platform-hero-title {
-  font-weight: 600;
-  font-size: clamp(2rem, 5vw, 3rem);
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  font-size: clamp(2.3rem, 10vw, 4.8rem);
+  letter-spacing: -0.03em;
   background: var(--studio-title-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -562,7 +563,7 @@ body[data-zen="true"] .app-shell-unified > header {
   gap: 12px;
   padding: 14px 28px;
   border-radius: 50px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1rem;
   transition: 0.2s;
   border: 1px solid var(--border-color);
@@ -571,6 +572,14 @@ body[data-zen="true"] .app-shell-unified > header {
   text-decoration: none;
   cursor: pointer;
   backdrop-filter: blur(10px);
+}
+
+@media (max-width: 380px) {
+  .platform-btn {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    gap: 8px;
+  }
 }
 
 .platform-btn:hover {
@@ -3023,7 +3032,7 @@ select:focus-visible,
 }
 
 .cabinet-main-content {
-  padding: 24px 24px 24px 24px;
+  padding: 24px 0 0 0;
   display: flex;
   gap: 24px;
   flex-wrap: wrap;
@@ -3032,7 +3041,7 @@ select:focus-visible,
 
 .cabinet-left-column {
   flex: 1.3;
-  min-width: 320px;
+  min-width: 0;
 }
 
 .cabinet-profile-card {
@@ -4321,7 +4330,7 @@ select:focus-visible,
 .universes-create-overlay {
   position: fixed;
   inset: 0;
-  width: 100vw;
+  width: 100%;
   height: 100dvh;
   min-height: 100dvh;
   z-index: 200;
@@ -4824,6 +4833,12 @@ a.sources-circle:hover,
 @media (max-width: 950px) {
   .cabinet-main-content {
     flex-direction: column;
+    padding: 16px 0 0 0;
+  }
+  .cabinet-left-column,
+  .cabinet-right-column {
+    width: 100%;
+    min-width: 0;
   }
   .cabinet-nav-links {
     gap: 20px;
@@ -5378,4 +5393,342 @@ a.sources-circle:hover,
   border-radius: 12px;
   border: 1px solid rgba(16, 185, 129, 0.3);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+/* ========== Чат (Стеклянный редизайн) ========== */
+
+.chat-container-glass {
+  background: var(--studio-panel-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--studio-panel-border);
+  box-shadow: var(--shadow-card), var(--neon-glow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  width: 100%;
+  flex: 1;
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.chat-container-glass:hover {
+  border-color: color-mix(in srgb, var(--accent-primary) 35%, var(--studio-panel-border));
+}
+
+.chat-header-glass {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--bg-header) 40%, transparent);
+  backdrop-filter: blur(12px);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+.chat-messages-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.15); /* Deep transparent background */
+  /* Remove the margin and border-radius as the container has it */
+}
+
+/* Base bubble styling */
+.chat-message-bubble {
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Outgoing messages (Вы) */
+.chat-bubble-me {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 85%, transparent) 0%, color-mix(in srgb, var(--accent-primary-hover) 85%, transparent) 100%);
+  color: white;
+  border: 1px solid color-mix(in srgb, var(--accent-primary-muted) 30%, transparent);
+  border-radius: 20px;
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--accent-primary) 30%, transparent);
+}
+
+/* Incoming messages (Собеседник) */
+.chat-bubble-them {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+}
+
+[data-theme="light"] .chat-bubble-them {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Selected message outline */
+.chat-message-selected {
+  outline: 2px solid var(--neon-border);
+  outline-offset: 4px;
+}
+
+.chat-input-glass {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  padding: 16px 20px;
+  background: color-mix(in srgb, var(--bg-header) 40%, transparent);
+  border-top: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+.chat-input-glass-field {
+  width: 100%;
+  padding: 14px 48px 14px 20px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-accent);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chat-input-glass-field:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), var(--neon-glow);
+  background: var(--hover-accent);
+}
+
+.chat-popup-glass {
+  background: color-mix(in srgb, var(--bg-secondary) 60%, rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transform: translateZ(0); /* helps prevent blur bleeding */
+}
+
+/* Переопределения для LiveKit компонентов внутри "Стеклянных комнат" */
+.lk-chat-container-override .lk-chat {
+  background: transparent !important;
+  border: none !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.lk-chat-container-override .lk-chat-header {
+  display: none !important; /* Убираем дублирующийся заголовок LiveKit */
+}
+.lk-chat-container-override .lk-chat-messages {
+  flex: 1 !important;
+  padding: 16px !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+.lk-chat-container-override .lk-chat-entry {
+  background: color-mix(in srgb, var(--bg-secondary) 40%, rgba(255, 255, 255, 0.05)) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-xl) !important;
+  margin-bottom: 16px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-primary) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.lk-chat-container-override .lk-chat-entry:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.lk-chat-container-override .lk-meta-data {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--text-muted) !important;
+}
+
+.lk-chat-container-override .lk-participant-name {
+  color: var(--accent-green) !important;
+  font-weight: 700 !important;
+}
+
+.lk-chat-container-override .lk-message-body {
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+  color: color-mix(in srgb, var(--text-primary) 95%, white) !important;
+  word-wrap: break-word !important;
+}
+.lk-chat-container-override .lk-chat-form {
+  padding: 12px 16px !important;
+  background: transparent !important;
+  border-top: 1px solid rgba(255,255,255,0.05) !important;
+  flex-shrink: 0 !important;
+}
+.lk-chat-container-override .lk-chat-form-input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+.lk-chat-container-override .lk-chat-form-input:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 1px var(--accent-primary) !important;
+}
+
+/* Меню выбора микрофона/камеры (LiveKit Dropdowns) */
+.lk-button-group {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.lk-device-menu {
+  /* Для порталов LiveKit: переменные CSS могут не работать, используем хардкод RGBA */
+  background: rgba(20, 20, 25, 0.75) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  padding: 8px !important;
+  min-width: 280px !important;
+  max-width: 90vw !important;
+  z-index: 99999 !important;
+  list-style: none !important;
+  margin: 0 !important;
+  /* Убираем жесткий position и bottom, доверяем автоматическому расчету LiveKit */
+}
+
+.lk-device-menu > li {
+  padding: 10px 16px !important;
+  color: #ffffff !important;
+  font-size: 0.95rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: block !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  border-radius: 8px !important;
+  margin-bottom: 2px !important;
+}
+
+.lk-device-menu > li:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.lk-device-menu > li[data-lk-active="true"] {
+  background: rgba(76, 175, 80, 0.2) !important; /* accent-green fallback */
+  color: #4CAF50 !important;
+  font-weight: 600 !important;
+}
+
+/* Скрываем заголовки внутри меню, если они там есть, чтобы было чище */
+.lk-device-menu-heading {
+  padding: 8px 16px 4px 16px !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* REACT FLOW (MIND MAPS) CUSTOMIZATION                                      */
+/* -------------------------------------------------------------------------- */
+
+.react-flow__controls {
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: rgba(20, 20, 25, 0.7) !important;
+  backdrop-filter: blur(30px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.react-flow__controls-button {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: none !important;
+  border-radius: 10px !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+}
+
+.react-flow__controls-button svg {
+  fill: rgba(255, 255, 255, 0.8) !important;
+  width: 18px !important;
+  height: 18px !important;
+  transition: fill 0.2s ease !important;
+}
+
+.react-flow__controls-button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.react-flow__controls-button:hover svg {
+  fill: #ffffff !important;
+}
+
+.react-flow__attribution {
+  background: rgba(0, 0, 0, 0.3) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  border-top-left-radius: 8px !important;
+  padding: 2px 6px !important;
+}
+.react-flow__attribution a {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+
+/* Mobile tweaks for content cards */
+@media (max-width: 768px) {
+  .content-card {
+    padding: 16px;
+    border-radius: 20px;
+  }
+}
+
+
+/* Mobile Opacity Fixes for Navigation and Notifications */
+@media (max-width: 768px) {
+  .sidebar-drawer {
+    background: var(--bg-secondary) !important;
+  }
+  .notifications-dropdown {
+    background: color-mix(in srgb, var(--bg-secondary) 98%, transparent) !important;
+    backdrop-filter: blur(32px) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
+  }
 }

@@ -7,6 +7,7 @@ import { CabinetUniverseItem } from '@/components/universe/CabinetUniverseItem';
 import { CabinetTrackedUniverseItem } from '@/components/universe/CabinetTrackedUniverseItem';
 import { DigestPreview } from '@/components/DigestPreview';
 import { LogoutButton } from '@/components/LogoutButton';
+import { EditableAvatar } from '@/components/profile/EditableAvatar';
 
 export const metadata = {
   title: 'Личный кабинет | SFERA',
@@ -186,19 +187,7 @@ export default async function MePage(
           <div className="cabinet-left-column">
             <div className="cabinet-profile-card">
               <div className="cabinet-profile-header">
-                {session.user.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  (<img
-                    src={session.user.image}
-                    alt=""
-                    width={80}
-                    height={80}
-                    className="cabinet-avatar-lg"
-                    style={{ objectFit: 'cover' }}
-                  />)
-                ) : (
-                  <div className="cabinet-avatar-lg">{initials}</div>
-                )}
+                <EditableAvatar currentImage={session.user.image} initials={initials} />
                 <div className="cabinet-name-email">
                   <h2>{displayName}</h2>
                   {userTagRow?.userTag && (

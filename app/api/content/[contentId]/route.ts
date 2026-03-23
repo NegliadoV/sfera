@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionForRequest } from '@/lib/session';
-import { db, content, user, universes, universeMembers } from '@/lib/db';
+import { db, content, user, universes, universeMembers, contentPolls, contentPollVotes } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -180,6 +180,7 @@ export async function GET(
       .select({
         id: content.id,
         universeId: content.universeId,
+        universeSlug: universes.slug, // explicitly added for mobile webview paths
         authorId: content.authorId,
         authorName: user.name,
         type: content.type,
@@ -192,9 +193,27 @@ export async function GET(
       })
       .from(content)
       .leftJoin(user, eq(content.authorId, user.id))
+      .leftJoin(universes, eq(content.universeId, universes.id))
       .where(eq(content.id, contentId));
     if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    return NextResponse.json(row);
+
+    const [pollData] = await db
+      .select({ id: contentPolls.id, options: contentPolls.options })
+      .from(contentPolls)
+      .where(eq(contentPolls.contentId, contentId))
+      .limit(1);
+
+    let initialPollVotes: any[] = [];
+    if (pollData) {
+      initialPollVotes = await db
+        .select()
+        .from(contentPollVotes)
+        .where(eq(contentPollVotes.pollId, pollData.id));
+    }
+
+    const finalRow = { ...row, poll: pollData ? { ...pollData, votes: initialPollVotes } : null };
+
+    return NextResponse.json(finalRow);
   } catch (e) {
     console.error('GET /api/content/[contentId]', e);
     return NextResponse.json({ error: 'Failed to load content' }, { status: 500 });
