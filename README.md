@@ -1,66 +1,71 @@
-# Ноосфера (Horizon)
+# 🌌 Roominate (бывш. Ноосфера)
 
-Платформа для глубокого познания: тематические «вселенные», структурированные дискуссии, совместное познание. Инструмент для мышления и осмысленного диалога.
+**Умная платформа для глубокого познания и дискуссий.**
+Здесь люди создают тематические "Вселенные", обсуждают контент, делятся мыслями через визуальные Mind-Maps и развивают идеи без бесконечного инфошума.
 
-**План разработки (фазы 0–6):** [docs/PLAN.md](docs/PLAN.md)
+![Roominate Cover](https://roominate.rest/og-image.png)
 
-## Стек
+🔗 **Продакшен:** [roominate.rest](https://roominate.rest)
 
-- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS
-- **Backend:** Next.js API Routes, Drizzle ORM, PostgreSQL, Redis (Docker)
-- **Auth:** NextAuth.js v5 (Auth.js) с Google OAuth и Drizzle adapter
+## 🛠 Технологический стек
 
-## Быстрый старт
+* **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS
+* **Backend:** Node.js, Next.js API Routes, NextAuth.js v5
+* **База данных:** PostgreSQL + Drizzle ORM
+* **Real-time:** Socket.IO / LiveKit (WebRTC)
+* **Асинхронные задачи:** Redis + BullMQ (парсеры RSS)
+* **Деплой:** Ubuntu VPS, PM2, NGINX
 
-1. Установить зависимости:
+## 🚀 Основные фичи
+
+* **OAuth & OTP Регистрация:** Вход по Google/GitHub + надежная кастомная система регистрации с подтверждением email (6-значные коды), индикатором надежности пароля и сбросом.
+* **Агрегатор контента:** Воркер (`worker-digest.ts`) автоматически парсит внешние RSS-ленты и каналы, обогащая "Вселенные" свежим контентом.
+* **Голосовые комнаты:** Real-time комнаты для общения с использованием LiveKit SDK.
+* **Mind-Maps:** Встроенный визуальный редактор связей (на базе React Flow).
+* **Система подписок и ленты:** TikTok-style ленты для мобильной версии, классические grid-сетки для веба. Форматирование постов в Markdown.
+* **Mobile App:** Параллельно разрабатывается нативного приложения на React Native (Expo).
+
+## 💻 Локальный запуск (Для разработчиков)
+
+1. Клонируйте репозиторий и установите зависимости:
    ```bash
    npm install
    ```
 
-2. Запустить БД и Redis:
-   - **Вариант A (Docker):** `docker compose up -d` — нужен работающий Docker Desktop.
-   - **Вариант B (без Docker):** 
-     - PostgreSQL: см. [docs/LOCAL_POSTGRES.md](docs/LOCAL_POSTGRES.md) — установка через winget, создание БД, затем `npm run db:push` и `npm run db:seed`.
-     - Redis: см. [docs/REDIS_SETUP.md](docs/REDIS_SETUP.md) — требуется Redis 5.0+ (рекомендуется Memurai Developer для Windows).
+2. Заполните `.env` (возьмите пример из `.env.example`):
+   ```env
+   # Database (PostgreSQL)
+   DATABASE_URL="postgresql://user:password@localhost:5432/sfera"
 
-3. Применить схему БД:
+   # Auth secrets
+   AUTH_SECRET="your_secure_random_string"
+
+   # Redis
+   REDIS_URL="redis://localhost:6379"
+   ```
+
+3. Поднимите БД и примените схему:
    ```bash
    npm run db:push
    ```
 
-4. (Опционально) Заполнить тестовыми данными — вселенные и контент в «Квантовая физика»:
-   ```bash
-   npm run db:seed
-   ```
-
-5. Настроить `.env` (есть `.env.example`): `DATABASE_URL`, `AUTH_SECRET`, при необходимости `AUTH_GOOGLE_*`.
-
-6. Запуск dev-сервера:
+4. Запустите все сервисы одним скриптом (Next.js + WebSockets):
    ```bash
    npm run dev
    ```
-   Открыть [http://localhost:3000](http://localhost:3000).
 
-## Скрипты
+5. (Опционально) Запустите парсер RSS в фоне:
+   ```bash
+   npm run worker
+   ```
 
-- `npm run dev` — режим разработки
-- `npm run build` — сборка
-- `npm run start` — запуск прод-сборки
-- `npm run lint` — ESLint
-- `npm run db:generate` — сгенерировать миграции Drizzle
-- `npm run db:push` — применить схему к БД (dev)
-- `npm run db:seed` — заполнить тестовыми данными (вселенные + контент)
-- `npm run worker` — запустить воркер агрегации контента (требует Redis)
-- `.\scripts\start-redis.ps1` — запустить Redis/Memurai (Windows)
-- `npm run db:studio` — Drizzle Studio
+Сервер будет доступен по адресу **http://localhost:3000**.
 
-## Дизайн
+## 📦 Команды
 
-Визуальный стиль и токены взяты из `index.html` (лендинг «Ноосфера»): тёмная тема по умолчанию, шрифты Inter и JetBrains Mono, акценты фиолетовый/синий, карточки с градиентной полосой и семантические реакции.
-
-## Структура
-
-- `app/` — страницы и API (Next.js App Router)
-- `components/` — React-компоненты (Header, Footer, UniversesDemo)
-- `lib/db/` — Drizzle схема и клиент БД
-- `auth.ts` — конфигурация NextAuth
+* `npm run dev` — запуск Next.js и Socket.IO параллельно
+* `npm run build` — сборка проекта для продакшена
+* `npm run db:push` — выгрузка схемы Drizzle в базу данных
+* `npm run db:seed` — заполнение базы тестовыми вселенными и пользователями
+* `npm run worker` — ручной триггер воркера для загрузки RSS
+* `npm run ws` — запуск только WebSocket сервера
