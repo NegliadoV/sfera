@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
+import Link from 'next/link';
 
 export function SignInForm({
   callbackUrl,
@@ -102,6 +103,13 @@ export function SignInForm({
           {error}
         </p>
       )}
+      
+      <div className="w-full flex justify-end mt-[-8px]">
+        <Link href="/auth/forgot-password" className="text-sm font-semibold transition-colors duration-200" style={{ color: 'var(--accent-primary)' }}>
+          Забыли пароль?
+        </Link>
+      </div>
+
       <button
         type="submit"
         disabled={loading}

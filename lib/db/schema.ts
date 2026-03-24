@@ -73,6 +73,22 @@ export const verificationToken = pgTable(
   })
 );
 
+export const passwordResetToken = pgTable(
+  'passwordResetToken',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    email: text('email').notNull(),
+    token: text('token').notNull(), // 6-значный OTP-код (лучше хранить хеш для безопасности)
+    expires: timestamp('expires', { mode: 'date' }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex('password_reset_token_email_idx').on(t.email), // У одного email может быть только 1 активный код
+  ]
+);
+
 // --- App tables ---
 export const roleEnum = pgEnum('role', ['owner', 'moderator', 'member']);
 
