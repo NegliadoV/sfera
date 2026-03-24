@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, user } from '@/lib/db';
-import { eq } from 'drizzle-orm';
+import { verificationToken } from '@/lib/db/schema';
+import { eq, and } from 'drizzle-orm';
 import { hashPassword } from '@/lib/password';
 import { normalizeAndValidateUserTag } from '@/lib/validation';
 
@@ -57,6 +58,34 @@ export async function POST(req: NextRequest) {
     if (existingTag) {
       return NextResponse.json({ error: 'Такой ник уже занят. Выберите другой.' }, { status: 409 });
     }
+
+    const verificationCode = typeof body.code === 'string' ? body.code.trim() : '';
+    if (!verificationCode) {
+      return NextResponse.json({ error: 'Введите проверочный код из Email' }, { status: 400 });
+    }
+
+    // Проверяем 6-значный код в базе
+    const [tokenRecord] = await db
+      .select()
+      .from(verificationToken)
+      .where(
+        and(
+          eq(verificationToken.identifier, emailStr),
+          eq(verificationToken.token, verificationCode)
+        )
+      )
+      .limit(1);
+
+    if (!tokenRecord) {
+      return NextResponse.json({ error: 'Неверный или устаревший код подтверждения' }, { status: 400 });
+    }
+    if (new Date() > new Date(tokenRecord.expires)) {
+      return NextResponse.json({ error: 'Код истёк. Запросите код заново' }, { status: 400 });
+    }
+
+    // Код верный! Идем дальше.
+    // Удаляем использованный токен
+    await db.delete(verificationToken).where(eq(verificationToken.identifier, emailStr));
 
     const passwordHash = await hashPassword(passwordStr);
     const [newUser] = await db
