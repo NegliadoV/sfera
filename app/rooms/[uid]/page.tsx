@@ -93,9 +93,9 @@ export default function GlassRoomPage() {
             red: true,
           },
           audioCaptureDefaults: {
-            autoGainControl: true,
+            autoGainControl: false,
             echoCancellation: true,
-            noiseSuppression: true,
+            noiseSuppression: false,
           }
         }}
         style={{
