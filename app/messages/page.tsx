@@ -192,8 +192,9 @@ export default function MessagesPage() {
             <i className="fa-solid fa-users" /> Создать группу
           </button>
         </div>
-        {showCreateGroup && <CreateGroupModal onClose={() => setShowCreateGroup(false)} />}
       </div>
+      
+      {showCreateGroup && <CreateGroupModal onClose={() => setShowCreateGroup(false)} />}
     </div>
   );
 }
