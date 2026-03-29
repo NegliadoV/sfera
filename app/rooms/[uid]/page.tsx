@@ -91,7 +91,6 @@ export default function GlassRoomPage() {
           flexDirection: 'column',
           position: 'relative',
         }}
-        onDisconnected={() => router.push('/rooms')}
       >
         {/* Огромный стеклянный контейнер всей комнаты на весь экран */}
         <div
