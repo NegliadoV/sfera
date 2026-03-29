@@ -5502,7 +5502,7 @@ a.sources-circle:hover,
   border: 1px solid var(--border-subtle);
   background: var(--bg-accent);
   color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: 16px; /* must be at least 16px to prevent iOS Safari auto-zoom */
   transition: all 0.2s ease;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }

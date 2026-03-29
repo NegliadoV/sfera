@@ -23,8 +23,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
+  maximumScale: 1, // disabled zoom to prevent iOS keyboard shift
+  userScalable: false,
   viewportFit: 'cover',
+  interactiveWidget: 'resizes-content', // ensures the viewport shrinks instead of shifting on modern mobile browsers
   themeColor: '#000000',
 };
 
