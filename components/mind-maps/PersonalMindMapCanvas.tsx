@@ -502,36 +502,48 @@ const nodeTypes = {
   media: MediaNode
 };
 
-const defaultInitialNodes: Node[] = [
-  {
-    id: 'welcome-1',
-    type: 'custom',
-    data: { label: '👋 Добро пожаловать!\nЭто ваша новая Личная Карта.', bgColor: 'rgba(33, 150, 243, 0.8)' },
-    position: { x: 250, y: 100 },
-  },
-  {
-    id: 'welcome-2',
-    type: 'custom',
-    data: { label: 'Здесь можно визуализировать идеи, собирать конспекты и ставить 💡', bgColor: 'rgba(20, 20, 25, 0.8)' },
-    position: { x: 100, y: 250 },
-  },
-  {
-    id: 'welcome-3',
-    type: 'custom',
-    data: { label: 'Вставьте ссылку на YouTube\nчерез кнопку "Медиа"!', bgColor: 'rgba(244, 67, 54, 0.6)' },
-    position: { x: 400, y: 250 },
-  }
-];
+const generateDefaultElements = () => {
+  if (typeof crypto === 'undefined' || !crypto.randomUUID) return { nodes: [], edges: [] };
+  const id1 = crypto.randomUUID();
+  const id2 = crypto.randomUUID();
+  const id3 = crypto.randomUUID();
+  
+  const defaultInitialNodes: Node[] = [
+    {
+      id: id1,
+      type: 'custom',
+      data: { label: '👋 Добро пожаловать!\nЭто ваша новая Личная Карта.', bgColor: 'rgba(33, 150, 243, 0.8)' },
+      position: { x: 250, y: 100 },
+    },
+    {
+      id: id2,
+      type: 'custom',
+      data: { label: 'Здесь можно визуализировать идеи, собирать конспекты и ставить 💡', bgColor: 'rgba(20, 20, 25, 0.8)' },
+      position: { x: 100, y: 250 },
+    },
+    {
+      id: id3,
+      type: 'custom',
+      data: { label: 'Вставьте ссылку на YouTube\nчерез кнопку "Медиа"!', bgColor: 'rgba(244, 67, 54, 0.6)' },
+      position: { x: 400, y: 250 },
+    }
+  ];
 
-const defaultInitialEdges: Edge[] = [
-  { id: 'e1-2', source: 'welcome-1', target: 'welcome-2', type: 'smoothstep', animated: true, style: { stroke: 'var(--accent-primary)', strokeWidth: 2 } },
-  { id: 'e1-3', source: 'welcome-1', target: 'welcome-3', type: 'smoothstep', animated: true, style: { stroke: 'var(--accent-primary)', strokeWidth: 2 } },
-];
+  const defaultInitialEdges: Edge[] = [
+    { id: crypto.randomUUID(), source: id1, target: id2, type: 'smoothstep', animated: true, style: { stroke: 'var(--accent-primary)', strokeWidth: 2 } },
+    { id: crypto.randomUUID(), source: id1, target: id3, type: 'smoothstep', animated: true, style: { stroke: 'var(--accent-primary)', strokeWidth: 2 } },
+  ];
+
+  return { nodes: defaultInitialNodes, edges: defaultInitialEdges };
+};
 
 export function PersonalMindMapInner(props: any) {
   const { mapId, initialNodes, initialEdges, onOpenViewer, isViewerOpen } = props;
-  const [nodes, setNodes] = useNodesState(initialNodes?.length > 0 ? initialNodes : defaultInitialNodes);
-  const [edges, setEdges] = useEdgesState(initialEdges?.length > 0 ? initialEdges : defaultInitialEdges);
+  
+  const [initialDefaults] = useState(() => generateDefaultElements());
+  
+  const [nodes, setNodes] = useNodesState(initialNodes?.length > 0 ? initialNodes : initialDefaults.nodes);
+  const [edges, setEdges] = useEdgesState(initialEdges?.length > 0 ? initialEdges : initialDefaults.edges);
   const { fitView, screenToFlowPosition } = useReactFlow();
   const savingRef = useRef(false);
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
