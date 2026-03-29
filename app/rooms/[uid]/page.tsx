@@ -85,6 +85,19 @@ export default function GlassRoomPage() {
         audio={false}
         token={token}
         serverUrl={liveKitUrl}
+        options={{
+          publishDefaults: {
+            // High quality voice (Discord standard)
+            audioPreset: { maxBitrate: 64_000 },
+            dtx: false,
+            red: true,
+          },
+          audioCaptureDefaults: {
+            autoGainControl: true,
+            echoCancellation: true,
+            noiseSuppression: true,
+          }
+        }}
         style={{
           flex: 1,
           display: 'flex',
