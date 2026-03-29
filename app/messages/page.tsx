@@ -83,7 +83,7 @@ export default function MessagesPage() {
 
   return (
     <div className="platform-page">
-      <div className="platform-card" style={{ maxWidth: 560, margin: '0 auto' }}>
+      <div className="platform-card" style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
         <div className="platform-card-title" style={{ marginBottom: 8 }}>
           <i className="fa-regular fa-message" aria-hidden /> Сообщения
         </div>
@@ -111,6 +111,7 @@ export default function MessagesPage() {
                 color: 'var(--accent-primary)',
                 textDecoration: 'none',
                 wordBreak: 'break-word',
+                display: 'block',
               }}
             >
               {shareTitle ? decodeURIComponent(shareTitle) : 'Материал'}
@@ -137,9 +138,9 @@ export default function MessagesPage() {
             </Link>
           </div>
         ) : (
-          <ul className="list-none p-0 m-0">
+          <ul className="list-none p-0 m-0 w-full overflow-hidden">
             {allItems.map((item) => (
-              <li key={item.type + item.key}>
+              <li key={item.type + item.key} className="w-full">
                 <Link
                   href={item.link}
                   style={{
@@ -152,19 +153,20 @@ export default function MessagesPage() {
                     color: 'inherit',
                     borderBottom: '1px solid var(--border-subtle)',
                     transition: 'background 0.15s',
+                    width: '100%',
                   }}
                   className="hover:bg-[var(--studio-participant-bg)]"
                 >
                   {item.image ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={item.image} alt="" width={44} height={44} style={{ borderRadius: 12, objectFit: 'cover' }} />
+                    <img src={item.image} alt="" width={44} height={44} style={{ borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
                   ) : (
-                    <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--bg-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 600 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--bg-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 600, flexShrink: 0 }}>
                       {item.type === 'group' ? <i className="fa-solid fa-users" style={{ fontSize: '1rem', color: 'var(--text-secondary)' }} /> : item.title.slice(0, 1).toUpperCase()}
                     </div>
                   )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{item.title}</div>
+                  <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
                     {item.subtitle && (
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.subtitle}{item.subtitle.length >= 80 ? '…' : ''}
