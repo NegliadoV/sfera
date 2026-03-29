@@ -79,7 +79,7 @@ export function CreateGroupModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[350] bg-black/50 flex items-center justify-center p-0 md:p-6 overflow-hidden"
+      className="fixed inset-0 z-[5000] bg-black/50 flex items-center justify-center p-0 md:p-6 overflow-hidden"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
@@ -112,8 +112,7 @@ export function CreateGroupModal({ onClose }: { onClose: () => void }) {
             onChange={(e) => { setName(e.target.value); setError(''); }}
             placeholder="Например: Команда проекта"
             maxLength={128}
-            className="chat-input-glass-field"
-            style={{ marginBottom: 16, borderRadius: 12, padding: '12px 14px' }}
+            style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid var(--border-color)', marginBottom: 16, fontSize: '0.95rem', background: 'var(--bg-accent)', color: 'var(--text-primary)' }}
           />
 
           <label style={{ display: 'block', marginBottom: 4, fontSize: '0.9rem', fontWeight: 500 }}>Участники (поиск по тегу или имени)</label>
@@ -122,8 +121,7 @@ export function CreateGroupModal({ onClose }: { onClose: () => void }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="@тег или имя"
-            className="chat-input-glass-field"
-            style={{ marginBottom: 12, borderRadius: 12, padding: '12px 14px' }}
+            style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid var(--border-color)', marginBottom: 16, fontSize: '0.95rem', background: 'var(--bg-accent)', color: 'var(--text-primary)' }}
           />
 
           {searchResults.length > 0 && (
