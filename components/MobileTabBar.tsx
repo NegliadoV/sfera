@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Logo } from '@/components/Logo'; // (Оставляем, если вдруг понадобится, но можно и удалить)
 import { SferaSphereIcon } from '@/components/SferaSphereIcon';
-import { ExploreIcon, CreateIcon, MessagesIcon, ProfileIcon, MenuIcon } from '@/components/MobileNavIcons';
+import { ExploreIcon, CreateIcon, ShortsIcon, MessagesIcon, ProfileIcon, MenuIcon } from '@/components/MobileNavIcons';
 
 export function MobileTabBar({ onMenuClick, isMenuOpen }: { onMenuClick?: () => void; isMenuOpen?: boolean }) {
   const { data: session } = useSession();
@@ -37,10 +37,10 @@ export function MobileTabBar({ onMenuClick, isMenuOpen }: { onMenuClick?: () => 
           {isActive('/rooms') && <div className="nav-indicator"></div>}
         </Link>
 
-        {/* Центральная кнопка Создать (Шортсы) - Ровно посередине (3-я из 5) */}
-        <Link href="/shorts/upload" className="flex flex-col items-center justify-center flex-1 h-full shrink-0 px-2">
-          <div className={`nav-icon-wrapper w-[44px] h-[44px] rounded-full transform active:scale-90 ${isActive('/shorts/upload') ? 'bg-[color-mix(in_srgb,var(--accent-primary)_20%,transparent)] shadow-[0_0_15px_var(--accent-primary)]' : ''}`}>
-            <CreateIcon size={34} />
+        {/* Центральная кнопка: Шортсы (Лента) */}
+        <Link href="/shorts" className="flex flex-col items-center justify-center flex-1 h-full shrink-0 px-2">
+          <div className={`nav-icon-wrapper w-[44px] h-[44px] rounded-full transform active:scale-90 ${isActive('/shorts') ? 'bg-[color-mix(in_srgb,var(--accent-primary)_20%,transparent)] shadow-[0_0_15px_var(--accent-primary)]' : ''}`}>
+            <ShortsIcon size={34} />
           </div>
         </Link>
 
