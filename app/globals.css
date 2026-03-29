@@ -244,12 +244,19 @@
 
 .bg-blob {
   position: absolute;
-  filter: blur(120px);
+  /* optimized performance: replacing heavy filter: blur(120px) with radial-gradients */
   border-radius: 50%;
   opacity: 0.4;
   z-index: -1;
   pointer-events: none;
   animation: blob-float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+@media (max-width: 768px) {
+  .bg-blob {
+    animation: none !important; /* disable continuous repaints on mobile */
+  }
 }
 
 .blob-1 {
@@ -257,7 +264,7 @@
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: var(--accent-primary);
+  background: radial-gradient(circle, var(--accent-primary) 0%, transparent 70%);
   animation-delay: 0s;
 }
 
@@ -266,7 +273,7 @@
   right: -10%;
   width: 60vw;
   height: 60vw;
-  background: var(--accent-secondary, var(--accent-purple));
+  background: radial-gradient(circle, var(--accent-secondary, var(--accent-purple)) 0%, transparent 70%);
   animation-delay: -5s;
 }
 
