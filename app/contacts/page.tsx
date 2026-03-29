@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 type Contact = { id: string; name: string | null; email: string | null; image: string | null; isContact?: boolean; isOutgoing?: boolean };
-type RequestObj = { id: string; sender: Contact; receiver: Contact; status: string; createdAt: string };
+type RequestObj = { id: string; fromUser?: Contact; toUser?: Contact; status: string; createdAt: string };
 
 export default function ContactsPage() {
   const router = useRouter();
@@ -165,8 +165,8 @@ export default function ContactsPage() {
                 {searchResults.map((u) => {
                   if (u.id === session?.user?.id) return null;
                   const isContact = contacts.some((c) => c.id === u.id);
-                  const isOutgoing = outgoing.some((r) => r.receiver.id === u.id);
-                  const isIncoming = incoming.some((r) => r.sender.id === u.id);
+                  const isOutgoing = outgoing.some((r) => r.toUser?.id === u.id);
+                  const isIncoming = incoming.some((r) => r.fromUser?.id === u.id);
 
                   return (
                     <div key={u.id} className="flex items-center justify-between p-3 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
@@ -228,10 +228,10 @@ export default function ContactsPage() {
                   <div key={req.id} className="flex flex-col gap-3 p-4 rounded-2xl bg-[color-mix(in_srgb,var(--accent-purple)_5%,transparent)] border border-[color-mix(in_srgb,var(--accent-purple)_20%,transparent)]">
                      <div className="flex items-center gap-3 overflow-hidden">
                          <div className="w-10 h-10 rounded-[12px] bg-[var(--bg-accent)] flex items-center justify-center shrink-0 overflow-hidden">
-                           {req.sender.image ? <img src={req.sender.image} alt="Avatar" className="w-full h-full object-cover" /> : <i className="fas fa-user text-[var(--text-secondary)]" />}
+                           {req.fromUser?.image ? <img src={req.fromUser.image} alt="Avatar" className="w-full h-full object-cover" /> : <i className="fas fa-user text-[var(--text-secondary)]" />}
                          </div>
                          <div className="flex flex-col min-w-0">
-                           <span className="font-semibold text-[15px] truncate text-[var(--text-primary)]">{req.sender.name || 'Аноним'}</span>
+                           <span className="font-semibold text-[15px] truncate text-[var(--text-primary)]">{req.fromUser?.name || 'Аноним'}</span>
                            <span className="text-[12px] text-[var(--text-secondary)]">Хочет добавить вас</span>
                          </div>
                      </div>
