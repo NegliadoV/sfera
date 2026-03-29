@@ -99,3 +99,17 @@ export function MenuIcon({ size = 26 }: { size?: number }) {
     </svg>
   );
 }
+
+export function ShortsIcon({ size = 26 }: { size?: number }) {
+  const uid = useId().replace(/:/g, '');
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+      <GlowDefs uid={uid} />
+      <g filter={`url(#iconGlowNav-${uid})`}>
+        {/* Play icon in a rounded vertical rectangle similar to Shorts/Reels */}
+        <rect x="5" y="3" width="14" height="18" rx="4" stroke={`url(#neonGlowNav-${uid})`} strokeWidth="1.5" fill="none" />
+        <path d="M10 9 L15 12 L10 15 Z" fill={`url(#neonGlowNav-${uid})`} stroke={`url(#neonGlowNav-${uid})`} strokeWidth="1" strokeLinejoin="round" />
+      </g>
+    </svg>
+  );
+}
