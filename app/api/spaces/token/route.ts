@@ -28,8 +28,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'LiveKit is not configured on the server.' }, { status: 503 });
     }
 
+    const identityNonce = Math.random().toString(36).substring(2, 8);
     const at = new AccessToken(apiKey, apiSecret, {
-      identity: session.user.id,
+      identity: `${session.user.id}_${identityNonce}`,
       name: participantName,
     });
 
