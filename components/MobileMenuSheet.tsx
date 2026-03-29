@@ -109,6 +109,14 @@ export function MobileMenuSheet({
               <span className="text-[15px] font-semibold tracking-wide">Приложения</span>
               <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Полезные утилиты</span>
             </button>
+
+            <Link href="/contacts" onClick={onClose} className="mobile-sheet-btn group">
+              <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,#3b82f6_15%,transparent)] group-active:bg-[color-mix(in_srgb,#3b82f6_25%,transparent)] transition-colors">
+                <i className="fas fa-users text-xl text-[#3b82f6] drop-shadow-[0_0_8px_#3b82f6]" />
+              </div>
+              <span className="text-[15px] font-semibold tracking-wide">Контакты</span>
+              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Поиск друзей</span>
+            </Link>
             
             <Link href="/settings" onClick={onClose} className="mobile-sheet-btn col-span-2 flex-row justify-start py-4 px-5 gap-4 h-auto mt-2">
               <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[color-mix(in_srgb,var(--text-secondary)_15%,transparent)]">
