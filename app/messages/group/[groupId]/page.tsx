@@ -743,140 +743,77 @@ export default function GroupChatPage() {
                 <button type="button" onClick={() => setAttachment(null)} style={{ position: 'absolute', top: 4, right: 4, width: 24, height: 24, borderRadius: 12, border: 'none', background: 'rgba(0,0,0,0.6)', color: 'white', cursor: 'pointer', fontSize: 14 }} aria-label="Удалить">×</button>
               </div>
             )}
-            <div className="chat-input-glass">
+            <div className="flex flex-col md:flex-row gap-2 items-end w-full max-w-5xl mx-auto px-4 py-3 pb-6 md:pb-4 border-top border-[var(--border-subtle)] bg-[color-mix(in_srgb,var(--bg-primary)_80%,transparent)] backdrop-blur-xl">
               <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
-            <div style={{ position: 'relative' }}>
-              <button
-                type="button"
-                onClick={() => setPlusOpen((v) => !v)}
-                title="Вложения"
-                className={`chat-attachments-plus-btn${plusOpen ? ' open' : ''}`}
-                aria-expanded={plusOpen}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-primary)',
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+              
+              <div
+                className="flex items-center w-full bg-[var(--bg-accent)] border border-[var(--border-subtle)] transition-all focus-within:border-[var(--accent-primary)] focus-within:shadow-[0_0_0_1px_var(--accent-primary)]"
+                style={{ borderRadius: 24, padding: '4px 6px' }}
               >
-                <i className="fa-solid fa-plus" />
-              </button>
-              {plusOpen && (
-                <div
-                  className="chat-attachments-menu chat-popup-glass"
-                  style={{
-                    position: 'absolute',
-                    bottom: '110%',
-                    left: 0,
-                    padding: 8,
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: 8,
-                    zIndex: 40,
-                  }}
-                >
+                {/* Вложения (внутри инпута слева) */}
+                <div style={{ position: 'relative' }}>
                   <button
                     type="button"
-                    onClick={() => {
-                      setPlusOpen(false);
-                      fileInputRef.current?.click();
-                    }}
-                    className="chat-attachments-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '6px 8px',
-                      borderRadius: 8,
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      fontSize: '1.1rem',
-                      color: 'var(--text-primary)',
-                    }}
-                    aria-label="Фото или файл"
+                    onClick={() => setPlusOpen((v) => !v)}
+                    title="Вложения"
+                    className={`text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center justify-center${plusOpen ? ' text-[var(--accent-primary)]' : ''}`}
+                    aria-expanded={plusOpen}
+                    style={{ width: 36, height: 36, borderRadius: '50%' }}
                   >
-                    <i className="fa-solid fa-image fa-fw" />
+                    <i className="fa-solid fa-paperclip text-lg" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPlusOpen(false);
-                      handleVideoRecord();
-                    }}
-                    className="chat-attachments-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '6px 8px',
-                      borderRadius: 8,
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      fontSize: '1.1rem',
-                      color: 'var(--text-primary)',
-                    }}
-                    aria-label="Видеокружок"
-                  >
-                    <i className="fa-solid fa-video fa-fw" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPlusOpen(false);
-                      handleVoiceRecord();
-                    }}
-                    className="chat-attachments-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '6px 8px',
-                      borderRadius: 8,
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      fontSize: '1.1rem',
-                      color: 'var(--text-primary)',
-                    }}
-                    aria-label="Голосовое сообщение"
-                  >
-                    <i className="fa-solid fa-microphone fa-fw" />
-                  </button>
-                  <GifPicker
-                    onPick={(url) => {
-                      setAttachment({ url, type: 'image' });
-                      setPlusOpen(false);
-                    }}
-                  >
+                  {plusOpen && (
                     <div
-                      className="chat-attachments-item"
+                      className="chat-attachments-menu chat-popup-glass"
                       style={{
+                        position: 'absolute',
+                        bottom: '120%',
+                        left: 0,
+                        padding: 8,
                         display: 'flex',
-                        alignItems: 'center',
+                        flexDirection: 'row',
                         gap: 8,
-                        padding: '6px 8px',
-                        borderRadius: 8,
-                        fontSize: '1.1rem',
-                        color: 'var(--text-primary)',
-                        width: '100%',
-                        textAlign: 'left',
+                        zIndex: 40,
                       }}
                     >
-                      <span className="gif-icon-label">GIF</span>
+                      <button
+                        type="button"
+                        onClick={() => { setPlusOpen(false); fileInputRef.current?.click(); }}
+                        className="chat-attachments-item hover:bg-[var(--hover-color)] p-2 rounded-xl transition-colors"
+                        aria-label="Фото или файл"
+                      >
+                        <i className="fa-solid fa-image fa-fw text-xl text-[var(--text-primary)]" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setPlusOpen(false); handleVideoRecord(); }}
+                        className="chat-attachments-item hover:bg-[var(--hover-color)] p-2 rounded-xl transition-colors"
+                        aria-label="Видеокружок"
+                      >
+                        <i className="fa-solid fa-video fa-fw text-xl text-[var(--text-primary)]" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setPlusOpen(false); handleVoiceRecord(); }}
+                        className="chat-attachments-item hover:bg-[var(--hover-color)] p-2 rounded-xl transition-colors"
+                        aria-label="Голосовое сообщение"
+                      >
+                        <i className="fa-solid fa-microphone fa-fw text-xl text-[var(--text-primary)]" />
+                      </button>
+                      <GifPicker
+                        onPick={(url) => { setAttachment({ url, type: 'image' }); setPlusOpen(false); }}
+                      >
+                        <div
+                          className="chat-attachments-item flex items-center hover:bg-[var(--hover-color)] p-2 rounded-xl transition-colors cursor-pointer text-xl font-bold text-[var(--text-primary)]"
+                        >
+                          GIF
+                        </div>
+                      </GifPicker>
                     </div>
-                  </GifPicker>
+                  )}
                 </div>
-              )}
-            </div>
-              <div style={{ flex: 1, minWidth: 120, position: 'relative', display: 'flex', alignItems: 'center' }}>
+
+                {/* Поле ввода текста */}
                 <input
                   type="text"
                   value={inputValue}
@@ -885,17 +822,38 @@ export default function GroupChatPage() {
                   placeholder="Сообщение…"
                   maxLength={8192}
                   disabled={sending}
-                  className="chat-input-glass-field"
+                  style={{ fontSize: 16 }}
+                  className="flex-1 bg-transparent border-none outline-none text-[var(--text-primary)] px-3 py-2 placeholder-[var(--text-muted)] min-w-0"
                 />
-                <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-                  <EmojiPicker onPick={(emoji) => setInputValue((v) => v + emoji)}>
-                    <i className="fa-regular fa-face-smile" style={{ fontSize: '1.1rem', color: 'var(--text-secondary)' }} />
-                  </EmojiPicker>
-                </div>
+
+                {/* Эмодзи (справа в инпуте) */}
+                <EmojiPicker onPick={(emoji) => setInputValue((v) => v + emoji)}>
+                  <div className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center justify-center cursor-pointer" style={{ width: 36, height: 36 }}>
+                    <i className="fa-regular fa-face-smile text-xl" />
+                  </div>
+                </EmojiPicker>
+
+                {/* Кнопка отправки (пропадает/меняется или просто иконка) */}
+                <button
+                  type="submit"
+                  disabled={sending || (!inputValue.trim() && !attachment)}
+                  className="ml-1 flex items-center justify-center transition-all"
+                  style={{
+                    width: 36, height: 36,
+                    borderRadius: '50%',
+                    background: (inputValue.trim() || attachment) ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+                    opacity: (inputValue.trim() || attachment) ? 1 : 0.5,
+                    color: (inputValue.trim() || attachment) ? '#fff' : 'var(--text-secondary)',
+                    pointerEvents: (inputValue.trim() || attachment) ? 'auto' : 'none',
+                  }}
+                >
+                  {sending ? (
+                    <i className="fa-solid fa-circle-notch fa-spin" />
+                  ) : (
+                    <i className="fa-solid fa-paper-plane text-sm" style={{ marginLeft: -2 }} />
+                  )}
+                </button>
               </div>
-              <button type="submit" disabled={sending || (!inputValue.trim() && !attachment)} className="platform-btn platform-btn-sm" style={{ alignSelf: 'stretch' }}>
-                {sending ? '…' : 'Отправить'}
-              </button>
             </div>
           </form>
         </>
