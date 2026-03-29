@@ -3,6 +3,7 @@
 /* Design system — SFERA. Темная/светлая тема + кастомный акцент (см. docs/DESIGN_SYSTEM.md) */
 :root,
 [data-theme="dark"] {
+  color-scheme: dark;
   --font-inter: ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-jetbrains-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
   /* Брендовый шрифт логотипа (Sora подключается в layout, переопределяет) */
@@ -102,6 +103,7 @@
 /* Светлая тема — по умолчанию «Мягкая» */
 [data-theme="light"],
 [data-theme="light"][data-light-style="soft"] {
+  color-scheme: light;
   --bg-primary: #f2f3f5;
   --bg-secondary: #ffffff;
   --bg-sidebar: #e8e9ec;
@@ -284,6 +286,12 @@
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
+html {
+  background-color: var(--bg-primary);
+  /* Предотвращает белые пятна при растяжении/overscroll на iOS */
+  /* overscroll-behavior-y: none; */ 
+}
+
 body {
   background: var(--studio-bg-gradient);
   color: var(--text-primary);
@@ -295,6 +303,7 @@ body {
   min-height: 100dvh;
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+  overscroll-behavior-y: none; /* Убираем эффект "резинки" на iOS (белые пятна) */
 }
 
 /* Убираем подсветку тапа на мобильном для более чистого UX */
