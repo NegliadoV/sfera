@@ -4590,20 +4590,14 @@ select:focus-visible,
 .universes-circle-logo {
   width: 96px;
   height: 96px;
-  border-radius: 50%;
-  background: var(--bg-accent);
-  backdrop-filter: blur(8px);
-  border: 2px solid color-mix(in srgb, var(--accent-primary-muted) 40%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-card);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s;
 }
 
 .universes-circle:hover .universes-circle-logo {
-  border-color: var(--accent-primary-muted);
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--accent-primary) 30%, transparent);
+  transform: scale(1.05);
 }
 
 .universes-circle-logo i {
@@ -5731,4 +5725,125 @@ a.sources-circle:hover,
     backdrop-filter: blur(32px) saturate(1.5) !important;
     -webkit-backdrop-filter: blur(32px) saturate(1.5) !important;
   }
+}
+
+/* нтерактивная искра-пользователь */
+@keyframes sparkBlink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+.room-portal-spark {
+  animation: sparkBlink 1.5s ease-in-out infinite; transform: translateY(0) scale(1); transform-origin: 50% 92px; transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1), opacity 0.3s; }
+:where(a, button, li, .platform-card, .cabinet-universe-item, .group):hover .room-portal-spark { transform: translateY(-24px) scale(0.7); }
+:where(a, button, li, .platform-card, .cabinet-universe-item, .group):active .room-portal-spark { transform: translateY(-45px) scale(0.1); opacity: 0; transition-duration: 0.15s; }
+
+
+/* оризонтальная искра (вход сбоку) */
+.room-portal-spark-x { transform: translateX(0) scale(1); transform-origin: 15px 50%; transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1), opacity 0.3s; animation: sparkBlink 1.5s ease-in-out infinite; }
+:where(a, button, li, .platform-card, .cabinet-universe-item, .group):hover .room-portal-spark-x { transform: translateX(18px) scale(0.7); }
+:where(a, button, li, .platform-card, .cabinet-universe-item, .group):active .room-portal-spark-x { transform: translateX(36px) scale(0.1); opacity: 0; transition-duration: 0.15s; }
+
+/* ==========================================================================
+   Roominate Neon Rebranding for All FontAwesome Icons
+   ========================================================================== */
+i[class*="fa-"], .fas, .far, .fal, .fab, .fa-solid, .fa-regular {
+  text-shadow: 0 0 8px color-mix(in srgb, currentColor 40%, transparent), 
+               0 0 16px color-mix(in srgb, currentColor 20%, transparent);
+  transition: text-shadow 0.3s ease, transform 0.3s ease, color 0.3s ease, filter 0.3s ease;
+  /* Ensure icons are visibly glowing even in normal state */
+  filter: drop-shadow(0 0 2px color-mix(in srgb, currentColor 30%, transparent));
+}
+
+/* Enhanced neon glow on interactive hover (The "Spark" effect) */
+:where(a, button, [role="button"], .platform-card, .glass-icon-btn, .group):hover i[class*="fa-"], 
+:where(a, button, [role="button"], .platform-card, .glass-icon-btn, .group):hover .fas, 
+:where(a, button, [role="button"], .platform-card, .glass-icon-btn, .group):hover .far {
+  text-shadow: 0 0 10px color-mix(in srgb, currentColor 80%, transparent), 
+               0 0 20px color-mix(in srgb, currentColor 50%, transparent),
+               0 0 30px color-mix(in srgb, currentColor 30%, transparent);
+  animation: neon-spark 1.5s infinite alternate;
+  transform: scale(1.05); /* Slight pop */
+}
+
+@keyframes neon-spark {
+  0% { 
+    opacity: 1; 
+    filter: brightness(1) drop-shadow(0 0 5px color-mix(in srgb, currentColor 50%, transparent)); 
+  }
+  50% { 
+    opacity: 0.8; 
+    filter: brightness(1.2) drop-shadow(0 0 10px color-mix(in srgb, currentColor 70%, transparent)); 
+  }
+  100% { 
+    opacity: 1; 
+    filter: brightness(1.4) drop-shadow(0 0 15px currentColor); 
+  }
+}
+
+/* =========================================
+   Mobile Web App Utilities
+   ========================================= */
+
+.mobile-safe-bottom {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.mobile-tab-bar-container {
+  position: fixed;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 16px;
+  right: 16px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 200;
+  pointer-events: none; /* let clicks pass through the container except for nav */
+}
+
+.mobile-tab-bar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  
+  border: 1px solid rgba(255,255,255,0.1);
+  background: color-mix(in srgb, var(--bg-secondary) 40%, transparent);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+}
+
+[data-theme="light"] .mobile-tab-bar {
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.nav-icon-wrapper {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon-active {
+  opacity: 1;
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px var(--accent-primary));
+}
+
+.nav-icon-inactive {
+  opacity: 0.5;
+  filter: grayscale(100%);
+  transform: scale(0.95);
+}
+
+.nav-indicator {
+  position: absolute;
+  bottom: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 6px var(--accent-primary);
 }

@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token');
-  const redirectUrl = req.nextUrl.searchParams.get('redirect') || '/';
+  const rawRedirectUrl = req.nextUrl.searchParams.get('redirect') || '/';
+  const redirectUrl = encodeURI(decodeURI(rawRedirectUrl));
 
   if (!token) {
     return NextResponse.redirect(new URL(redirectUrl, req.url));

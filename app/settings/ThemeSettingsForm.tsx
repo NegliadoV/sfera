@@ -32,30 +32,7 @@ export function ThemeSettingsForm() {
           Тема, цвет интерфейса, прозрачность и акцент.
         </div>
 
-        <div className="settings-color-label">
-          <i className="fa-solid fa-fill-drip" aria-hidden /> ЦВЕТ ИНТЕРФЕЙСА
-        </div>
-        <div className="settings-color-hint">
-          Оттенок фона и границ по всему приложению (сайдбар, карточки, шапка).
-        </div>
-        <div className="settings-color-grid">
-          {interfaceTintPresets.map((preset) => {
-            const isActive = interfaceTint === preset.hue;
-            return (
-              <button
-                key={preset.hue}
-                type="button"
-                onClick={() => setInterfaceTint(preset.hue)}
-                title={preset.label}
-                className={`settings-color-option ${isActive ? 'active' : ''}`}
-              >
-                {preset.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div style={{ marginTop: 24 }}>
+        <div>
           <div className="settings-color-label" style={{ marginTop: 0 }}>
             Акцентный цвет
           </div>
@@ -134,31 +111,6 @@ export function ThemeSettingsForm() {
             aria-label="Прозрачность основного блока"
           />
 
-        <div style={{ marginTop: 24 }}>
-          <div className="settings-color-label" style={{ marginTop: 0 }}>
-            Сила размытия
-          </div>
-          <div className="settings-glass-presets" style={{ marginTop: 12 }}>
-            {backgroundBlurPresets.map((preset) => {
-              const isActive = backgroundBlur === preset.value;
-              return (
-                <button
-                  key={preset.value}
-                  type="button"
-                  onClick={() => setBackgroundBlur(preset.value)}
-                  className={`settings-glass-btn ${isActive ? 'active' : ''}`}
-                >
-                  {preset.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-          <div className="settings-blur-note">
-            <i className="fa-regular fa-blur" aria-hidden />
-            <span>{backgroundBlur === 0 ? 'размытие отключено' : `размытие ${backgroundBlur}px (backdrop-filter)`}</span>
-          </div>
         </div>
       </div>
     </>

@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }) 
     .select({ title: content.title })
     .from(content)
     .where(eq(content.id, contentId));
-  if (!row) return { title: 'Материал | SFERA' };
-  return { title: `${row.title} | SFERA` };
+  if (!row) return { title: 'Материал | Roominate' };
+  return { title: `${row.title} | Roominate` };
 }
 
 export default async function UniverseContentPage({

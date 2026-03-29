@@ -24,7 +24,7 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const name = FALLBACK[slug]?.name ?? slug;
-  return { title: `Лента — ${name} | SFERA` };
+  return { title: `Лента — ${name} | Roominate` };
 }
 
 export default async function ContentFeedPage({
@@ -151,9 +151,9 @@ export default async function ContentFeedPage({
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
-        <Link href="/"><i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> SFERA</Link>
+        <Link href="/"><i className="fa-solid fa-shapes" style={{ marginRight: 4 }} /> Roominate</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <Link href="/">Сферы знаний</Link>
+        <Link href="/">Комнаты знаний</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <Link href={`/universes/${slug}`}>{name}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />

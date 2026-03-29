@@ -61,7 +61,7 @@ export default function GlobalRoomsPage() {
   };
 
   return (
-    <div className="platform-page fade-in" style={{ padding: '2rem' }}>
+    <div className="platform-page fade-in">
       <div className="platform-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
           <h1 className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
@@ -133,7 +133,7 @@ export default function GlobalRoomsPage() {
         </div>
       ) : (
         <div style={{ 
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' 
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' 
         }}>
           {spaces.map(space => (
             <div
@@ -234,7 +234,7 @@ export default function GlobalRoomsPage() {
               background: 'color-mix(in srgb, var(--bg-primary) 80%, transparent)',
               border: '1px solid var(--border-color)',
               borderRadius: 'var(--radius-xl)',
-              padding: 40,
+              padding: 'clamp(20px, 5vw, 40px)',
               width: 480,
               maxWidth: '90vw',
               boxShadow: '0 30px 60px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1)',

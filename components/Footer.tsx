@@ -18,7 +18,7 @@ export function Footer() {
     >
       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <i className="fas fa-cube" aria-hidden style={{ color: 'var(--studio-ctrl-icon)' }} />
-        SFERA — Вселенные знания
+        Roominate — Вселенные знания
       </span>
       <Link href="/about" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
         <i className="fas fa-scale-balanced" aria-hidden />

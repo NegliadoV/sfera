@@ -6,7 +6,7 @@ description: Deploy Horizon Project to Production (Ubuntu PM2 via SSH)
 
 1. Упаковка нужных файлов локально. Исключаем `node_modules`, `.git` и папку `logs/`, чтобы сэкономить пропускную способность:
 // turbo
-2. `tar.exe -czvf sfera-patch.tar.gz --exclude node_modules --exclude .git --exclude logs .`
+2. `tar.exe -czvf sfera-patch.tar.gz --exclude node_modules --exclude .git --exclude logs --exclude .env --exclude .env.example --exclude sfera-patch*.tar.gz .`
 
 3. Запуск локального Node HTTP-сервера для раздачи архива (порт 8085 выделен под патчи):
 // turbo

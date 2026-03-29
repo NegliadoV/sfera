@@ -656,7 +656,7 @@ export function PersonalMindMapInner(props: any) {
   };
 
   const addPostNode = () => {
-    const input = window.prompt('Вставьте ссылку на пост или ID поста SFERA:');
+    const input = window.prompt('Вставьте ссылку на пост или ID поста Roominate:');
     if (!input) return;
 
     const match = input.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/);

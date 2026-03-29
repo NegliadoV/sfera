@@ -254,13 +254,12 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
     <>
       {/* Навигация */}
       <aside
-        className="sidebar-nav-section"
+        className={`sidebar-nav-section ${(contactsOpen || spheresOpen || collectionOpen) ? 'hidden md:flex' : 'flex'}`}
         style={{
           width: 240,
           minWidth: 240,
           flexShrink: 0,
           padding: '16px 14px',
-          display: 'flex',
           flexDirection: 'column',
           borderRight: (contactsOpen || spheresOpen || collectionOpen) ? '1px solid var(--studio-panel-border)' : 'none',
         }}
@@ -305,7 +304,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
           </div>
         )}
         <nav style={{ flex: 1, overflowY: 'auto' }}>
-        <div className="sidebar-nav-label">Сферы</div>
+        <div className="sidebar-nav-label">Комнаты</div>
         <div style={{ marginBottom: 16 }}>
           <button
             type="button"
@@ -329,8 +328,8 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
               textAlign: 'left',
             }}
           >
-            <i className="fas fa-compass" />
-            {universeSlug ? '← К сферам' : 'Сферы'}
+            <i className="fas fa-shapes" />
+            {universeSlug ? '← Выбор комнаты' : 'Комнаты'}
             <i className={`fas fa-chevron-${spheresOpen ? 'left' : 'right'}`} style={{ fontSize: '0.75rem', marginLeft: 'auto' }} />
           </button>
         </div>
@@ -440,7 +439,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
         <div>
           {[
             { href: '/explore', label: 'Лента (В тренде)', icon: 'fa-fire', active: pathname === '/explore' },
-            { href: '/rooms', label: 'Комнаты', icon: 'fa-microphone-alt', active: pathname === '/rooms' },
+            { href: '/rooms', label: 'Аудио-комнаты', icon: 'fa-microphone-alt', active: pathname === '/rooms' },
             { href: '/shorts', label: 'Шортс', icon: 'fa-play', active: pathname?.startsWith('/shorts') },
             { href: '/me/mind-maps', label: 'Мои карты', icon: 'fa-project-diagram', active: pathname?.startsWith('/me/mind-maps') },
             { href: '/settings', label: 'Настройки', icon: 'fa-gear', active: pathname === '/settings' },
@@ -733,11 +732,11 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
     >
       <div style={{ width: 260, minWidth: 260, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '16px 14px', borderBottom: '1px solid var(--studio-panel-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <span className="sidebar-nav-label" style={{ marginBottom: 0 }}>Сферы</span>
+          <span className="sidebar-nav-label" style={{ marginBottom: 0 }}>Комнаты</span>
           <button
             type="button"
             onClick={() => setSpheresOpen(false)}
-            aria-label="Скрыть сферы"
+            aria-label="Скрыть комнаты"
             style={{
               width: 32,
               height: 32,
@@ -783,7 +782,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Загрузка…</p>
             ) : filteredUniverses.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                {spheresSearchQuery.trim() ? 'Ничего не найдено' : 'Пока нет сфер'}
+                {spheresSearchQuery.trim() ? 'Ничего не найдено' : 'Пока нет комнат'}
               </p>
             ) : (
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>

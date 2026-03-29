@@ -28,12 +28,12 @@ export function MiniAppModal({
     const handleMessage = (e: MessageEvent) => {
       try {
         const data = e.data;
-        if (data.type === 'SFERA_MINI_APP_CLOSE') {
+        if (data.type === 'Roominate_MINI_APP_CLOSE') {
           onClose();
         }
-        if (data.type === 'SFERA_MINI_APP_READY') {
+        if (data.type === 'Roominate_MINI_APP_READY') {
           iframeRef.current?.contentWindow?.postMessage({
-            type: 'SFERA_THEME_INFO',
+            type: 'Roominate_THEME_INFO',
             payload: { theme: document.documentElement.getAttribute('data-theme') || 'dark' }
           }, '*');
         }

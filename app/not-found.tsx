@@ -23,7 +23,7 @@ export default function NotFound() {
         </span>
       </div>
       <p className="text-lg mb-2" style={{ color: 'var(--text-secondary)' }}>
-        Такой страницы в Ноосфере нет.
+        Такой страницы в Roominate нет.
       </p>
       <p className="text-sm mb-10" style={{ color: 'var(--text-secondary)' }}>
         Возможно, ссылка устарела или материал был перемещён.

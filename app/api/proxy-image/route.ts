@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   try {
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'Horizon/1.0',
+        'User-Agent': 'Roominate/1.0',
         Referer: '',
       },
       signal: AbortSignal.timeout(10000),

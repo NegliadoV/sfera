@@ -10,7 +10,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 const sora = Sora({ subsets: ['latin', 'latin-ext'], variable: '--font-brand' });
 
 export const metadata: Metadata = {
-  title: 'SFERA | Платформа для глубокого познания',
+  title: 'Roominate | Платформа для глубокого познания',
   description:
     'Инструмент для мышления и осмысленного диалога. Тематические вселенные, структурированные дискуссии, совместное познание.',
 };
@@ -20,6 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: 'cover',
+  themeColor: '#000000',
 };
 
 export default async function RootLayout({

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 
 export const metadata = {
-  title: 'Контакты | SFERA',
+  title: 'Контакты | Roominate',
   description: 'Контакты и запросы в друзья.',
 };
 
