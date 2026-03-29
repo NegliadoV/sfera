@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   title: 'Roominate | Платформа для глубокого познания',
   description:
     'Инструмент для мышления и осмысленного диалога. Тематические вселенные, структурированные дискуссии, совместное познание.',
+  appleWebApp: {
+    capable: true,
+    title: 'Roominate',
+    statusBarStyle: 'black-translucent',
+  },
 };
 
 export const viewport: Viewport = {
