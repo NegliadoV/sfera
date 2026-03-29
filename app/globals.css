@@ -5757,40 +5757,17 @@ a.sources-circle:hover,
 :where(a, button, li, .platform-card, .cabinet-universe-item, .group):active .room-portal-spark-x { transform: translateX(36px) scale(0.1); opacity: 0; transition-duration: 0.15s; }
 
 /* ==========================================================================
-   Roominate Neon Rebranding for All FontAwesome Icons
+   Roominate Neon Rebranding for All FontAwesome Icons (Glow effect removed for performance)
    ========================================================================== */
 i[class*="fa-"], .fas, .far, .fal, .fab, .fa-solid, .fa-regular {
-  text-shadow: 0 0 8px color-mix(in srgb, currentColor 40%, transparent), 
-               0 0 16px color-mix(in srgb, currentColor 20%, transparent);
-  transition: text-shadow 0.3s ease, transform 0.3s ease, color 0.3s ease, filter 0.3s ease;
-  /* Ensure icons are visibly glowing even in normal state */
-  filter: drop-shadow(0 0 2px color-mix(in srgb, currentColor 30%, transparent));
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
-/* Enhanced neon glow on interactive hover (The "Spark" effect) */
+/* Enhanced hover effect without intense glow */
 :where(a, button, [role="button"], .platform-card, .glass-icon-btn, .group):hover i[class*="fa-"], 
 :where(a, button, [role="button"], .platform-card, .glass-icon-btn, .group):hover .fas, 
 :where(a, button, [role="button"], .platform-card, .glass-icon-btn, .group):hover .far {
-  text-shadow: 0 0 10px color-mix(in srgb, currentColor 80%, transparent), 
-               0 0 20px color-mix(in srgb, currentColor 50%, transparent),
-               0 0 30px color-mix(in srgb, currentColor 30%, transparent);
-  animation: neon-spark 1.5s infinite alternate;
   transform: scale(1.05); /* Slight pop */
-}
-
-@keyframes neon-spark {
-  0% { 
-    opacity: 1; 
-    filter: brightness(1) drop-shadow(0 0 5px color-mix(in srgb, currentColor 50%, transparent)); 
-  }
-  50% { 
-    opacity: 0.8; 
-    filter: brightness(1.2) drop-shadow(0 0 10px color-mix(in srgb, currentColor 70%, transparent)); 
-  }
-  100% { 
-    opacity: 1; 
-    filter: brightness(1.4) drop-shadow(0 0 15px currentColor); 
-  }
 }
 
 /* =========================================
