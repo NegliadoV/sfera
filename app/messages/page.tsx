@@ -132,8 +132,8 @@ export default function MessagesPage() {
             <i className="fa-regular fa-message" style={{ fontSize: '2rem', marginBottom: 12, display: 'block', opacity: 0.5 }} />
             Пока нет диалогов.
             <br />
-            <Link href="/" style={{ color: 'var(--accent-primary)', textDecoration: 'underline', marginTop: 8, display: 'inline-block' }}>
-              Добавить контакты
+            <Link href="/contacts" style={{ color: 'var(--accent-primary)', textDecoration: 'underline', marginTop: 8, display: 'inline-block' }}>
+              Перейти к контактам
             </Link>
           </div>
         ) : (
@@ -191,13 +191,6 @@ export default function MessagesPage() {
           >
             <i className="fa-solid fa-users" /> Создать группу
           </button>
-          <Link
-            href="/"
-            className="platform-btn platform-btn-sm"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
-          >
-            <i className="fa-regular fa-address-book" /> Контакты
-          </Link>
         </div>
         {showCreateGroup && <CreateGroupModal onClose={() => setShowCreateGroup(false)} />}
       </div>
