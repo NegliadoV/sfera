@@ -76,7 +76,7 @@ export default function ContactsPage() {
       const res = await fetch('/api/me/contacts/requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targetUserId: userId }),
+        body: JSON.stringify({ toUserId: userId }),
       });
       if (res.ok) {
         fetchContactsAndRequests();
@@ -170,7 +170,7 @@ export default function ContactsPage() {
 
                   return (
                     <div key={u.id} className="flex items-center justify-between p-3 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-                      <div className="flex items-center gap-3 overflow-hidden cursor-pointer" onClick={() => router.push(`/profile/${u.id}`)}>
+                      <div className="flex items-center gap-3 overflow-hidden">
                          <div className="w-10 h-10 rounded-[12px] bg-[var(--bg-accent)] flex items-center justify-center shrink-0 overflow-hidden">
                            {u.image ? <img src={u.image} alt="Avatar" className="w-full h-full object-cover" /> : <i className="fas fa-user text-[var(--text-secondary)]" />}
                          </div>
@@ -226,7 +226,7 @@ export default function ContactsPage() {
                 </div>
                 {incoming.map((req) => (
                   <div key={req.id} className="flex flex-col gap-3 p-4 rounded-2xl bg-[color-mix(in_srgb,var(--accent-purple)_5%,transparent)] border border-[color-mix(in_srgb,var(--accent-purple)_20%,transparent)]">
-                     <div className="flex items-center gap-3 overflow-hidden cursor-pointer" onClick={() => router.push(`/profile/${req.sender.id}`)}>
+                     <div className="flex items-center gap-3 overflow-hidden">
                          <div className="w-10 h-10 rounded-[12px] bg-[var(--bg-accent)] flex items-center justify-center shrink-0 overflow-hidden">
                            {req.sender.image ? <img src={req.sender.image} alt="Avatar" className="w-full h-full object-cover" /> : <i className="fas fa-user text-[var(--text-secondary)]" />}
                          </div>
