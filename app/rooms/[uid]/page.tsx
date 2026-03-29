@@ -105,6 +105,7 @@ export default function GlassRoomPage() {
           position: 'relative',
         }}
       >
+        <RoomAudioRenderer />
         {/* Огромный стеклянный контейнер всей комнаты на весь экран */}
         <div
           className="glass-card relative"
