@@ -33,7 +33,12 @@ export async function GET(req: NextRequest) {
       name: participantName,
     });
 
-    at.addGrant({ roomJoin: true, room: roomId });
+    at.addGrant({ 
+      roomJoin: true, 
+      room: roomId,
+      canPublish: true,
+      canSubscribe: true
+    });
 
     const token = await at.toJwt();
 
