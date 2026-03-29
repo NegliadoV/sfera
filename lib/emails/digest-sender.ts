@@ -112,9 +112,9 @@ export async function sendDailyDigests() {
     }
 
     // Рендерим HTML
-    let html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">`;
-    html += `<h2>Ваш ежедневный дайджест Ноосферы</h2>`;
-    html += `<p>Привет, ${u.name ?? 'искатель'}! Вот что нового появилось в отслеживаемых вами вселенных за последние 24 часа:</p>`;
+    let html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">      `;
+    html += `<h2>Ваш ежедневный дайджест Roominate</h2>`;
+    html += `<p style="color: #666; font-size: 14px;">Мы собрали самое интересное из ваших Вселенных за последние 24 часа. (${newContent.length} материалов)</p>`;
     
     for (const [uName, { slug, items }] of Object.entries(byUniverse)) {
       html += `<h3 style="color: #3b82f6; margin-top: 30px;">Вселенная: ${uName}</h3>`;
@@ -131,13 +131,13 @@ export async function sendDailyDigests() {
     html += `<p style="margin-top: 40px; font-size: 12px; color: #64748b;">Вы получаете это письмо, так как включили email-дайджест в настройках цифровой гигиены. Вы можете отключить его в любой момент.</p>`;
     html += `</div>`;
 
-    const fromEmail = process.env.SMTP_FROM || '"Ноосфера Дайджест" <digest@noosphere.local>';
+    const fromEmail = process.env.SMTP_FROM || '"Roominate" <hello@roominate.rest>';
 
     try {
       const info = await transporter.sendMail({
         from: fromEmail,
         to: u.email,
-        subject: `🌐 Ноосфера: Дайджест за 24 часа (${newContent.length} новых материалов)`,
+        subject: `🌐 Roominate: Дайджест за 24 часа (${newContent.length} новых материалов)`,
         html,
       });
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import { getSphereColorPreset } from '@/lib/sphere-colors';
 
 interface SferaSphereIconProps {
@@ -12,32 +13,50 @@ interface SferaSphereIconProps {
 
 export function SferaSphereIcon({ size = 'md', color = null, className = '' }: SferaSphereIconProps) {
   const isSm = size === 'sm';
-  const sphereSize = isSm ? 28 : 48;
+  const h = isSm ? 28 : 48;
+  const w = h;
   const preset = getSphereColorPreset(color);
+  const uid = useId().replace(/:/g, '');
+  
+  // Уникальный ID для градиентов
+  const gradId = preset.highlight.replace('#', '') + preset.dark.replace('#', '') + uid;
 
   return (
     <div
-      className={`sfera-sphere-icon ${className}`}
+      className={`room-portal-icon group ${className}`}
       style={{
-        width: sphereSize,
-        height: sphereSize,
+        width: w,
+        height: h,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
       }}
     >
-      <div
-        className="sfera-sphere-icon-core"
-        style={{
-          width: sphereSize,
-          height: sphereSize,
-          borderRadius: '50%',
-          background: `radial-gradient(circle at 40% 35%, ${preset.highlight}, ${preset.mid} 70%, ${preset.dark})`,
-          boxShadow: `0 0 16px ${preset.glow}, 0 0 8px ${preset.highlight} inset, -3px -3px 10px rgba(0,0,0,0.5) inset, 2px 2px 12px rgba(255,255,255,0.4) inset`,
-          border: '1.5px solid rgba(255, 255, 255, 0.5)',
-        }}
-      />
+      <svg width="100%" height="100%" viewBox="0 0 24 24" style={{ overflow: 'visible' }}>
+        <defs>
+          <linearGradient id={`grad-${gradId}`} x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={preset.highlight} />
+            <stop offset="50%" stopColor={preset.mid} />
+            <stop offset="100%" stopColor={preset.dark} />
+          </linearGradient>
+          <filter id={`glow-${gradId}`} x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+
+        <g filter={`url(#glow-${gradId})`}>
+           {/* Чистая геометрическая сфера (Кольца и орбиты) */}
+           <circle cx="12" cy="12" r="9" stroke={`url(#grad-${gradId})`} strokeWidth="1.5" fill="none" opacity="0.9" />
+           <ellipse cx="12" cy="12" rx="4" ry="9" stroke={`url(#grad-${gradId})`} strokeWidth="1.2" fill="none" opacity="0.6" />
+           <path d="M3 12H21" stroke={`url(#grad-${gradId})`} strokeWidth="1.2" opacity="0.6" />
+           
+           {/* Яркое энергетическое ядро портала */}
+           <circle cx="12" cy="12" r="2.5" fill={`url(#grad-${gradId})`} />
+           <circle cx="12" cy="12" r="1" fill="#ffffff" opacity="0.8" />
+        </g>
+      </svg>
     </div>
   );
 }

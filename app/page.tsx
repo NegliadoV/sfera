@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { UniversesDemo } from '@/components/UniversesDemo';
+import { auth } from '@/auth';
 
 export default async function HomePage(
   props: {
@@ -8,6 +10,15 @@ export default async function HomePage(
 ) {
   const searchParams = await props.searchParams;
   if (searchParams) await searchParams;
+
+  let session = null;
+  try {
+    session = await auth();
+    if (session?.user) {
+      redirect('/explore');
+    }
+  } catch {}
+
   return (
     <div className="platform-page relative animate-in fade-in duration-700">
       {/* Мягкое фоновое свечение (glow) */}
@@ -15,52 +26,52 @@ export default async function HomePage(
 
       <section className="text-center mb-20 md:mb-28 relative mt-12 z-10">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-8 animate-in slide-in-from-bottom-4 duration-700" style={{ background: 'color-mix(in srgb, var(--accent-primary) 15%, transparent)', borderColor: 'color-mix(in srgb, var(--accent-primary) 30%, transparent)', color: 'var(--accent-primary)' }}>
-          <i className="fa-solid fa-sparkles" />
-          <span className="text-sm font-semibold tracking-wide uppercase">Новый уровень осмысления</span>
+          <i className="fa-solid fa-shapes" />
+          <span className="text-sm font-semibold tracking-wide uppercase">Пространство без шума</span>
         </div>
         
         <h1 className="platform-hero-title font-extrabold tracking-tight mb-6 animate-in slide-in-from-bottom-6 duration-700 delay-100" style={{ lineHeight: 1.15 }}>
-          Платформа для <br />
-          <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #60a5fa 0%, #c084fc 100%)' }}>
-            глубокого познания
+          Интернет, разбитый на <br />
+          <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%)' }}>
+            уютные комнаты
           </span>
         </h1>
         
         <p className="platform-hero-desc mx-auto text-lg md:text-xl mb-10 animate-in slide-in-from-bottom-8 duration-700 delay-200" style={{ color: 'var(--studio-meta-color)', maxWidth: '750px', lineHeight: 1.7 }}>
-          SFERA — инструмент для мышления и осмысленного диалога. Помогаем строить понимание и находить единомышленников для глубокого обмена идеями вне информационного шума.
+          Roominate — это место, где весь контент, идеи и дискуссии разложены по полочкам. Бесконечная мультивселенная, в которой вы сами выбираете портал: никакого хаоса, только то, что важно именно сейчас.
         </p>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-5 animate-in slide-in-from-bottom-10 duration-700 delay-300 w-full sm:w-auto px-2 sm:px-0">
-          <Link href="/universes" className="platform-btn platform-btn-primary no-underline text-base sm:text-lg px-6 py-3 sm:px-8 sm:py-4 shadow-2xl hover:scale-105 transition-transform flex-1 justify-center whitespace-normal text-center h-auto min-h-[50px] leading-tight" style={{ borderRadius: '50px' }}>
-            <i className="fa-solid fa-compass" aria-hidden />
-            Исследовать сферы
+          <Link href={session?.user ? "/universes" : "/auth/signin"} className="platform-btn platform-btn-primary no-underline text-base sm:text-lg px-6 py-3 sm:px-8 sm:py-4 shadow-2xl hover:scale-105 transition-transform flex-1 justify-center whitespace-normal text-center h-auto min-h-[50px] leading-tight" style={{ borderRadius: '50px' }}>
+            <i className="fa-solid fa-door-open" aria-hidden />
+            Войти в комнаты
           </Link>
-          <Link href="/about" className="platform-btn no-underline text-base sm:text-lg px-6 py-3 sm:px-8 sm:py-4 glass-icon-btn hover:scale-105 transition-transform flex-1 justify-center whitespace-normal text-center h-auto min-h-[50px] leading-tight" style={{ borderRadius: '50px' }}>
-            Узнать больше
+          <Link href="/auth/register" className="platform-btn no-underline text-base sm:text-lg px-6 py-3 sm:px-8 sm:py-4 glass-icon-btn hover:scale-105 transition-transform flex-1 justify-center whitespace-normal text-center h-auto min-h-[50px] leading-tight" style={{ borderRadius: '50px' }}>
+            Создать аккаунт
           </Link>
         </div>
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
         <ConceptCard
-          icon="fa-cubes"
-          title="Контекстуальные «Сферы»"
-          description="Создавайте или выбирайте тематические пространства. В каждой сфере — свои четкие правила, профессиональная модерация и уникальные типы контента."
-          tags={['тематические пространства', 'целенаправленный контент']}
+          icon="fa-layer-group"
+          title="Тематические комнаты"
+          description="Создавайте собственные пространства под любые интересы. В каждой комнате — своя атмосфера, свой контент и свои правила."
+          tags={['четкий контекст', 'свои интересы']}
           delay="100ms"
         />
         <ConceptCard
           icon="fa-comments"
-          title="Глубокое общение"
-          description="Структурированные обсуждения архитектуры знаний. Виртуальные комнаты для качественных дискуссий с тематическими временными раундами."
-          tags={['структурированные дискуссии', 'виртуальные комнаты']}
+          title="Фокус на обсуждении"
+          description="Никакого разбросанного текста. Дискуссии организованы в понятные ветки, чтобы было легко находить нужное и хранить историю идей."
+          tags={['структурированные беседы', 'без хаоса']}
           delay="200ms"
         />
         <ConceptCard
-          icon="fa-brain"
-          title="Интеллектуальный агрегатор"
-          description="Многомерный анализ контента по выбранной вами теме. Развитые алгоритмы помогают строить чистую картину знания без отвлекающих факторов."
-          tags={['анализ контента', 'прозрачные алгоритмы']}
+          icon="fa-cubes"
+          title="Связанная мультивселенная"
+          description="Свободно перемещайтесь между комнатами через порталы. Умная площадка связывает смыслы и отсекает информационный шум."
+          tags={['мультивселенная', 'чистый фокус']}
           delay="300ms"
         />
       </section>

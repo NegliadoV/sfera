@@ -2,9 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { Logo } from '@/components/Logo'; // (Оставляем, если вдруг понадобится, но можно и удалить)
+import { SferaSphereIcon } from '@/components/SferaSphereIcon';
+import { ExploreIcon, CreateIcon, MessagesIcon, ProfileIcon, MenuIcon } from '@/components/MobileNavIcons';
 
-export function MobileTabBar() {
+export function MobileTabBar({ onMenuClick, isMenuOpen }: { onMenuClick?: () => void; isMenuOpen?: boolean }) {
+  const { data: session } = useSession();
   const pathname = usePathname();
+
+  if (!session?.user) return null;
 
   const isActive = (path: string) => {
     if (path === '/' && pathname === '/') return true;
@@ -13,39 +20,52 @@ export function MobileTabBar() {
   };
 
   return (
-    <div className="md:hidden fixed bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-[200] max-w-[400px] mx-auto pointer-events-none">
-      <nav className="mobile-tab-bar pointer-events-auto flex items-center justify-between h-[64px] px-4 rounded-full glass-panel border border-[rgba(255,255,255,0.1)] bg-[color-mix(in_srgb,var(--bg-secondary)_40%,transparent)] shadow-[0_10px_20px_rgba(0,0,0,0.5)] backdrop-blur-[32px]">
-        <Link href="/" className="relative flex flex-col items-center justify-center flex-1 h-full">
-          <i className={`fas fa-house text-[22px] transition-colors duration-200 ${isActive('/') ? 'text-[var(--accent-primary)]' : 'text-[#a1a1aa]'}`}></i>
-          {isActive('/') && <div className="absolute bottom-[8px] w-1 h-1 rounded-full bg-[var(--accent-primary)] shadow-[0_0_6px_var(--accent-primary)]"></div>}
-        </Link>
-        
-        <Link href="/explore" className="relative flex flex-col items-center justify-center flex-1 h-full">
-          <i className={`fas fa-globe text-[22px] transition-colors duration-200 ${isActive('/explore') ? 'text-[var(--accent-primary)]' : 'text-[#a1a1aa]'}`}></i>
-          {isActive('/explore') && <div className="absolute bottom-[8px] w-1 h-1 rounded-full bg-[var(--accent-primary)] shadow-[0_0_6px_var(--accent-primary)]"></div>}
-        </Link>
+    <div className="mobile-tab-bar-container md:hidden">
+      <nav className="mobile-tab-bar">
 
-        {/* Центральная кнопка Плюс */}
-        <Link href="/universes/create" className="flex flex-col items-center justify-center flex-1 h-full shrink-0 px-2">
-          <div className="flex items-center justify-center w-[40px] h-[40px] bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white rounded-full shadow-[0_4px_12px_color-mix(in_srgb,var(--accent-primary)_40%,transparent)] transform active:scale-90 transition-all">
-            <i className="fas fa-plus text-lg"></i>
+        <Link href="/explore" className="relative flex flex-col items-center justify-center flex-1 h-full">
+          <div className={`nav-icon-wrapper ${isActive('/explore') ? 'nav-icon-active' : 'nav-icon-inactive'}`}>
+            <ExploreIcon size={26} />
           </div>
+          {isActive('/explore') && <div className="nav-indicator"></div>}
         </Link>
 
         <Link href="/rooms" className="relative flex flex-col items-center justify-center flex-1 h-full">
-          <i className={`fas fa-microphone text-[22px] transition-colors duration-200 ${isActive('/rooms') ? 'text-[var(--accent-primary)]' : 'text-[#a1a1aa]'}`}></i>
-          {isActive('/rooms') && <div className="absolute bottom-[8px] w-1 h-1 rounded-full bg-[var(--accent-primary)] shadow-[0_0_6px_var(--accent-primary)]"></div>}
+          <div className={`nav-icon-wrapper ${isActive('/rooms') ? 'nav-icon-active' : 'nav-icon-inactive'}`}>
+            <SferaSphereIcon size="sm" />
+          </div>
+          {isActive('/rooms') && <div className="nav-indicator"></div>}
+        </Link>
+
+        {/* Центральная кнопка Создать (Шортсы) - Ровно посередине (3-я из 5) */}
+        <Link href="/shorts/upload" className="flex flex-col items-center justify-center flex-1 h-full shrink-0 px-2">
+          <div className={`nav-icon-wrapper w-[44px] h-[44px] rounded-full transform active:scale-90 ${isActive('/shorts/upload') ? 'bg-[color-mix(in_srgb,var(--accent-primary)_20%,transparent)] shadow-[0_0_15px_var(--accent-primary)]' : ''}`}>
+            <CreateIcon size={34} />
+          </div>
         </Link>
 
         <Link href="/messages" className="relative flex flex-col items-center justify-center flex-1 h-full">
-          <i className={`fas fa-comment-dots text-[22px] transition-colors duration-200 ${isActive('/messages') ? 'text-[var(--accent-primary)]' : 'text-[#a1a1aa]'}`}></i>
-          {isActive('/messages') && <div className="absolute bottom-[8px] w-1 h-1 rounded-full bg-[var(--accent-primary)] shadow-[0_0_6px_var(--accent-primary)]"></div>}
+          <div className={`nav-icon-wrapper ${isActive('/messages') ? 'nav-icon-active' : 'nav-icon-inactive'}`}>
+            <MessagesIcon size={26} />
+          </div>
+          {isActive('/messages') && <div className="nav-indicator"></div>}
         </Link>
 
-        <Link href="/me" className="relative flex flex-col items-center justify-center flex-1 h-full">
-          <i className={`fas fa-user text-[22px] transition-colors duration-200 ${isActive('/me') ? 'text-[var(--accent-primary)]' : 'text-[#a1a1aa]'}`}></i>
-          {isActive('/me') && <div className="absolute bottom-[8px] w-1 h-1 rounded-full bg-[var(--accent-primary)] shadow-[0_0_6px_var(--accent-primary)]"></div>}
-        </Link>
+        {onMenuClick ? (
+          <button type="button" onClick={onMenuClick} className="relative flex flex-col items-center justify-center flex-1 h-full bg-transparent border-none cursor-pointer p-0 m-0">
+            <div className={`nav-icon-wrapper ${isMenuOpen ? 'nav-icon-active' : 'nav-icon-inactive'}`}>
+              <MenuIcon size={26} />
+            </div>
+            {isMenuOpen && <div className="nav-indicator"></div>}
+          </button>
+        ) : (
+          <Link href="/me" className="relative flex flex-col items-center justify-center flex-1 h-full">
+            <div className={`nav-icon-wrapper ${isActive('/me') ? 'nav-icon-active' : 'nav-icon-inactive'}`}>
+              <ProfileIcon size={26} avatarUrl={session?.user?.image} />
+            </div>
+            {isActive('/me') && <div className="nav-indicator"></div>}
+          </Link>
+        )}
       </nav>
     </div>
   );

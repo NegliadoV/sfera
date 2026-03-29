@@ -56,8 +56,8 @@ export async function POST(req: NextRequest) {
         text: `Ваш код: ${otp}\nОн действителен 10 минут.`,
         html: `
           <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #333; border-radius: 12px; background: #111; color: #fff;">
-            <h2 style="margin-top: 0;">Сброс пароля в Ноосферу</h2>
-            <p>Вы запросили восстановление пароля для аккаунта <b>${userEmail}</b>.</p>
+            <h2 style="margin-top: 0;">Сброс пароля в Roominate</h2>
+            <p>Кто-то (надеемся, что вы) запросил сброс пароля для аккаунта <b>${userEmail}</b>.</p>
             <p>Ваш 6-значный код безопасности:</p>
             <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
               <span style="font-size: 36px; letter-spacing: 8px; font-weight: bold; color: #60a5fa;">${otp}</span>

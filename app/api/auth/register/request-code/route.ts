@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
         text: `Ваш код: ${otp}\nОн действителен 10 минут.`,
         html: `
           <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #333; border-radius: 12px; background: #111; color: #fff;">
-            <h2 style="margin-top: 0;">Регистрация в Ноосфере</h2>
+            <h2 style="margin-top: 0;">Регистрация в Roominate</h2>
             <p>Вы начали регистрацию аккаунта <b>${emailStr}</b>.</p>
             <p>Ваш 6-значный код подтверждения:</p>
             <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">

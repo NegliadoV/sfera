@@ -32,7 +32,7 @@ export default function MeContentPage() {
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
-        <Link href="/"><i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> SFERA</Link>
+        <Link href="/"><i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> Roominate</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <Link href="/me">Личный кабинет</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />

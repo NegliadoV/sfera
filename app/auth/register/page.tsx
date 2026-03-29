@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { RegisterForm } from './RegisterForm';
+import { SferaLogo } from '@/components/SferaLogo';
 
 export default async function RegisterPage({
   searchParams,
@@ -18,9 +19,12 @@ export default async function RegisterPage({
   return (
     <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full px-4 py-12">
       <div className="glass-panel w-full max-w-md p-6 sm:p-10 flex flex-col items-center">
+        <div className="mb-8 scale-[1.2]">
+          <SferaLogo compact={true} href="" />
+        </div>
         <h1 
-          className="text-3xl font-bold mb-3 text-center w-full" 
-          style={{ background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}
+          className="text-2xl font-bold mb-3 text-center w-full" 
+          style={{ letterSpacing: '-0.02em', color: 'var(--text-primary)' }}
         >
           Регистрация
         </h1>

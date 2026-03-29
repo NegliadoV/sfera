@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { DigestContent } from '@/components/DigestContent';
 
 export const metadata = {
-  title: 'Дайджест | SFERA',
+  title: 'Дайджест | Roominate',
   description: 'Ежедневный отчёт: новый контент за 24 часа в ваших сферах.',
 };
 
@@ -25,7 +25,7 @@ export default async function DigestPage(
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
         <Link href="/">
-          <i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> SFERA
+          <i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> Roominate
         </Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <span>Дайджест</span>

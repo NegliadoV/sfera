@@ -3,6 +3,10 @@
     "shadcn": {
       "command": "npx",
       "args": ["shadcn@latest", "mcp"]
+    },
+    "openclaw": {
+      "command": "ssh",
+      "args": ["admin@192.168.0.129", "-p", "2222", "openclaw", "mcp"]
     }
   }
 }

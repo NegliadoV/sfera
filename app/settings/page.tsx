@@ -9,7 +9,7 @@ import { UserTagSettingsForm } from './UserTagSettingsForm';
 import { SubscriptionsList } from './SubscriptionsList';
 
 export const metadata = {
-  title: 'Настройки | SFERA',
+  title: 'Настройки | Roominate',
   description: 'Внешний вид и цифровая гигиена.',
 };
 
@@ -30,7 +30,7 @@ export default async function SettingsPage(
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
         <Link href="/">
-          <i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> SFERA
+          <i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> Roominate
         </Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <span>Настройки</span>

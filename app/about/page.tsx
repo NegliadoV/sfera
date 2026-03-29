@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'О проекте | SFERA',
+  title: 'О проекте | Roominate',
   description: 'Инструмент для мышления и осмысленного диалога.',
 };
 
@@ -14,12 +14,12 @@ export default async function AboutPage({
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
-        <Link href="/">SFERA</Link>
+        <Link href="/">Roominate</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <span>О проекте</span>
       </div>
 
-      <h1 className="platform-hero-title mb-2">О проекте SFERA</h1>
+      <h1 className="platform-hero-title mb-2">О проекте Roominate</h1>
       <p className="platform-hero-desc mb-10">
         Платформа для глубокого познания: тематические вселенные, структурированные дискуссии,
         комнаты синхронного просмотра и агрегация контента.

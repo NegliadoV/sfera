@@ -3,7 +3,7 @@ import { auth } from '@/auth';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Сообщения | SFERA',
+  title: 'Сообщения | Roominate',
   description: 'Личные сообщения.',
 };
 
@@ -38,7 +38,7 @@ export default async function MessagesLayout({
     >
       <div className="platform-breadcrumb mb-6" style={{ flexShrink: 0 }}>
         <Link href="/">
-          <i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> SFERA
+          <i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> Roominate
         </Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <Link href="/messages" style={{ color: 'var(--text-secondary)' }}>Сообщения</Link>

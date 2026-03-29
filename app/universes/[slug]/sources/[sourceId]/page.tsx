@@ -22,7 +22,7 @@ export async function generateMetadata({
     .from(sources)
     .where(eq(sources.id, sourceId));
   const name = source?.name ?? 'Источник';
-  return { title: `${name} | SFERA` };
+  return { title: `${name} | Roominate` };
 }
 
 export default async function SourceContentPage({
@@ -106,7 +106,7 @@ export default async function SourceContentPage({
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
-        <Link href="/"><i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> SFERA</Link>
+        <Link href="/"><i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> Roominate</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <Link href="/">Сферы знаний</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />

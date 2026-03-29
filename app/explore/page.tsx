@@ -7,7 +7,7 @@ import { ContentFeedGrid } from '@/app/universes/[slug]/ContentFeedGrid';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Общая лента | SFERA',
+  title: 'Общая лента | Roominate',
 };
 
 export default async function ExplorePage() {

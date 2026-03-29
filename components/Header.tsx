@@ -20,7 +20,7 @@ export function Header({
   const { hygiene } = useHygiene();
 
   return (
-    <header className="w-full flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-50 pointer-events-none">
+    <header className="w-full flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 relative z-50 pointer-events-none">
       <div className="max-w-[1440px] w-full mx-auto flex justify-between items-center gap-2 sm:gap-3 pointer-events-auto">
         {/* Desktop Header */}
         <div className="hidden md:flex items-center gap-3 min-w-0 flex-1 justify-between">

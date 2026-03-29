@@ -17,7 +17,7 @@ export function CreateUniverseDialog({ compact = false }: { compact?: boolean })
       className="universes-create-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="Создать сферу"
+      aria-label="Создать комнату"
       onClick={(e) => e.target === e.currentTarget && setOpen(false)}
     >
       <div className="universes-create-modal" onClick={(e) => e.stopPropagation()}>
@@ -45,7 +45,7 @@ export function CreateUniverseDialog({ compact = false }: { compact?: boolean })
         style={compact ? undefined : { marginBottom: 24 }}
       >
         <i className="fa-solid fa-plus" aria-hidden />
-        Создать сферу
+        Создать комнату
       </button>
 
       {mounted && typeof document !== 'undefined' && overlay && createPortal(overlay, document.body)}

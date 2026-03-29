@@ -24,7 +24,7 @@ export default function GlassRoomPage() {
   const [token, setToken] = useState('');
   const [error, setError] = useState('');
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<'speakers' | 'mindmap' | 'sphere'>('speakers');
+  const [activeTab, setActiveTab] = useState<'speakers' | 'mindmap' | 'sphere' | 'chat'>('speakers');
 
   useEffect(() => {
     setMounted(true);
@@ -79,10 +79,10 @@ export default function GlassRoomPage() {
   const liveKitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || 'ws://localhost:7880';
 
   return (
-    <div className="fade-in" style={{ padding: '16px', height: 'calc(100dvh - 64px)', width: '100%', display: 'flex', overflow: 'hidden' }}>
+    <div className="fade-in flex-1 flex flex-col w-full overflow-hidden p-2 md:p-4 shrink-0">
       <LiveKitRoom
         video={false}
-        audio={true}
+        audio={false}
         token={token}
         serverUrl={liveKitUrl}
         style={{
@@ -95,36 +95,46 @@ export default function GlassRoomPage() {
       >
         {/* Огромный стеклянный контейнер всей комнаты на весь экран */}
         <div
-          className="glass-card"
+          className="glass-card relative"
           style={{
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             borderRadius: 'var(--radius-xl)',
             border: '1px solid color-mix(in srgb, var(--accent-primary) 30%, var(--border-subtle))',
-            background: 'color-mix(in srgb, var(--bg-secondary) 50%, rgba(0,0,0,0.4))',
-            backdropFilter: 'blur(60px) saturate(200%)',
-            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            background: 'color-mix(in srgb, var(--bg-secondary) 50%, rgba(0,0,0,0.6))',
+            backdropFilter: 'blur(20px) saturate(150%)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
             overflow: 'hidden',
           }}
         >
-          {/* Декоративное фоновое свечение внутри комнаты */}
-          <div style={{ position: 'absolute', top: '-10%', left: '40%', width: '40vw', height: '40vw', background: 'var(--accent-primary)', opacity: 0.08, filter: 'blur(100px)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: '-10%', right: '10%', width: '30vw', height: '30vw', background: 'var(--accent-green)', opacity: 0.05, filter: 'blur(100px)', pointerEvents: 'none' }} />
+          {/* Декоративное фоновое свечение внутри комнаты (только для больших экранов, чтобы не сжигать GPU на мобилках) */}
+          <div className="hidden md:block absolute pointer-events-none" style={{ top: '-10%', left: '40%', width: '40vw', height: '40vw', background: 'var(--accent-primary)', opacity: 0.08, filter: 'blur(100px)' }} />
+          <div className="hidden md:block absolute pointer-events-none" style={{ bottom: '-10%', right: '10%', width: '30vw', height: '30vw', background: 'var(--accent-green)', opacity: 0.05, filter: 'blur(100px)' }} />
 
           {/* Шапка комнаты */}
-          <div className="flex items-center justify-between" style={{
-            padding: '20px 24px',
-            borderBottom: '1px solid var(--border-subtle)',
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 md:p-6 border-b z-[2] w-full" style={{
+            borderColor: 'var(--border-subtle)',
             background: 'rgba(255, 255, 255, 0.02)',
-            zIndex: 1
           }}>
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
-              <h1 className="text-gradient" style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800 }}>Эфир {roomId.slice(0, 8)}</h1>
+            <div className="flex w-full md:w-auto flex-row items-center justify-between md:justify-start gap-4 shrink-0">
+              <h1 className="text-gradient m-0 text-xl md:text-[1.4rem] font-bold truncate">Эфир {roomId.slice(0, 8)}</h1>
               
-              <div className="flex bg-[rgba(255,255,255,0.05)] p-1 rounded-xl border border-[rgba(255,255,255,0.1)] gap-1">
+              <button
+                onClick={() => router.push('/rooms')}
+                className="md:hidden shrink-0 flex items-center justify-center p-2 rounded-lg text-red-500 bg-red-500/10 border border-red-500/20 text-sm transition-transform active:scale-95"
+              >
+                <i className="fas fa-door-open" />
+              </button>
+            </div>
+            
+            <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar gap-2 pb-2 md:pb-0 shrink-0">
+               <div className="flex bg-[rgba(255,255,255,0.05)] p-1 rounded-xl border border-[rgba(255,255,255,0.1)] gap-1 min-w-max">
                 <button onClick={() => setActiveTab('speakers')} className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'speakers' ? 'bg-[var(--accent-primary)] text-white' : 'text-gray-400 hover:text-white'}`}>
                   🎙️ Спикеры
+                </button>
+                <button onClick={() => setActiveTab('chat')} className={`md:hidden px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'chat' ? 'bg-[var(--accent-primary)] text-white' : 'text-gray-400 hover:text-white'}`}>
+                  💬 Чат
                 </button>
                 <button onClick={() => setActiveTab('mindmap')} className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'mindmap' ? 'bg-[var(--accent-primary)] text-white' : 'text-gray-400 hover:text-white'}`}>
                   🧠 Карта
@@ -132,44 +142,46 @@ export default function GlassRoomPage() {
                 <button onClick={() => setActiveTab('sphere')} className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'sphere' ? 'bg-[var(--accent-primary)] text-white' : 'text-gray-400 hover:text-white'}`}>
                   🌐 Сфера
                 </button>
-              </div>
+               </div>
+            </div>
 
-              <div className="flex items-center gap-2 ml-4">
+            <div className="hidden md:flex items-center gap-4 shrink-0 justify-end flex-1">
+              <div className="flex items-center gap-2">
                 <ConnectionStatus />
                 <span style={{ color: 'var(--text-muted)' }}>·</span>
                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}><i className="fas fa-headphones" /> Слушают</span>
               </div>
+              
+              <button
+                onClick={() => router.push('/rooms')}
+                className="btn-glow shrink-0"
+                style={{
+                  background: 'color-mix(in srgb, #ff4c4c 20%, transparent)',
+                  border: '1px solid #ff4c4c',
+                  color: '#ff4c4c',
+                  padding: '10px 20px',
+                  borderRadius: 'var(--radius-full)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#ff4c4c';
+                  e.currentTarget.style.color = '#fff';
+                  e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 76, 76, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'color-mix(in srgb, #ff4c4c 20%, transparent)';
+                  e.currentTarget.style.color = '#ff4c4c';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <i className="fas fa-door-open" /> Покинуть
+              </button>
             </div>
-            
-            <button
-              onClick={() => router.push('/rooms')}
-              className="btn-glow shrink-0"
-              style={{
-                background: 'color-mix(in srgb, #ff4c4c 20%, transparent)',
-                border: '1px solid #ff4c4c',
-                color: '#ff4c4c',
-                padding: '10px 20px',
-                borderRadius: 'var(--radius-full)',
-                cursor: 'pointer',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#ff4c4c';
-                e.currentTarget.style.color = '#fff';
-                e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 76, 76, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'color-mix(in srgb, #ff4c4c 20%, transparent)';
-                e.currentTarget.style.color = '#ff4c4c';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <i className="fas fa-door-open" /> Покинуть эфир
-            </button>
           </div>
 
           {/* Основная сцена (Спикеры + Чат) */}
@@ -179,12 +191,12 @@ export default function GlassRoomPage() {
             <div className="flex-1 min-w-0 min-h-0 relative flex flex-col">
               {activeTab === 'speakers' && (
                 <>
-                  <div className="flex-1 overflow-y-auto" style={{ padding: '24px', display: 'flex', flexWrap: 'wrap', gap: 32, justifyContent: 'center', alignContent: 'center' }}>
+                  <div className="flex-1 overflow-y-auto" style={{ padding: '24px', display: 'flex', flexWrap: 'wrap', gap: 'clamp(16px, 4vw, 32px)', justifyContent: 'center', alignContent: 'center' }}>
                     <ActiveSpeakers />
                   </div>
 
                   {/* Красивый контрол-бар (Микрофон) внизу зоны спикеров */}
-                  <div className="shrink-0 flex justify-center w-full" style={{ padding: '16px 20px', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }}>
+                  <div className="shrink-0 flex justify-center w-full" style={{ padding: '8px 20px 16px', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }}>
                     <div className="custom-control-bar glass-panel shadow-xl" style={{ padding: '8px 12px', borderRadius: 'var(--radius-full)', display: 'flex', gap: 12, border: '1px solid var(--border-subtle)' }}>
                       <ControlBar variation="minimal" controls={{ microphone: true, camera: false, screenShare: false, chat: false, leave: false }} />
                     </div>
@@ -192,6 +204,12 @@ export default function GlassRoomPage() {
                 </>
               )}
               
+              {activeTab === 'chat' && (
+                <div className="flex-1 w-full h-full md:hidden fade-in relative flex flex-col min-h-0">
+                  <CustomGlassChat />
+                </div>
+              )}
+
               {activeTab === 'mindmap' && (
                 <div className="flex-1 w-full h-full p-4 fade-in">
                   <MindMapCanvas />
@@ -205,10 +223,10 @@ export default function GlassRoomPage() {
               )}
             </div>
 
-            {/* Панель (Чат) справа - на мобилках будет внизу, либо скрыта, если узко */}
-            <div className="flex flex-col shrink-0 border-t md:border-t-0 md:border-l w-full md:w-[320px] lg:w-[400px] h-[300px] md:h-auto" style={{
-              borderColor: 'var(--border-subtle)',
-              background: 'rgba(0, 0, 0, 0.25)',
+            {/* Панель (Чат) справа - полностью скрыта на мобилках, видна на десктопе */}
+            <div className="hidden md:flex flex-col shrink-0 border-l w-[320px] lg:w-[400px]" style={{
+              borderColor: 'color-mix(in srgb, var(--border-subtle) 50%, transparent)',
+              background: 'rgba(0, 0, 0, 0.1)',
             }}>
               <div className="shrink-0 flex items-center gap-2" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
                 <h3 className="m-0 text-[1.1rem] font-semibold text-primary flex items-center gap-2">
@@ -283,7 +301,9 @@ function ActiveSpeakers() {
           }}>
             <div 
               style={{
-                width: 140, height: 140, borderRadius: 70, // Идеальный круг
+                width: 'clamp(80px, 25vw, 140px)', 
+                height: 'clamp(80px, 25vw, 140px)', 
+                borderRadius: '50%', // Идеальный круг
                 background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 70%, black), var(--accent-primary))',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '3rem', fontWeight: 700, color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.5)',

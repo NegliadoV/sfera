@@ -33,6 +33,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           Google({
             clientId: process.env.AUTH_GOOGLE_ID!,
             clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+            allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),
@@ -96,19 +97,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     redirect({ url, baseUrl }) {
-      // Если редирект не указан явно, направляем на страницу вселенных
-      if (url === baseUrl || url === `${baseUrl}/`) {
+      let finalUrl = url;
+      try {
+        // Safe encoding for callback URLs that might contain cyrillic chars
+        finalUrl = new URL(url, baseUrl).toString();
+      } catch (e) {}
+
+      if (finalUrl === baseUrl || finalUrl === `${baseUrl}/`) {
         return `${baseUrl}/universes`;
       }
-      // Если URL относительный, добавляем baseUrl
-      if (url.startsWith('/')) {
-        return `${baseUrl}${url}`;
+      if (finalUrl.startsWith('/')) {
+        return new URL(`${baseUrl}${finalUrl}`).toString();
       }
-      // Если URL из того же домена, возвращаем как есть
-      if (url.startsWith(baseUrl)) {
-        return url;
+      if (finalUrl.startsWith(baseUrl)) {
+        return finalUrl;
       }
-      // В остальных случаях редиректим на вселенные
       return `${baseUrl}/universes`;
     },
   },

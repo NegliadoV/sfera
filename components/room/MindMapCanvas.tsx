@@ -658,7 +658,7 @@ export function MindMapInner() {
   };
 
   const addPostNode = () => {
-    const input = window.prompt('Вставьте ссылку на пост или ID поста SFERA:');
+    const input = window.prompt('Вставьте ссылку на пост или ID поста Roominate:');
     if (!input) return;
 
     // Пытаемся вытащить UUID поста из любой вставленной ссылки/строки

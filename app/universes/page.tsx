@@ -4,7 +4,7 @@ import { UniverseCard } from '@/components/universe/UniverseCard';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Все сферы знаний | SFERA',
+  title: 'Все комнаты знаний | Roominate',
 };
 
 export const dynamic = 'force-dynamic';
@@ -25,24 +25,24 @@ export default async function UniversesHubPage() {
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
         <Link href="/">
-          <i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> SFERA
+          <i className="fa-solid fa-shapes" style={{ marginRight: 4 }} /> Roominate
         </Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <span>Все сферы</span>
+        <span>Все комнаты</span>
       </div>
 
       <div className="platform-card mb-8">
         <div className="platform-card-title mb-4">
-          <i className="fa-solid fa-compass" aria-hidden />
-          Все сферы знаний
+          <i className="fa-solid fa-shapes" aria-hidden />
+          Все комнаты знаний
         </div>
         <p className="platform-card-desc mb-8">
-          Здесь собраны все доступные пространства (Сферы). Выберите интересующую вас тему, чтобы присоединиться к обсуждению.
+          Здесь собраны все доступные пространства (Комнаты). Выберите интересующую вас тему, чтобы присоединиться к обсуждению.
         </p>
 
         {allUniverses.length === 0 ? (
           <div className="text-center p-8 text-[var(--text-muted)] border border-dashed border-[var(--border-subtle)] rounded-xl">
-            Сферы пока не созданы. Станьте первым!
+            Комнаты пока не созданы. Станьте первым!
           </div>
         ) : (
           <div className="flex flex-wrap gap-4">

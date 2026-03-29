@@ -66,7 +66,7 @@ export function CreateUniverseForm() {
         if (res.status === 401) {
           setError('Сессия истекла или вы не авторизованы. Войдите снова.');
         } else if (res.status === 409) {
-          setError('Сфера с таким адресом (slug) уже существует. Перейдите к ней или измените slug.');
+          setError('Комната с таким адресом (slug) уже существует. Перейдите к ней или измените slug.');
           setConflictSlug(typeof data?.slug === 'string' ? data.slug.trim() : s || null);
         } else {
           setError(data?.error ?? 'Ошибка создания');
@@ -76,7 +76,7 @@ export function CreateUniverseForm() {
       }
       const targetSlug = typeof data?.slug === 'string' && data.slug.trim() ? data.slug.trim() : s;
       if (!targetSlug) {
-        setError('Не удалось определить адрес сферы.');
+        setError('Не удалось определить адрес комнаты.');
         setPending(false);
         return;
       }
@@ -91,8 +91,8 @@ export function CreateUniverseForm() {
   return (
     <form onSubmit={submit}>
       <div className="universes-create-header">
-        <i className="fa-solid fa-compass" aria-hidden />
-        <h2>Создать сферу</h2>
+        <i className="fa-solid fa-shapes" aria-hidden />
+        <h2>Создать комнату</h2>
       </div>
 
       <div className="universes-form-grid">
@@ -123,7 +123,7 @@ export function CreateUniverseForm() {
               id="universe-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Краткое описание сферы"
+              placeholder="Краткое описание комнаты"
               rows={2}
             />
           </div>
@@ -178,10 +178,10 @@ export function CreateUniverseForm() {
               onChange={(e) => setIsPrivate(e.target.checked)}
               style={{ width: 18, height: 18, cursor: 'pointer' }}
             />
-            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Сделать сферу закрытой (по подписке)</span>
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Сделать комнату закрытой (по подписке)</span>
           </label>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: 4, marginLeft: 28 }}>
-            Доступ к сфере будет только у подписчиков после оплаты через ЮKassa.
+            Доступ к комнате будет только у подписчиков после оплаты через ЮKassa.
           </div>
           
           {isPrivate && (
@@ -210,7 +210,7 @@ export function CreateUniverseForm() {
           className="universes-create-btn"
         >
           <i className={`fa-regular ${pending ? 'fa-spinner fa-spin' : 'fa-star'}`} aria-hidden />
-          {pending ? 'Создание...' : 'Создать сферу'}
+          {pending ? 'Создание...' : 'Создать комнату'}
           <i className="fa-solid fa-plus" aria-hidden />
         </button>
       </div>
@@ -231,7 +231,7 @@ export function CreateUniverseForm() {
               href={`/universes/${encodeURIComponent(conflictSlug)}`}
               style={{ display: 'inline-block', marginTop: 8, textDecoration: 'underline', color: '#79a6ff' }}
             >
-              Перейти к существующей сфере
+              Перейти к существующей комнате
             </Link>
           )}
         </div>
