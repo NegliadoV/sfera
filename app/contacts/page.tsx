@@ -239,7 +239,7 @@ export default function ContactsPage() {
                        <button onClick={() => handleAcceptRequest(req.id)} className="flex-1 py-2 bg-[var(--accent-primary)] text-white rounded-[12px] text-sm font-semibold hover:brightness-110 shadow-sm shadow-[var(--accent-primary-muted)] transition-all">
                          Добавить
                        </button>
-                       <button onClick={() => handleDeclineRequest(req.id)} className="flex-1 py-2 bg-transparent border border-[var(--border-[var(--text-danger)])] text-[var(--text-danger)] rounded-[12px] text-sm font-semibold hover:bg-[color-mix(in_srgb,var(--text-danger)_10%,transparent)] transition-all">
+                       <button onClick={() => handleDeclineRequest(req.id)} className="flex-1 py-2 bg-transparent border border-[var(--text-danger)] text-[var(--text-danger)] rounded-[12px] text-sm font-semibold hover:bg-[color-mix(in_srgb,var(--text-danger)_10%,transparent)] transition-all">
                          Скрыть
                        </button>
                      </div>
