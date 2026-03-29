@@ -129,27 +129,6 @@ export function MobileMenuSheet({
               <i className="fas fa-chevron-right ml-auto text-[var(--border-color)] text-sm" />
             </Link>
           </div>
-
-          <style jsx>{`
-            .mobile-sheet-btn {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              padding: 20px 10px;
-              background: var(--bg-accent);
-              border: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent);
-              border-radius: 24px;
-              text-decoration: none;
-              color: var(--text-primary);
-              transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-              box-shadow: inset 0 1px 1px rgba(255,255,255,0.03);
-            }
-            .mobile-sheet-btn:active {
-              transform: scale(0.96);
-              background: color-mix(in srgb, var(--accent-primary) 5%, var(--bg-accent) 95%);
-            }
-          `}</style>
         </div>
       </div>
 
