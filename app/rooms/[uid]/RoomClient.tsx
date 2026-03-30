@@ -25,17 +25,6 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
   const [error] = useState('');
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'speakers' | 'mindmap' | 'sphere' | 'chat'>('speakers');
-  const [krispProcessor, setKrispProcessor] = useState<any>(undefined);
-
-  useEffect(() => {
-    import('@livekit/krisp-noise-filter')
-      .then(({ KrispNoiseFilter, isKrispNoiseFilterSupported }) => {
-        if (isKrispNoiseFilterSupported()) {
-          setKrispProcessor(KrispNoiseFilter());
-        }
-      })
-      .catch(e => console.warn('Умное шумоподавление Krisp не загрузилось:', e));
-  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -100,7 +89,6 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
             red: true,
           },
           audioCaptureDefaults: {
-            processor: krispProcessor,
             autoGainControl: true,
             echoCancellation: true,
             noiseSuppression: true,
