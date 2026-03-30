@@ -244,8 +244,6 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
             </div>
           </div>
         </div>
-
-        <RoomAudioRenderer />
         <AutoEnableMic canPublish={canPublish} />
       </LiveKitRoom>
     </div>
