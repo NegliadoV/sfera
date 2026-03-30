@@ -1,444 +1,86 @@
-'use client';
+import { db } from '@/lib/db';
+import { liveSpaces } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { getSessionForServerComponent } from '@/lib/session';
+import { AccessToken } from 'livekit-server-sdk';
+import RoomClient from './RoomClient';
 
-import { useEffect, useState, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { GifPicker } from '@/components/GifPicker';
-import { EmojiPicker } from '@/components/EmojiPicker';
-import { MindMapCanvas } from '@/components/room/MindMapCanvas';
-import { SphereViewer } from '@/components/room/SphereViewer';
-import {
-  LiveKitRoom,
-  RoomAudioRenderer,
-  ControlBar,
-  useParticipants,
-  useConnectionState,
-  useChat,
-} from '@livekit/components-react';
-import '@livekit/components-styles';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export default function GlassRoomPage() {
-  const params = useParams();
-  const router = useRouter();
-  const roomId = params.uid as string;
+export default async function RoomPage({ params }: { params: Promise<{ uid: string }> | { uid: string } }) {
+  const session = await getSessionForServerComponent();
+  const roomId = (await Promise.resolve(params)).uid;
 
-  const [token, setToken] = useState('');
-  const [error, setError] = useState('');
-  const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<'speakers' | 'mindmap' | 'sphere' | 'chat'>('speakers');
+  if (!session?.user?.id) {
+    return (
+      <div className="studio-page-wrap">
+        <div className="studio-card" style={{ maxWidth: '800px', padding: 40, textAlign: 'center' }}>
+          <h2 style={{ marginBottom: 16 }}>Войдите в аккаунт</h2>
+          <p style={{ color: 'var(--text-muted)' }}>Для участия в аудиокомнатах необходимо авторизоваться.</p>
+        </div>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const apiKey = process.env.LIVEKIT_API_KEY;
+  const apiSecret = process.env.LIVEKIT_API_SECRET;
 
-  useEffect(() => {
-    if (!roomId) return;
-    fetch(`/api/spaces/token?room=${roomId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch token or LiveKit not configured');
-        return res.json();
-      })
-      .then((data) => {
-        if (data.token) {
-          setToken(data.token);
-        } else {
-          setError(data.error || 'Unknown error');
-        }
-      })
-      .catch((e) => setError(e.message));
-  }, [roomId]);
-
-  if (!mounted) return null;
-
-  if (error) {
+  if (!apiKey || !apiSecret) {
     return (
       <div className="studio-page-wrap">
         <div className="studio-card" style={{ maxWidth: '800px', padding: 40, textAlign: 'center' }}>
           <h2 style={{ marginBottom: 16 }}>Ошибка подключения</h2>
-          <p style={{ color: 'var(--alert-error)', marginBottom: 24 }}>{error}</p>
-          <button onClick={() => router.push('/rooms')} className="studio-ctrl-btn">
-            Вернуться к списку комнат
-          </button>
+          <p style={{ color: 'var(--alert-error)' }}>LiveKit is not configured on the server.</p>
         </div>
       </div>
     );
   }
 
-  if (!token) {
+  const [space] = await db
+    .select()
+    .from(liveSpaces)
+    .where(eq(liveSpaces.id, roomId))
+    .limit(1);
+
+  if (!space) {
     return (
       <div className="studio-page-wrap">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80vh' }}>
-          <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-            <div className="spinner" style={{ margin: '0 auto 16px auto', borderTopColor: 'var(--accent-primary)' }} />
-            Подключение к эфиру...
-          </div>
+        <div className="studio-card" style={{ maxWidth: '800px', padding: 40, textAlign: 'center' }}>
+          <h2 style={{ marginBottom: 16 }}>Комната не найдена</h2>
+          <p style={{ color: 'var(--text-muted)' }}>Возможно сессия была завершена или удалена.</p>
         </div>
       </div>
     );
   }
 
-  const liveKitUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || 'ws://localhost:7880';
+  const isModerator = space.creatorId === session.user.id;
+  const isOpenMic = space.isOpenMic === true;
+  const canPublish = isModerator || isOpenMic;
 
-  return (
-    <div className="fade-in flex-1 flex flex-col w-full overflow-hidden p-2 md:p-4 shrink-0">
-      <LiveKitRoom
-        video={false}
-        audio={false}
-        token={token}
-        serverUrl={liveKitUrl}
-        options={{
-          publishDefaults: {
-            // High quality voice (Discord standard)
-            audioPreset: { maxBitrate: 64_000 },
-            dtx: false,
-            red: true,
-          },
-          audioCaptureDefaults: {
-            autoGainControl: false,
-            echoCancellation: true,
-            noiseSuppression: false,
-          }
-        }}
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'relative',
-        }}
-      >
-        <RoomAudioRenderer />
-        {/* Огромный стеклянный контейнер всей комнаты на весь экран */}
-        <div
-          className="glass-card relative"
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            borderRadius: 'var(--radius-xl)',
-            border: '1px solid color-mix(in srgb, var(--accent-primary) 30%, var(--border-subtle))',
-            background: 'color-mix(in srgb, var(--bg-secondary) 50%, rgba(0,0,0,0.6))',
-            backdropFilter: 'blur(20px) saturate(150%)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Декоративное фоновое свечение внутри комнаты (только для больших экранов, чтобы не сжигать GPU на мобилках) */}
-          <div className="hidden md:block absolute pointer-events-none" style={{ top: '-10%', left: '40%', width: '40vw', height: '40vw', background: 'var(--accent-primary)', opacity: 0.08, filter: 'blur(100px)' }} />
-          <div className="hidden md:block absolute pointer-events-none" style={{ bottom: '-10%', right: '10%', width: '30vw', height: '30vw', background: 'var(--accent-green)', opacity: 0.05, filter: 'blur(100px)' }} />
+  // Добавляем случайный суффикс на время отладки, чтобы обойти ошибку DUPLICATE_IDENTITY,
+  // когда Next.js кэширует сессию или браузеры имеют один и тот же JWT-токен в куках.
+  const uniqueIdentity = session.user.id + '-' + Math.random().toString(36).substring(7);
 
-          {/* Шапка комнаты */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 md:p-6 border-b z-[2] w-full" style={{
-            borderColor: 'var(--border-subtle)',
-            background: 'rgba(255, 255, 255, 0.02)',
-          }}>
-            <div className="flex w-full md:w-auto flex-row items-center justify-between md:justify-start gap-4 shrink-0">
-              <h1 className="text-gradient m-0 text-xl md:text-[1.4rem] font-bold truncate">Эфир {roomId.slice(0, 8)}</h1>
-              
-              <button
-                onClick={() => router.push('/rooms')}
-                className="md:hidden shrink-0 flex items-center justify-center p-2 rounded-lg text-red-500 bg-red-500/10 border border-red-500/20 text-sm transition-transform active:scale-95"
-              >
-                <i className="fas fa-door-open" />
-              </button>
-            </div>
-            
-            <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar gap-2 pb-2 md:pb-0 shrink-0">
-               <div className="flex bg-[rgba(255,255,255,0.05)] p-1 rounded-xl border border-[rgba(255,255,255,0.1)] gap-1 min-w-max">
-                <button onClick={() => setActiveTab('speakers')} className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'speakers' ? 'bg-[var(--accent-primary)] text-white' : 'text-gray-400 hover:text-white'}`}>
-                  🎙️ Спикеры
-                </button>
-                <button onClick={() => setActiveTab('chat')} className={`md:hidden px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'chat' ? 'bg-[var(--accent-primary)] text-white' : 'text-gray-400 hover:text-white'}`}>
-                  💬 Чат
-                </button>
-                <button onClick={() => setActiveTab('mindmap')} className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'mindmap' ? 'bg-[var(--accent-primary)] text-white' : 'text-gray-400 hover:text-white'}`}>
-                  🧠 Карта
-                </button>
-                <button onClick={() => setActiveTab('sphere')} className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'sphere' ? 'bg-[var(--accent-primary)] text-white' : 'text-gray-400 hover:text-white'}`}>
-                  🌐 Сфера
-                </button>
-               </div>
-            </div>
+  const at = new AccessToken(apiKey, apiSecret, {
+    identity: uniqueIdentity,
+    name: session.user.name || 'Anonymous',
+    metadata: JSON.stringify({
+      role: isModerator ? 'moderator' : isOpenMic ? 'speaker' : 'listener',
+      handRaised: false,
+      isOpenMic
+    })
+  });
 
-            <div className="hidden md:flex items-center gap-4 shrink-0 justify-end flex-1">
-              <div className="flex items-center gap-2">
-                <ConnectionStatus />
-                <span style={{ color: 'var(--text-muted)' }}>·</span>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}><i className="fas fa-headphones" /> Слушают</span>
-              </div>
-              
-              <button
-                onClick={() => router.push('/rooms')}
-                className="btn-glow shrink-0"
-                style={{
-                  background: 'color-mix(in srgb, #ff4c4c 20%, transparent)',
-                  border: '1px solid #ff4c4c',
-                  color: '#ff4c4c',
-                  padding: '10px 20px',
-                  borderRadius: 'var(--radius-full)',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#ff4c4c';
-                  e.currentTarget.style.color = '#fff';
-                  e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 76, 76, 0.5)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'color-mix(in srgb, #ff4c4c 20%, transparent)';
-                  e.currentTarget.style.color = '#ff4c4c';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <i className="fas fa-door-open" /> Покинуть
-              </button>
-            </div>
-          </div>
+  at.addGrant({ 
+    roomJoin: true, 
+    room: roomId,
+    canPublish: canPublish,
+    canSubscribe: true,
+    canPublishData: true,
+  });
 
-          {/* Основная сцена (Спикеры + Чат) */}
-          <div className="flex flex-col md:flex-row flex-1 min-h-0 z-[1] overflow-hidden">
-            
-            {/* Зона контента / Спикеров */}
-            <div className="flex-1 min-w-0 min-h-0 relative flex flex-col">
-              {activeTab === 'speakers' && (
-                <>
-                  <div className="flex-1 overflow-y-auto" style={{ padding: '24px', display: 'flex', flexWrap: 'wrap', gap: 'clamp(16px, 4vw, 32px)', justifyContent: 'center', alignContent: 'center' }}>
-                    <ActiveSpeakers />
-                  </div>
+  const token = await at.toJwt();
 
-                  {/* Красивый контрол-бар (Микрофон) внизу зоны спикеров */}
-                  <div className="shrink-0 flex justify-center w-full" style={{ padding: '8px 20px 16px', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }}>
-                    <div className="custom-control-bar glass-panel shadow-xl" style={{ padding: '8px 12px', borderRadius: 'var(--radius-full)', display: 'flex', gap: 12, border: '1px solid var(--border-subtle)' }}>
-                      <ControlBar variation="minimal" controls={{ microphone: true, camera: false, screenShare: false, chat: false, leave: false }} />
-                    </div>
-                  </div>
-                </>
-              )}
-              
-              {activeTab === 'chat' && (
-                <div className="flex-1 w-full h-full md:hidden fade-in relative flex flex-col min-h-0">
-                  <CustomGlassChat />
-                </div>
-              )}
-
-              {activeTab === 'mindmap' && (
-                <div className="flex-1 w-full h-full p-4 fade-in">
-                  <MindMapCanvas />
-                </div>
-              )}
-
-              {activeTab === 'sphere' && (
-                <div className="flex-1 w-full h-full p-4 fade-in">
-                  <SphereViewer />
-                </div>
-              )}
-            </div>
-
-            {/* Панель (Чат) справа - полностью скрыта на мобилках, видна на десктопе */}
-            <div className="hidden md:flex flex-col shrink-0 border-l w-[320px] lg:w-[400px]" style={{
-              borderColor: 'color-mix(in srgb, var(--border-subtle) 50%, transparent)',
-              background: 'rgba(0, 0, 0, 0.1)',
-            }}>
-              <div className="shrink-0 flex items-center gap-2" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
-                <h3 className="m-0 text-[1.1rem] font-semibold text-primary flex items-center gap-2">
-                  <i className="fas fa-comments text-gradient" /> Чат комнаты
-                </h3>
-              </div>
-              <div className="flex-1 relative min-h-0">
-                <div className="lk-chat-container-override absolute inset-0 flex flex-col">
-                  <CustomGlassChat />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <RoomAudioRenderer />
-      </LiveKitRoom>
-    </div>
-  );
-}
-
-function ConnectionStatus() {
-  const state = useConnectionState();
-  const isConnected = state === 'connected';
-  
-  return (
-    <div style={{ 
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      background: isConnected ? 'color-mix(in srgb, var(--accent-green) 15%, transparent)' : 'rgba(255,255,255,0.05)',
-      border: `1px solid ${isConnected ? 'color-mix(in srgb, var(--accent-green) 30%, transparent)' : 'rgba(255,255,255,0.1)'}`,
-      padding: '4px 12px', borderRadius: 20
-    }}>
-      <span style={{ 
-        width: 8, height: 8, borderRadius: 4, 
-        background: isConnected ? 'var(--accent-green)' : 'var(--text-secondary)',
-        boxShadow: isConnected ? '0 0 10px var(--accent-green)' : 'none',
-        animation: isConnected ? 'pulse 2s infinite' : 'none'
-      }} />
-      <span style={{ 
-        color: isConnected ? 'var(--accent-green)' : 'var(--text-secondary)', 
-        fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' 
-      }}>
-        {isConnected ? 'LIVE' : state === 'connecting' ? 'Соединение...' : 'Отключено'}
-      </span>
-    </div>
-  );
-}
-
-function ActiveSpeakers() {
-  const participants = useParticipants();
-
-  if (participants.length === 0) {
-    return (
-      <div style={{ textAlign: 'center', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-        <i className="fas fa-microphone-lines" style={{ fontSize: '3rem', opacity: 0.2 }} />
-        <span>Ожидание первого спикера...</span>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      {participants.map((p, i) => {
-        const isSpeaking = p.isSpeaking;
-        const initials = (p.name || p.identity || '?').slice(0, 2).toUpperCase();
-        
-        return (
-          <div key={p.sid} style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            transform: isSpeaking ? 'scale(1.1) translateY(-10px)' : 'scale(1)',
-          }}>
-            <div 
-              style={{
-                width: 'clamp(80px, 25vw, 140px)', 
-                height: 'clamp(80px, 25vw, 140px)', 
-                borderRadius: '50%', // Идеальный круг
-                background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 70%, black), var(--accent-primary))',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '3rem', fontWeight: 700, color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                border: isSpeaking ? '4px solid var(--accent-green)' : '4px solid rgba(255,255,255,0.1)',
-                boxShadow: isSpeaking 
-                  ? '0 0 40px color-mix(in srgb, var(--accent-green) 60%, transparent), inset 0 0 20px rgba(255,255,255,0.2)' 
-                  : '0 10px 30px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.1)',
-                position: 'relative',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-            >
-              {initials}
-              {p.isMicrophoneEnabled === false && (
-                <div style={{ 
-                  position: 'absolute', bottom: 0, right: 0, 
-                  background: 'var(--bg-primary)', borderRadius: '50%', padding: 4 
-                }}>
-                  <div style={{ 
-                    width: 36, height: 36, borderRadius: 18, 
-                    background: 'var(--alert-error)', color: '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px',
-                    boxShadow: '0 4px 10px rgba(255, 76, 76, 0.4)'
-                  }}>
-                    <i className="fas fa-microphone-slash" />
-                  </div>
-                </div>
-              )}
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <span style={{ 
-                fontSize: '1.2rem', fontWeight: 600, 
-                color: isSpeaking ? '#fff' : 'var(--text-primary)',
-                textShadow: isSpeaking ? '0 0 10px rgba(255,255,255,0.5)' : 'none'
-              }}>
-                {p.name || p.identity || 'Аноним'}
-              </span>
-              {p.isLocal && <div style={{ marginTop: 4, fontSize: '0.9rem', color: 'var(--accent-primary)', fontWeight: 500 }}>Вы (в эфире)</div>}
-            </div>
-          </div>
-        );
-      })}
-    </>
-  );
-}
-
-function CustomGlassChat() {
-  const { send, chatMessages, isSending } = useChat();
-  const [message, setMessage] = useState('');
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
-  }, [chatMessages]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (message.trim()) {
-      send(message.trim());
-      setMessage('');
-    }
-  };
-
-  const handleGifPick = (url: string) => {
-    send(url); // Отправляем URL гифки сразу в чат
-  };
-
-  const handleEmojiPick = (emoji: string) => {
-    setMessage(prev => prev + emoji); // Добавляем эмодзи в поле ввода
-  };
-
-  return (
-    <div className="flex flex-col h-full w-full">
-      <div ref={containerRef} className="flex-1 overflow-y-auto lk-chat-messages" style={{ padding: '16px 16px 24px 16px' }}>
-        {chatMessages.map(msg => {
-          const isGif = msg.message.startsWith('https://media') && msg.message.includes('giphy.com');
-          return (
-            <div key={msg.id} className="lk-chat-entry group relative" style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-               <div className="lk-meta-data">
-                 <span className="lk-participant-name">{msg.from?.name || msg.from?.identity || 'Аноним'}</span>
-                 <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-               </div>
-               <div className="lk-message-body mt-1">
-                 {isGif ? (
-                   <img src={msg.message} alt="GIF" style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8, objectFit: 'cover' }} />
-                 ) : (
-                   msg.message
-                 )}
-               </div>
-            </div>
-          );
-        })}
-      </div>
-      
-      <form onSubmit={handleSubmit} className="shrink-0 p-3 flex items-center gap-2 border-t" style={{ borderColor: 'var(--border-subtle)', background: 'rgba(0,0,0,0.15)' }}>
-        <input 
-          type="text" 
-          value={message}
-          onChange={e => setMessage(e.target.value)}
-          placeholder="Написать..." 
-          className="flex-1 lk-chat-form-input"
-          style={{ padding: '10px 14px', borderRadius: 'var(--radius-lg)' }}
-        />
-        
-        <EmojiPicker onPick={handleEmojiPick}>
-          <i className="fas fa-smile text-[1.2rem]" style={{ color: 'var(--text-secondary)' }} />
-        </EmojiPicker>
-
-        <GifPicker onPick={handleGifPick}>
-          <span /> {/* Dummy child for TS since GifPicker requires children but ignores them */}
-        </GifPicker>
-        
-        <button 
-          type="submit" 
-          disabled={!message.trim() || isSending} 
-          className="btn-glow shrink-0 font-semibold flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
-          style={{ width: 40, height: 40, background: 'var(--accent-primary)', color: '#fff', borderRadius: 10 }}
-        >
-          <i className="fas fa-paper-plane" />
-        </button>
-      </form>
-    </div>
-  );
+  return <RoomClient initialToken={token} rId={roomId} isOpenMic={isOpenMic} canPublish={canPublish} />;
 }

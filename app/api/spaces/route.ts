@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, description, isPrivate, universeId, type = 'audio' } = await req.json();
+    const { name, description, isPrivate, isOpenMic, universeId, type = 'audio' } = await req.json();
 
     if (!name || name.trim() === '') {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       description: description?.trim() || null,
       type: type,
       isPrivate: !!isPrivate,
+      isOpenMic: !!isOpenMic,
       universeId: universeId || null,
       creatorId: session.user.id,
       isActive: true,

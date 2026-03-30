@@ -34,6 +34,7 @@
     "@auth/drizzle-adapter": "^1.11.1",
     "@livekit/components-react": "^2.9.20",
     "@livekit/components-styles": "^1.2.0",
+    "@livekit/krisp-noise-filter": "^0.3.4",
     "@serwist/next": "^9.5.7",
     "@xyflow/react": "^12.10.1",
     "bullmq": "^5.68.0",

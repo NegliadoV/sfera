@@ -58,7 +58,7 @@ export default async function ExplorePage() {
       .from(content)
       .leftJoin(user, eq(content.authorId, user.id))
       .innerJoin(universes, eq(content.universeId, universes.id))
-      .orderBy(desc(sql`${content.savesCount} * 2`), desc(content.createdAt))
+      .orderBy(desc(content.savesCount), desc(content.createdAt))
       .limit(50);
 
     contentList = await Promise.all(

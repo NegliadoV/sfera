@@ -597,8 +597,15 @@ export function MindMapInner() {
 
   // Sync to other users when local changes happen
   const broadcastSync = (newNodes: Node[], newEdges: Edge[]) => {
-    const payload = JSON.stringify({ type: 'SYNC_NODES', nodes: newNodes, edges: newEdges });
-    sendData.send(new TextEncoder().encode(payload), { reliable: true });
+    try {
+      const payload = JSON.stringify({ type: 'SYNC_NODES', nodes: newNodes, edges: newEdges });
+      const promise = sendData.send(new TextEncoder().encode(payload), { reliable: true });
+      if (promise && promise.catch) {
+        promise.catch((e: any) => console.warn('Failed to broadcast sync (async)', e));
+      }
+    } catch (e) {
+      console.warn('Failed to broadcast sync (sync)', e);
+    }
   };
 
   const onNodesChange = useCallback(
@@ -716,7 +723,8 @@ export function MindMapInner() {
       });
       // Reliable = false prevents blocking WebRTC with cursor spam
       try {
-        sendData.send(new TextEncoder().encode(payload), { reliable: false });
+        const promise = sendData.send(new TextEncoder().encode(payload), { reliable: false });
+        if (promise && promise.catch) promise.catch(() => {});
         lastCursorSend.current = Date.now();
       } catch (err) {}
     }

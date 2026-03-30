@@ -1,0 +1,17 @@
+port: 7880
+bind_addresses:
+  - ""
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 60000
+  use_external_ip: true # Forces LiveKit to use STUN to discover external IP
+  enable_loopback_candidate: false
+keys:
+  # ЗАМЕНИТЕ ЭТИ КЛЮЧИ!  Ключ : Секрет
+  AJtBv8a8FjL9xX: Nqk9s2M9aWk3pYm1B9gR0jL3hF2vB4
+turn:
+  enabled: false # Не нужен, если клиенты могут подключаться к серверу напрямую
+logging:
+  json: false
+  level: info
