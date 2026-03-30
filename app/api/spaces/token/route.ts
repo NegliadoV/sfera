@@ -28,16 +28,37 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'LiveKit is not configured on the server.' }, { status: 503 });
     }
 
+    // Проверяем, является ли пользователь создателем комнаты
+    const { db } = await import('@/lib/db');
+    const { liveSpaces } = await import('@/lib/db/schema');
+    const { eq } = await import('drizzle-orm');
+    
+    const [space] = await db
+      .select()
+      .from(liveSpaces)
+      .where(eq(liveSpaces.id, roomId))
+      .limit(1);
+
+    const isModerator = space?.creatorId === session.user.id;
+    const isOpenMic = space?.isOpenMic === true;
+    const canPublish = isModerator || isOpenMic;
+
     const at = new AccessToken(apiKey, apiSecret, {
       identity: session.user.id,
       name: participantName,
+      metadata: JSON.stringify({
+        role: isModerator ? 'moderator' : isOpenMic ? 'speaker' : 'listener',
+        handRaised: false,
+        isOpenMic: isOpenMic
+      })
     });
 
     at.addGrant({ 
       roomJoin: true, 
       room: roomId,
-      canPublish: true,
-      canSubscribe: true
+      canPublish: canPublish,
+      canSubscribe: true,
+      canPublishData: true, // Нужно для поднятия руки через дата-пакеты или metadata update
     });
 
     const token = await at.toJwt();

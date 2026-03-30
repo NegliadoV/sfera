@@ -753,6 +753,7 @@ export const liveSpaces = pgTable('live_spaces', {
   universeId: uuid('universe_id')
     .references(() => universes.id, { onDelete: 'cascade' }),
   isPrivate: boolean('is_private').notNull().default(false),
+  isOpenMic: boolean('is_open_mic').notNull().default(false),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   endedAt: timestamp('ended_at', { withTimezone: true }),

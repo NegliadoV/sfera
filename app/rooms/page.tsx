@@ -19,6 +19,7 @@ export default function GlobalRoomsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [isOpenMic, setIsOpenMic] = useState(false);
   const router = useRouter();
 
   const fetchSpaces = async () => {
@@ -49,7 +50,7 @@ export default function GlobalRoomsPage() {
       const res = await fetch('/api/spaces', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName, description: newDesc, type: 'audio' }),
+        body: JSON.stringify({ name: newName, description: newDesc, type: 'audio', isOpenMic }),
       });
       if (!res.ok) throw new Error('Failed to create space');
       const data = await res.json();
@@ -271,7 +272,7 @@ export default function GlobalRoomsPage() {
               />
             </div>
 
-            <div style={{ marginBottom: 32, position: 'relative', zIndex: 1 }}>
+            <div style={{ marginBottom: 24, position: 'relative', zIndex: 1 }}>
               <label style={{ display: 'block', marginBottom: 12, color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 500 }}>Описание (необязательно)</label>
               <textarea
                 value={newDesc}
@@ -293,6 +294,18 @@ export default function GlobalRoomsPage() {
                 onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.boxShadow = '0 0 0 1px var(--accent-primary)'; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.boxShadow = 'none'; }}
               />
+            </div>
+
+            <div style={{ marginBottom: 32, position: 'relative', zIndex: 1 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', color: 'var(--text-primary)', fontSize: '1rem', fontWeight: 500 }}>
+                <input 
+                  type="checkbox" 
+                  checked={isOpenMic} 
+                  onChange={e => setIsOpenMic(e.target.checked)} 
+                  style={{ width: 18, height: 18, accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+                />
+                Свободное обсуждение (говорить могут все)
+              </label>
             </div>
 
             <div style={{ display: 'flex', gap: 16, justifyContent: 'flex-end', position: 'relative', zIndex: 1 }}>
