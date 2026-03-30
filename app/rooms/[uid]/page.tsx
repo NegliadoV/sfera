@@ -8,9 +8,9 @@ import RoomClient from './RoomClient';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function RoomPage({ params }: { params: Promise<{ uid: string }> | { uid: string } }) {
+export default async function RoomPage({ params }: { params: Promise<{ uid: string }> }) {
   const session = await getSessionForServerComponent();
-  const roomId = (await Promise.resolve(params)).uid;
+  const roomId = (await params).uid;
 
   if (!session?.user?.id) {
     return (
