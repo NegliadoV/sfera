@@ -15,7 +15,10 @@ import {
   useConnectionState,
   useChat,
   TrackToggle,
+  useTracks,
+  VideoTrack,
 } from '@livekit/components-react';
+import { Track } from 'livekit-client';
 import { useRNNoiseFilter } from '@/hooks/useRNNoiseFilter';
 import '@livekit/components-styles';
 
@@ -81,7 +84,8 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
     <div className="fade-in flex-1 flex flex-col w-full overflow-hidden p-2 md:p-4 shrink-0">
       <LiveKitRoom
         video={false}
-        audio={false} // Пользователь должен сам нажать на кнопку микрофона, чтобы дать разрешение (исправляет 'не дает выбрать')
+        audio={false}
+        screen={false} // Мы вручную управляем Share
         token={token}
         serverUrl={liveKitUrl}
         options={{
@@ -203,6 +207,7 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
             <div className="flex-1 min-w-0 min-h-0 relative flex flex-col">
               {activeTab === 'speakers' && (
                 <div className="flex-1 overflow-y-auto" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+                  <ScreenShareView />
                   <ActiveSpeakers isOpenMicProp={isOpenMic} />
                 </div>
               )}
@@ -421,6 +426,7 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
   const krisp = useRNNoiseFilter();
   
   const isMicOn = localParticipant.isMicrophoneEnabled;
+  const isScreenSharing = localParticipant.isScreenShareEnabled;
   
   let meta: any = { isOpenMic: isOpenMicProp };
   if (localParticipant.metadata) {
@@ -454,6 +460,10 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
   const handleMicToggle = async () => {
     if (isDeafened) setIsDeafened(false); // Discord-like undeafen automatically
     await localParticipant.setMicrophoneEnabled(!isMicOn);
+  };
+
+  const handleScreenShareToggle = async () => {
+    await localParticipant.setScreenShareEnabled(!isScreenSharing);
   };
 
   useEffect(() => {
@@ -493,23 +503,47 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
         </button>
         {/* Custom Microphone Button instead of ControlBar */}
         {canPublish ? (
-          <button
-            onClick={handleMicToggle}
-            className="relative flex items-center justify-center transition-all overflow-hidden"
-            style={{ 
-              width: 56, height: 56, 
-              borderRadius: '50%',
-              background: !isMicOn ? 'rgba(255, 76, 76, 0.15)' : 'var(--accent-primary)',
-              border: `1px solid ${!isMicOn ? 'rgba(255, 76, 76, 0.4)' : 'transparent'}`,
-              color: !isMicOn ? '#ff4c4c' : '#fff',
-              boxShadow: isMicOn ? '0 0 20px rgba(var(--accent-primary-rgb), 0.5)' : '0 0 15px rgba(255, 76, 76, 0.2)'
-            }}
-          >
-            <i className={`fas fa-microphone${!isMicOn ? '-slash' : ''}`} style={{ fontSize: '1.4rem' }} />
-            {!isMicOn && (
-              <div className="absolute w-[42px] h-[3px] bg-red-500 rotate-45 rounded-full" style={{ boxShadow: '0 0 5px rgba(0,0,0,0.5)' }} />
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleScreenShareToggle}
+              title={isScreenSharing ? "Остановить стрим экрана" : "Показать экран"}
+              className="relative flex items-center justify-center transition-all overflow-hidden"
+              style={{ 
+                width: 48, height: 48, 
+                borderRadius: '50%',
+                background: isScreenSharing ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                border: `1px solid ${isScreenSharing ? 'transparent' : 'rgba(255,255,255,0.1)'}`,
+                color: isScreenSharing ? '#fff' : 'var(--text-secondary)',
+                boxShadow: isScreenSharing ? '0 0 15px var(--accent-primary)' : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (!isScreenSharing) e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+              }}
+              onMouseLeave={(e) => {
+                if (!isScreenSharing) e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+              }}
+            >
+              <i className="fas fa-desktop" style={{ fontSize: '1.2rem' }} />
+            </button>
+
+            <button
+              onClick={handleMicToggle}
+              className="relative flex items-center justify-center transition-all overflow-hidden"
+              style={{ 
+                width: 56, height: 56, 
+                borderRadius: '50%',
+                background: !isMicOn ? 'rgba(255, 76, 76, 0.15)' : 'var(--accent-primary)',
+                border: `1px solid ${!isMicOn ? 'rgba(255, 76, 76, 0.4)' : 'transparent'}`,
+                color: !isMicOn ? '#ff4c4c' : '#fff',
+                boxShadow: isMicOn ? '0 0 20px rgba(0, 150, 255, 0.4)' : '0 0 15px rgba(255, 76, 76, 0.2)'
+              }}
+            >
+              <i className={`fas fa-microphone${!isMicOn ? '-slash' : ''}`} style={{ fontSize: '1.4rem' }} />
+              {!isMicOn && (
+                <div className="absolute w-[42px] h-[3px] bg-red-500 rotate-45 rounded-full" style={{ boxShadow: '0 0 5px rgba(0,0,0,0.5)' }} />
+              )}
+            </button>
+          </div>
         ) : !meta.isOpenMic ? (
           <button 
             onClick={toggleHand}
@@ -550,6 +584,37 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
           {isMicOn ? 'Микрофон включен' : 'Вас не слышно'}
         </div>
       )}
+    </div>
+  );
+}
+
+function ScreenShareView() {
+  const tracks = useTracks([Track.Source.ScreenShare]);
+  
+  if (tracks.length === 0) return null;
+
+  // Отрисовываем первый найденный стрим
+  const trackRef = tracks[0];
+  
+  return (
+    <div className="w-full relative glass-card p-2 md:p-3 mb-8 rounded-xl shadow-2xl overflow-hidden group border border-[rgba(255,255,255,0.05)] bg-[rgba(0,0,0,0.4)]">
+      <VideoTrack trackRef={trackRef} className="w-full h-auto max-h-[60vh] object-contain rounded-lg" style={{ background: '#000' }} />
+      
+      <div className="absolute top-4 left-4 bg-black/60 px-3 py-1.5 rounded-full text-white text-xs font-semibold backdrop-blur-md border border-[rgba(255,255,255,0.1)] flex items-center gap-2">
+        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+        {trackRef.participant.name || trackRef.participant.identity} запустил(а) стрим
+      </div>
+      
+      <button 
+        className="absolute bottom-4 right-4 bg-black/60 hover:bg-black/80 p-3 rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all backdrop-blur-md border border-[rgba(255,255,255,0.1)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] z-[10]"
+        onClick={(e) => {
+          const videoEl = e.currentTarget.parentElement?.querySelector('video');
+          if (videoEl?.requestFullscreen) videoEl.requestFullscreen();
+        }}
+        title="На весь экран"
+      >
+        <i className="fas fa-expand text-lg" />
+      </button>
     </div>
   );
 }
