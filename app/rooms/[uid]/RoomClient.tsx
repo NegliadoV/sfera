@@ -78,7 +78,7 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
     <div className="fade-in flex-1 flex flex-col w-full overflow-hidden p-2 md:p-4 shrink-0">
       <LiveKitRoom
         video={false}
-        audio={canPublish} // Автоматически включаем микрофон при входе, если есть права
+        audio={false} // Пользователь должен сам нажать на кнопку микрофона, чтобы дать разрешение (исправляет 'не дает выбрать')
         token={token}
         serverUrl={liveKitUrl}
         options={{
@@ -244,30 +244,12 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
             </div>
           </div>
         </div>
-        <AutoEnableMic canPublish={canPublish} />
       </LiveKitRoom>
     </div>
   );
 }
 
-function AutoEnableMic({ canPublish }: { canPublish?: boolean }) {
-  const { localParticipant } = useLocalParticipant();
-  const state = useConnectionState();
 
-  useEffect(() => {
-    let mounted = true;
-    if (state === 'connected' && canPublish && !localParticipant.isMicrophoneEnabled) {
-      // Пытаемся автоматически включить микрофон
-      localParticipant.setMicrophoneEnabled(true)
-        .catch(err => {
-          if (mounted) console.warn('Browser blocked auto-microphone. User must click manually:', err);
-        });
-    }
-    return () => { mounted = false; };
-  }, [state, canPublish, localParticipant]);
-
-  return null;
-}
 
 function ConnectionStatus() {
   const state = useConnectionState();
@@ -454,7 +436,7 @@ function RoomControls({ isOpenMicProp, canPublishProp }: { isOpenMicProp?: boole
     <div className="shrink-0 flex justify-center w-full" style={{ padding: '8px 20px 16px', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }}>
       <div className="custom-control-bar glass-panel shadow-xl" style={{ padding: '8px 12px', borderRadius: 'var(--radius-full)', display: 'flex', gap: 12, border: '1px solid var(--border-subtle)', alignItems: 'center' }}>
         {canPublish ? (
-          <ControlBar variation="minimal" controls={{ microphone: true, camera: false, screenShare: false, chat: false, leave: false }} />
+          <ControlBar saveUserChoices={true} controls={{ microphone: true, camera: false, screenShare: false, chat: false, leave: false }} />
         ) : !meta.isOpenMic ? (
           <button 
             onClick={toggleHand}
