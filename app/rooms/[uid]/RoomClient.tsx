@@ -18,7 +18,7 @@ import {
   useTracks,
   VideoTrack,
 } from '@livekit/components-react';
-import { Track, ConnectionState } from 'livekit-client';
+import { Track } from 'livekit-client';
 import { useRNNoiseFilter } from '@/hooks/useRNNoiseFilter';
 import '@livekit/components-styles';
 
@@ -445,7 +445,7 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
   
   const isMicOn = localParticipant.isMicrophoneEnabled;
   const isScreenSharing = localParticipant.isScreenShareEnabled;
-  const isConnected = connectionState === ConnectionState.Connected;
+  const isConnected = connectionState === 'connected';
   
   let meta: any = { isOpenMic: isOpenMicProp };
   if (localParticipant.metadata) {
