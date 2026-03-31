@@ -458,12 +458,20 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
   };
   
   const handleMicToggle = async () => {
-    if (isDeafened) setIsDeafened(false); // Discord-like undeafen automatically
-    await localParticipant.setMicrophoneEnabled(!isMicOn);
+    try {
+      if (isDeafened) setIsDeafened(false); // Discord-like undeafen automatically
+      await localParticipant.setMicrophoneEnabled(!isMicOn);
+    } catch (e) {
+      console.warn('Failed to toggle microphone', e);
+    }
   };
 
   const handleScreenShareToggle = async () => {
-    await localParticipant.setScreenShareEnabled(!isScreenSharing);
+    try {
+      await localParticipant.setScreenShareEnabled(!isScreenSharing);
+    } catch (e) {
+      console.warn('Failed to toggle screen share', e);
+    }
   };
 
   useEffect(() => {
