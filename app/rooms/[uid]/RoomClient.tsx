@@ -38,8 +38,13 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
     const originalConsoleError = console.error;
     console.error = (...args: any[]) => {
       const msg = args.map(a => (a?.message || String(a))).join(' ');
-      if (msg.includes('Unknown DataChannel error')) {
-        return; // Suppress harmless LiveKit renegotiation error
+      if (
+        msg.includes('Unknown DataChannel error') ||
+        msg.includes('could not establish pc connection') ||
+        msg.includes('Permission denied by user') ||
+        msg.includes('PublishTrackError')
+      ) {
+        return; // Suppress harmless LiveKit teardown/renegotiation noise
       }
       originalConsoleError(...args);
     };
