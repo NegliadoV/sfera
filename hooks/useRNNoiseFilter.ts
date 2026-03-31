@@ -32,7 +32,7 @@ export function useRNNoiseFilter() {
         if (!processorRef.current) {
           // Initialize processor pointing to our self-hosted WASM files
           processorRef.current = new DenoiseTrackProcessor({
-             workletCDNURL: '/rnnoise/' // Must end with slash
+             workletCDNURL: window.location.origin + '/rnnoise/' // Must end with slash, absolute URL required
           });
         }
         
