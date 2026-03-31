@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 type NotificationItem = {
   id: string;
@@ -28,6 +29,8 @@ export function NotificationsDropdown() {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; maxHeight: number } | null>(null);
+
+  const { isSupported, subscription, loading: pushLoading, subscribe, unsubscribe, testPush } = usePushNotifications();
 
   const fetchNotifications = async () => {
     try {
@@ -232,6 +235,45 @@ export function NotificationsDropdown() {
               ))}
             </ul>
           )}
+
+          <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+            {isSupported ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ opacity: 0.9 }}>Фоновые Push (PWA)</span>
+                  <button 
+                    disabled={pushLoading}
+                    onClick={subscription ? unsubscribe : subscribe}
+                    style={{
+                      background: subscription ? 'rgba(239, 68, 68, 0.1)' : 'var(--accent-primary)',
+                      color: subscription ? '#ef4444' : '#fff',
+                      border: 'none',
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      fontSize: '0.8rem',
+                      cursor: pushLoading ? 'wait' : 'pointer',
+                    }}
+                  >
+                    {pushLoading ? '...' : subscription ? 'Выключить' : 'Включить'}
+                  </button>
+                </div>
+                {subscription && (
+                  <button 
+                    onClick={testPush} 
+                    style={{
+                      background: 'none', border: 'none', padding: 0,
+                      color: 'var(--accent-primary)', opacity: 0.8,
+                      fontSize: '0.8rem', textAlign: 'left', cursor: 'pointer'
+                    }}
+                  >
+                    Отправить тест
+                  </button>
+                )}
+              </div>
+            ) : (
+              <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>Push-уведомления не поддерживаются</span>
+            )}
+          </div>
         </div>,
         document.body
       )}
