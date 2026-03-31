@@ -18,7 +18,7 @@ import {
   useTracks,
   VideoTrack,
 } from '@livekit/components-react';
-import { Track } from 'livekit-client';
+import { Track, ConnectionState } from 'livekit-client';
 import { useRNNoiseFilter } from '@/hooks/useRNNoiseFilter';
 import '@livekit/components-styles';
 
@@ -435,10 +435,12 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
   const params = useParams();
   const roomId = params.uid as string;
   const canPublish = localParticipant.permissions?.canPublish ?? canPublishProp;
+  const connectionState = useConnectionState();
   const krisp = useRNNoiseFilter();
   
   const isMicOn = localParticipant.isMicrophoneEnabled;
   const isScreenSharing = localParticipant.isScreenShareEnabled;
+  const isConnected = connectionState === ConnectionState.Connected;
   
   let meta: any = { isOpenMic: isOpenMicProp };
   if (localParticipant.metadata) {
@@ -462,14 +464,16 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
   };
 
   const handleDeafenToggle = () => {
+    if (!isConnected) return;
     const nextState = !isDeafened;
     setIsDeafened(nextState);
     if (nextState && isMicOn) {
-      localParticipant.setMicrophoneEnabled(false);
+      localParticipant.setMicrophoneEnabled(false).catch(e => console.warn(e));
     }
   };
   
   const handleMicToggle = async () => {
+    if (!isConnected) return;
     try {
       if (isDeafened) setIsDeafened(false); // Discord-like undeafen automatically
       await localParticipant.setMicrophoneEnabled(!isMicOn);
@@ -479,6 +483,7 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
   };
 
   const handleScreenShareToggle = async () => {
+    if (!isConnected) return;
     try {
       await localParticipant.setScreenShareEnabled(!isScreenSharing);
     } catch (e) {
@@ -582,10 +587,14 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
         {/* Krisp wand */}
         {canPublish && (
           <button
-            onClick={() => krisp.setNoiseFilterEnabled(!krisp.isNoiseFilterEnabled)}
-            disabled={krisp.isNoiseFilterPending}
-            title={krisp.isNoiseFilterEnabled ? "Выключить ИИ Шумоподавление" : "Включить ИИ Шумоподавление"}
-            className="hidden md:flex items-center justify-center transition-all bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)] rounded-full"
+            onClick={() => {
+              if (isMicOn || krisp.isNoiseFilterEnabled) {
+                krisp.setNoiseFilterEnabled(!krisp.isNoiseFilterEnabled).catch(e => console.warn(e));
+              }
+            }}
+            disabled={krisp.isNoiseFilterPending || !isMicOn}
+            title={!isMicOn ? "Сначала включите микрофон" : krisp.isNoiseFilterEnabled ? "Выключить ИИ Шумоподавление" : "Включить ИИ Шумоподавление"}
+            className="hidden md:flex items-center justify-center transition-all bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)] rounded-full disabled:cursor-not-allowed"
             style={{ width: 48, height: 48, color: krisp.isNoiseFilterEnabled ? 'var(--accent-primary)' : '#fff', opacity: krisp.isNoiseFilterPending ? 0.5 : 1, border: krisp.isNoiseFilterEnabled ? '1px solid var(--accent-primary)' : '1px solid transparent' }}
           >
             {krisp.isNoiseFilterPending ? (
@@ -599,9 +608,9 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
       
       {/* Active Mic Indicator */}
       {canPublish && (
-        <div className="text-[0.7rem] text-center fade-in bg-[rgba(0,0,0,0.6)] px-4 py-1.5 rounded-full border border-[rgba(255,255,255,0.1)] uppercase font-semibold tracking-wider backdrop-blur-md" style={{ color: 'var(--text-secondary)' }}>
-          <i className="fas fa-microphone-lines text-[var(--accent-primary)] mr-2" />
-          {isMicOn ? 'Микрофон включен' : 'Вас не слышно'}
+        <div className="text-[0.7rem] text-center fade-in bg-[rgba(0,0,0,0.6)] px-4 py-1.5 rounded-full border border-[rgba(255,255,255,0.1)] uppercase font-semibold tracking-wider backdrop-blur-md" style={{ color: !isConnected ? 'var(--alert-error)' : 'var(--text-secondary)' }}>
+          <i className={`fas ${!isConnected ? 'fa-triangle-exclamation text-[var(--alert-error)]' : 'fa-microphone-lines text-[var(--accent-primary)]'} mr-2`} />
+          {!isConnected ? 'Соединение...' : isMicOn ? 'Микрофон включен' : 'Вас не слышно'}
         </div>
       )}
     </div>
