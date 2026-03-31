@@ -85,7 +85,7 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
           publishDefaults: {
             // High quality voice (Discord standard)
             audioPreset: { maxBitrate: 64_000 },
-            dtx: false,
+            dtx: true, // Включаем VAD (Voice Activity Detection), чтобы микрофон отключался в тишине
             red: true,
           },
           audioCaptureDefaults: {
@@ -307,19 +307,19 @@ function ActiveSpeakers({ isOpenMicProp }: { isOpenMicProp?: boolean }) {
     ? participants 
     : localParticipant.identity ? [localParticipant, ...participants] : participants;
 
-  const parsedMeta = (p: any) => { try { return JSON.parse(p.metadata || '{}'); } catch(e) { return {}; } };
-  const speakers = displayParticipants.filter(p => {
-    const role = parsedMeta(p).role;
-    return role === 'moderator' || role === 'speaker' || p.permissions?.canPublish;
-  });
-  const listeners = displayParticipants.filter(p => !speakers.includes(p));
-
   let localMeta: any = {};
   if (localParticipant.metadata) {
     try { localMeta = JSON.parse(localParticipant.metadata); } catch(e) {}
   }
   const isModerator = localMeta.role === 'moderator';
   const isOpenMic = localMeta.isOpenMic ?? isOpenMicProp;
+
+  const parsedMeta = (p: any) => { try { return JSON.parse(p.metadata || '{}'); } catch(e) { return {}; } };
+  const speakers = displayParticipants.filter(p => {
+    const role = parsedMeta(p).role;
+    return isOpenMic || role === 'moderator' || role === 'speaker' || p.permissions?.canPublish;
+  });
+  const listeners = displayParticipants.filter(p => !speakers.includes(p));
 
   const toggleSpeech = async (p: any, action: 'grant' | 'revoke') => {
     try {
