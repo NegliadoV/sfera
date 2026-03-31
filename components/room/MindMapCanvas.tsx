@@ -348,7 +348,7 @@ function PostNode({ id, data, selected }: any) {
         <div className="nodrag" style={{ cursor: 'text' }}>
           {post.imageUrl && (
             <img 
-              src={post.imageUrl} 
+              src={`/api/proxy-image?url=${encodeURIComponent(post.imageUrl)}`} 
               alt="Post Image" 
               style={{ width: '100%', borderRadius: '12px', marginBottom: '12px', maxHeight: '160px', objectFit: 'cover' }} 
             />
@@ -369,7 +369,7 @@ function PostNode({ id, data, selected }: any) {
           {post.author && (
             <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
               {post.author.image ? (
-                <img src={post.author.image} alt="Author" style={{ width: 20, height: 20, borderRadius: '50%' }} />
+                <img src={`/api/proxy-image?url=${encodeURIComponent(post.author.image)}`} alt="Author" style={{ width: 20, height: 20, borderRadius: '50%' }} />
               ) : (
                 <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--accent-primary)' }} />
               )}
@@ -495,10 +495,10 @@ function MediaNode({ id, data, selected }: any) {
           />
         ) : (
           <img 
-            src={data.url} 
+            src={`/api/proxy-image?url=${encodeURIComponent(data.url)}`} 
             alt="Media" 
             style={{ width: '100%', maxHeight: '200px', borderRadius: '12px', objectFit: 'cover' }} 
-            onError={(e) => { (e.target as any).src = 'https://placehold.co/400x200?text=Invalid+Image' }}
+            onError={(e) => { (e.target as any).src = '/error-image-placeholder.svg' }}
           />
         )}
         {renderReactions()}
