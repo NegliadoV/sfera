@@ -14,6 +14,7 @@ type Space = {
 
 export default function GlobalRoomsPage() {
   const [spaces, setSpaces] = useState<Space[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -28,6 +29,7 @@ export default function GlobalRoomsPage() {
       if (res.ok) {
         const data = await res.json();
         setSpaces(data.spaces || []);
+        if (data.currentUserId) setCurrentUserId(data.currentUserId);
       }
     } catch (e) {
       console.error(e);
@@ -41,6 +43,17 @@ export default function GlobalRoomsPage() {
     const int = setInterval(fetchSpaces, 15000);
     return () => clearInterval(int);
   }, []);
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!confirm('Вы уверены, что хотите удалить эту комнату? Осторожно, все вылетят.')) return;
+    try {
+      const res = await fetch(`/api/spaces/${id}`, { method: 'DELETE' });
+      if (res.ok) fetchSpaces();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,6 +204,25 @@ export default function GlobalRoomsPage() {
                   <span style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--accent-green)', boxShadow: '0 0 8px var(--accent-green)', animation: 'pulse 2s infinite' }}></span>
                   <span style={{ color: 'var(--accent-green)', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>LIVE</span>
                 </div>
+                
+                {(currentUserId === space.creatorId || currentUserId === '00000000-0000-0000-0000-000000000001') && (
+                  <button
+                    onClick={(e) => handleDelete(e, space.id)}
+                    title="Удалить комнату"
+                    style={{
+                      position: 'absolute', top: -12, right: -12, 
+                      background: 'rgba(255, 76, 76, 0.1)', color: '#ff4c4c', 
+                      width: 32, height: 32, borderRadius: 16, 
+                      border: '1px solid rgba(255, 76, 76, 0.3)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      cursor: 'pointer', transition: 'all 0.2s', zIndex: 10
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#ff4c4c'; e.currentTarget.style.color = '#fff'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 76, 76, 0.1)'; e.currentTarget.style.color = '#ff4c4c'; }}
+                  >
+                    <i className="fas fa-trash" style={{ fontSize: '0.8rem' }} />
+                  </button>
+                )}
               </div>
 
               <div style={{ position: 'relative', zIndex: 1 }}>
