@@ -14,6 +14,7 @@ import {
   useLocalParticipant,
   useConnectionState,
   useChat,
+  useMediaDeviceSelect,
 } from '@livekit/components-react';
 import { useRNNoiseFilter } from '@/hooks/useRNNoiseFilter';
 import '@livekit/components-styles';
@@ -26,6 +27,7 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
   const [error] = useState('');
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'speakers' | 'mindmap' | 'sphere' | 'chat'>('speakers');
+  const [isDeafened, setIsDeafened] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -102,7 +104,7 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
           position: 'relative',
         }}
       >
-        <RoomAudioRenderer />
+        <RoomAudioRenderer volume={isDeafened ? 0 : 1} muted={isDeafened} />
         {/* Огромный стеклянный контейнер всей комнаты на весь экран */}
         <div
           className="glass-card relative"
@@ -200,12 +202,9 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
             {/* Зона контента / Спикеров */}
             <div className="flex-1 min-w-0 min-h-0 relative flex flex-col">
               {activeTab === 'speakers' && (
-                <>
-                  <div className="flex-1 overflow-y-auto" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
-                    <ActiveSpeakers isOpenMicProp={isOpenMic} />
-                  </div>
-                  <RoomControls isOpenMicProp={isOpenMic} canPublishProp={canPublish} />
-                </>
+                <div className="flex-1 overflow-y-auto" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+                  <ActiveSpeakers isOpenMicProp={isOpenMic} />
+                </div>
               )}
               
               {activeTab === 'chat' && (
@@ -225,6 +224,14 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
                   <SphereViewer />
                 </div>
               )}
+
+              {/* Permanent Room Controls visible across all tabs */}
+              <RoomControls 
+                isOpenMicProp={isOpenMic} 
+                canPublishProp={canPublish}
+                isDeafened={isDeafened}
+                setIsDeafened={setIsDeafened}
+              />
             </div>
 
             {/* Панель (Чат) справа - полностью скрыта на мобилках, видна на десктопе */}
@@ -406,12 +413,15 @@ function ActiveSpeakers({ isOpenMicProp }: { isOpenMicProp?: boolean }) {
   );
 }
 
-function RoomControls({ isOpenMicProp, canPublishProp }: { isOpenMicProp?: boolean, canPublishProp?: boolean }) {
+function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened }: { isOpenMicProp?: boolean, canPublishProp?: boolean, isDeafened: boolean, setIsDeafened: (val: boolean) => void }) {
   const { localParticipant } = useLocalParticipant();
   const params = useParams();
   const roomId = params.uid as string;
   const canPublish = localParticipant.permissions?.canPublish ?? canPublishProp;
   const krisp = useRNNoiseFilter();
+  const { devices, activeDeviceId } = useMediaDeviceSelect({ kind: 'audioinput' });
+  const activeDevice = devices?.find(d => d.deviceId === activeDeviceId);
+  const activeMicName = activeDevice?.label || 'Системный по умолчанию';
   
   let meta: any = { isOpenMic: isOpenMicProp };
   if (localParticipant.metadata) {
@@ -434,9 +444,41 @@ function RoomControls({ isOpenMicProp, canPublishProp }: { isOpenMicProp?: boole
     } catch(e) { console.error('Failed to toggle hand via API', e); }
   };
 
+  const handleDeafenToggle = () => {
+    const nextState = !isDeafened;
+    setIsDeafened(nextState);
+    if (nextState && localParticipant.isMicrophoneEnabled) {
+      localParticipant.setMicrophoneEnabled(false);
+    }
+  };
+
+  useEffect(() => {
+    // If user unmutes mic, we should automatically undeafen (like Discord)
+    if (localParticipant.isMicrophoneEnabled && isDeafened) {
+      setIsDeafened(false);
+    }
+  }, [localParticipant.isMicrophoneEnabled, isDeafened, setIsDeafened]);
+
   return (
-    <div className="shrink-0 flex justify-center w-full" style={{ padding: '8px 20px 16px', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }}>
+    <div className="shrink-0 flex flex-col items-center justify-center w-full" style={{ padding: '8px 20px 16px', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)', gap: 8 }}>
       <div className="custom-control-bar glass-panel shadow-xl" style={{ padding: '8px 12px', borderRadius: 'var(--radius-full)', display: 'flex', gap: 'clamp(8px, 1.5vw, 16px)', border: '1px solid var(--border-subtle)', alignItems: 'center' }}>
+        
+        {/* Deafen Button */}
+        <button
+          onClick={handleDeafenToggle}
+          title={isDeafened ? "Включить наушники" : "Выключить наушники (Deafen)"}
+          className="flex items-center justify-center transition-all bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] rounded-xl"
+          style={{ width: 44, height: 44, color: isDeafened ? 'var(--alert-error)' : '#fff' }}
+        >
+          {isDeafened ? (
+             <span className="fa-layers fa-fw text-lg">
+               <i className="fas fa-headphones text-red-500" />
+               <i className="fas fa-slash text-red-500" />
+             </span>
+          ) : (
+             <i className="fas fa-headphones text-lg" />
+          )}
+        </button>
         {canPublish && (
           <button
             onClick={() => krisp.setNoiseFilterEnabled(!krisp.isNoiseFilterEnabled)}
@@ -469,6 +511,14 @@ function RoomControls({ isOpenMicProp, canPublishProp }: { isOpenMicProp?: boole
           </button>
         ) : null}
       </div>
+      
+      {/* Active Mic Indicator */}
+      {canPublish && (
+        <div className="text-xs text-center fade-in bg-[rgba(0,0,0,0.4)] px-3 py-1 rounded-full border border-[rgba(255,255,255,0.05)]" style={{ color: 'var(--text-secondary)' }}>
+          <i className="fas fa-microphone-lines text-[var(--accent-primary)] mr-2" />
+          {activeMicName}
+        </div>
+      )}
     </div>
   );
 }
