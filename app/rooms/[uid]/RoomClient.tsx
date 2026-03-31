@@ -15,6 +15,7 @@ import {
   useConnectionState,
   useChat,
 } from '@livekit/components-react';
+import { useRNNoiseFilter } from '@/hooks/useRNNoiseFilter';
 import '@livekit/components-styles';
 
 export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }: { initialToken: string, rId: string, isOpenMic?: boolean, canPublish?: boolean }) {
@@ -410,6 +411,22 @@ function RoomControls({ isOpenMicProp, canPublishProp }: { isOpenMicProp?: boole
   const params = useParams();
   const roomId = params.uid as string;
   const canPublish = localParticipant.permissions?.canPublish ?? canPublishProp;
+  const krisp = useRNNoiseFilter();
+  const krispInited = useRef(false);
+
+  useEffect(() => {
+    // Auto-enable noise filter on startup if a microphone track exists
+    if (!krispInited.current && !krisp.isNoiseFilterEnabled) {
+      const audioTrack = Array.from(localParticipant.audioTrackPublications.values()).find(
+        (p) => p.track && p.source === 'microphone'
+      )?.track;
+      
+      if (audioTrack) {
+        krispInited.current = true;
+        krisp.setNoiseFilterEnabled(true).catch(e => console.warn('RNNoise auto-enable failed', e));
+      }
+    }
+  }, [localParticipant.audioTrackPublications, krisp]);
   
   let meta: any = { isOpenMic: isOpenMicProp };
   if (localParticipant.metadata) {
@@ -434,7 +451,22 @@ function RoomControls({ isOpenMicProp, canPublishProp }: { isOpenMicProp?: boole
 
   return (
     <div className="shrink-0 flex justify-center w-full" style={{ padding: '8px 20px 16px', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)' }}>
-      <div className="custom-control-bar glass-panel shadow-xl" style={{ padding: '8px 12px', borderRadius: 'var(--radius-full)', display: 'flex', gap: 12, border: '1px solid var(--border-subtle)', alignItems: 'center' }}>
+      <div className="custom-control-bar glass-panel shadow-xl" style={{ padding: '8px 12px', borderRadius: 'var(--radius-full)', display: 'flex', gap: 'clamp(8px, 1.5vw, 16px)', border: '1px solid var(--border-subtle)', alignItems: 'center' }}>
+        {canPublish && (
+          <button
+            onClick={() => krisp.setNoiseFilterEnabled(!krisp.isNoiseFilterEnabled)}
+            disabled={krisp.isNoiseFilterPending}
+            title={krisp.isNoiseFilterEnabled ? "Выключить ИИ Шумоподавление" : "Включить ИИ Шумоподавление"}
+            className="flex items-center justify-center transition-all bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)] rounded-xl"
+            style={{ width: 44, height: 44, color: krisp.isNoiseFilterEnabled ? 'var(--accent-primary)' : '#fff', opacity: krisp.isNoiseFilterPending ? 0.5 : 1 }}
+          >
+            {krisp.isNoiseFilterPending ? (
+              <i className="fas fa-circle-notch fa-spin text-lg" />
+            ) : (
+              <i className={`fas fa-wand-magic-sparkles text-lg`} />
+            )}
+          </button>
+        )}
         {canPublish ? (
           <ControlBar saveUserChoices={true} controls={{ microphone: true, camera: false, screenShare: false, chat: false, leave: false }} />
         ) : !meta.isOpenMic ? (
