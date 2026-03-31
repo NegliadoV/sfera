@@ -412,21 +412,6 @@ function RoomControls({ isOpenMicProp, canPublishProp }: { isOpenMicProp?: boole
   const roomId = params.uid as string;
   const canPublish = localParticipant.permissions?.canPublish ?? canPublishProp;
   const krisp = useRNNoiseFilter();
-  const krispInited = useRef(false);
-
-  useEffect(() => {
-    // Auto-enable noise filter on startup if a microphone track exists
-    if (!krispInited.current && !krisp.isNoiseFilterEnabled) {
-      const audioTrack = Array.from(localParticipant.audioTrackPublications.values()).find(
-        (p) => p.track && p.source === 'microphone'
-      )?.track;
-      
-      if (audioTrack) {
-        krispInited.current = true;
-        krisp.setNoiseFilterEnabled(true).catch(e => console.warn('RNNoise auto-enable failed', e));
-      }
-    }
-  }, [localParticipant.audioTrackPublications, krisp]);
   
   let meta: any = { isOpenMic: isOpenMicProp };
   if (localParticipant.metadata) {
