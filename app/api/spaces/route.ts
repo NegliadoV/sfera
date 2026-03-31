@@ -7,8 +7,9 @@ import { eq, desc } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 
 /** GET /api/spaces — получить список активных глобальных комнат */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const session = await getSessionForRequest(req);
     const activeSpaces = await db
       .select()
       .from(liveSpaces)
@@ -16,7 +17,7 @@ export async function GET() {
       .orderBy(desc(liveSpaces.createdAt))
       .limit(50);
 
-    return NextResponse.json({ spaces: activeSpaces });
+    return NextResponse.json({ spaces: activeSpaces, currentUserId: session?.user?.id || null });
   } catch (e) {
     console.error('[spaces GET]', e);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
