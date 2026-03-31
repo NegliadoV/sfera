@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getSessionForRequest } from '@/lib/session';
+
 const ALLOWED_DOMAINS = [
   'cdn.telegram.org',
   't.me',
   'telegram.org',
   'telegram.me',
   'telegram.dog',
+  'googleusercontent.com',
+  'yandex.net',
+  'discordapp.com',
+  'discord.com',
 ];
 
-function isAllowedUrl(url: string): boolean {
+function isAllowedUrl(url: string, isAuthenticated: boolean): boolean {
+  if (isAuthenticated) return true; // Разрешаем любые домены для картинок авторизованным (для MindMap и постов внутри COEP изолированных комнат)
   try {
     const host = new URL(url).hostname.toLowerCase();
     return ALLOWED_DOMAINS.some((d) => host === d || host.endsWith('.' + d));
@@ -18,8 +25,11 @@ function isAllowedUrl(url: string): boolean {
 }
 
 export async function GET(req: NextRequest) {
+  const session = await getSessionForRequest(req);
+  const isAuthenticated = !!session?.user?.id;
+
   const url = req.nextUrl.searchParams.get('url');
-  if (!url || !isAllowedUrl(url)) {
+  if (!url || !isAllowedUrl(url, isAuthenticated)) {
     return NextResponse.json({ error: 'Invalid or disallowed URL' }, { status: 400 });
   }
 
@@ -43,6 +53,8 @@ export async function GET(req: NextRequest) {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+        'Access-Control-Allow-Origin': '*',
       },
     });
   } catch (e) {
