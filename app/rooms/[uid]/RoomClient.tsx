@@ -207,7 +207,6 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
             <div className="flex-1 min-w-0 min-h-0 relative flex flex-col">
               {activeTab === 'speakers' && (
                 <div className="flex-1 overflow-y-auto" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
-                  <ScreenShareView />
                   <ActiveSpeakers isOpenMicProp={isOpenMic} />
                 </div>
               )}
@@ -343,7 +342,7 @@ function ActiveSpeakers({ isOpenMicProp }: { isOpenMicProp?: boolean }) {
           style={{
             width: role === 'speaker' ? 'clamp(80px, 25vw, 140px)' : 'clamp(50px, 15vw, 80px)', 
             height: role === 'speaker' ? 'clamp(80px, 25vw, 140px)' : 'clamp(50px, 15vw, 80px)', 
-            borderRadius: '50%',
+            borderRadius: p.isScreenShareEnabled ? 'var(--radius-xl)' : '50%',
             background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 70%, black), var(--accent-primary))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: role === 'speaker' ? '3rem' : '1.5rem', fontWeight: 700, color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.5)',
@@ -353,9 +352,22 @@ function ActiveSpeakers({ isOpenMicProp }: { isOpenMicProp?: boolean }) {
               : '0 10px 30px rgba(0,0,0,0.5), inset 0 2px 10px rgba(255,255,255,0.1)',
             position: 'relative',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            overflow: 'hidden'
           }}
         >
-          {initials}
+          {p.isScreenShareEnabled ? (
+            <VideoTrack
+              trackRef={{ participant: p, publication: p.getTrackPublication(Track.Source.ScreenShare) as any, source: Track.Source.ScreenShare } as any}
+              className="w-full h-full object-cover cursor-pointer brightness-110 hover:brightness-100 transition-all"
+              onClick={(e) => {
+                const videoEl = e.currentTarget;
+                if (videoEl.requestFullscreen) videoEl.requestFullscreen();
+              }}
+              title="Нажмите, чтобы развернуть во весь экран"
+            />
+          ) : (
+            initials
+          )}
           {role === 'speaker' && p.isMicrophoneEnabled === false && (
             <div style={{ position: 'absolute', bottom: 0, right: 0, background: 'var(--bg-primary)', borderRadius: '50%', padding: 4 }}>
               <div style={{ width: 36, height: 36, borderRadius: 18, background: 'var(--alert-error)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', boxShadow: '0 4px 10px rgba(255, 76, 76, 0.4)' }}>
@@ -592,41 +604,6 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
           {isMicOn ? 'Микрофон включен' : 'Вас не слышно'}
         </div>
       )}
-    </div>
-  );
-}
-
-function ScreenShareView() {
-  const tracks = useTracks(
-    [{ source: Track.Source.ScreenShare, withPlaceholder: false }], 
-    { onlySubscribed: false }
-  );
-  
-  if (tracks.length === 0) return null;
-
-  // Отрисовываем первый найденный стрим
-  const trackRef = tracks[0];
-  if (!trackRef.publication) return null;
-  
-  return (
-    <div className="w-full relative glass-card p-2 md:p-3 mb-8 rounded-xl shadow-2xl overflow-hidden group border border-[rgba(255,255,255,0.05)] bg-[rgba(0,0,0,0.4)]">
-      <VideoTrack trackRef={trackRef as any} className="w-full h-auto max-h-[60vh] object-contain rounded-lg shadow-[0_0_30px_rgba(0,0,0,0.5)]" style={{ background: '#000' }} />
-      
-      <div className="absolute top-4 left-4 bg-black/60 px-3 py-1.5 rounded-full text-white text-xs font-semibold backdrop-blur-md border border-[rgba(255,255,255,0.1)] flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]" />
-        {trackRef.participant.name || trackRef.participant.identity} запустил(а) стрим
-      </div>
-      
-      <button 
-        className="absolute bottom-4 right-4 bg-black/60 hover:bg-black/80 p-3 rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all backdrop-blur-md border border-[rgba(255,255,255,0.1)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] z-[10]"
-        onClick={(e) => {
-          const videoEl = e.currentTarget.parentElement?.querySelector('video');
-          if (videoEl?.requestFullscreen) videoEl.requestFullscreen();
-        }}
-        title="На весь экран"
-      >
-        <i className="fas fa-expand text-lg" />
-      </button>
     </div>
   );
 }
