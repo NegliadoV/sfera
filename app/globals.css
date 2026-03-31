@@ -459,9 +459,22 @@ body[data-zen="true"] .app-shell-unified > header {
 }
 
 @media (max-width: 768px) {
+  .app-container-glass.studio-card {
+    border: none !important;
+    border-radius: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
   .app-shell-unified > header {
-    margin: 12px 12px 0 12px;
-    border-radius: 16px;
+    margin: 0 !important;
+    padding-top: max(16px, env(safe-area-inset-top, 0)) !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+  .app-shell-unified {
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 }
 
