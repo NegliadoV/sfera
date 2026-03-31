@@ -14,7 +14,7 @@ import {
   useLocalParticipant,
   useConnectionState,
   useChat,
-  useMediaDeviceSelect,
+  TrackToggle,
 } from '@livekit/components-react';
 import { useRNNoiseFilter } from '@/hooks/useRNNoiseFilter';
 import '@livekit/components-styles';
@@ -419,9 +419,8 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
   const roomId = params.uid as string;
   const canPublish = localParticipant.permissions?.canPublish ?? canPublishProp;
   const krisp = useRNNoiseFilter();
-  const { devices, activeDeviceId } = useMediaDeviceSelect({ kind: 'audioinput' });
-  const activeDevice = devices?.find(d => d.deviceId === activeDeviceId);
-  const activeMicName = activeDevice?.label || 'Системный по умолчанию';
+  
+  const isMicOn = localParticipant.isMicrophoneEnabled;
   
   let meta: any = { isOpenMic: isOpenMicProp };
   if (localParticipant.metadata) {
@@ -447,76 +446,108 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
   const handleDeafenToggle = () => {
     const nextState = !isDeafened;
     setIsDeafened(nextState);
-    if (nextState && localParticipant.isMicrophoneEnabled) {
+    if (nextState && isMicOn) {
       localParticipant.setMicrophoneEnabled(false);
     }
   };
+  
+  const handleMicToggle = async () => {
+    if (isDeafened) setIsDeafened(false); // Discord-like undeafen automatically
+    await localParticipant.setMicrophoneEnabled(!isMicOn);
+  };
 
   useEffect(() => {
-    // If user unmutes mic, we should automatically undeafen (like Discord)
-    if (localParticipant.isMicrophoneEnabled && isDeafened) {
+    if (isMicOn && isDeafened) {
       setIsDeafened(false);
     }
-  }, [localParticipant.isMicrophoneEnabled, isDeafened, setIsDeafened]);
+  }, [isMicOn, isDeafened, setIsDeafened]);
 
   return (
-    <div className="shrink-0 flex flex-col items-center justify-center w-full" style={{ padding: '8px 20px 16px', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)', gap: 8 }}>
-      <div className="custom-control-bar glass-panel shadow-xl" style={{ padding: '8px 12px', borderRadius: 'var(--radius-full)', display: 'flex', gap: 'clamp(8px, 1.5vw, 16px)', border: '1px solid var(--border-subtle)', alignItems: 'center' }}>
+    <div className="shrink-0 flex flex-col items-center justify-center w-full relative z-[5]" style={{ padding: '8px 20px 16px', background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)', gap: 8 }}>
+      <div className="glass-panel shadow-xl" style={{ padding: '8px 12px', borderRadius: 'var(--radius-full)', display: 'flex', gap: 'clamp(8px, 1.5vw, 16px)', border: '1px solid var(--border-subtle)', alignItems: 'center', background: 'rgba(25,25,30,0.8)', backdropFilter: 'blur(24px)' }}>
         
         {/* Deafen Button */}
         <button
           onClick={handleDeafenToggle}
-          title={isDeafened ? "Включить наушники" : "Выключить наушники (Deafen)"}
-          className="flex items-center justify-center transition-all bg-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.1)] rounded-xl"
-          style={{ width: 44, height: 44, color: isDeafened ? 'var(--alert-error)' : '#fff' }}
+          title={isDeafened ? "Включить наушники" : "Отключить динамики (Deafen)"}
+          className="relative flex items-center justify-center transition-all overflow-hidden"
+          style={{ 
+            width: 48, height: 48, 
+            borderRadius: '50%',
+            background: isDeafened ? 'rgba(255, 76, 76, 0.15)' : 'rgba(255,255,255,0.05)',
+            border: `1px solid ${isDeafened ? 'rgba(255, 76, 76, 0.4)' : 'transparent'}`,
+            color: isDeafened ? '#ff4c4c' : '#fff',
+            boxShadow: isDeafened ? '0 0 15px rgba(255, 76, 76, 0.2)' : 'none'
+          }}
+          onMouseEnter={(e) => {
+            if (!isDeafened) e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+          }}
+          onMouseLeave={(e) => {
+            if (!isDeafened) e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+          }}
         >
-          {isDeafened ? (
-             <span className="fa-layers fa-fw text-lg">
-               <i className="fas fa-headphones text-red-500" />
-               <i className="fas fa-slash text-red-500" />
-             </span>
-          ) : (
-             <i className="fas fa-headphones text-lg" />
+          <i className="fas fa-headphones" style={{ fontSize: '1.2rem' }} />
+          {isDeafened && (
+             <div className="absolute w-[36px] h-[3px] bg-red-500 rotate-45 rounded-full" style={{ left: '6px', top: '22px', boxShadow: '0 0 5px rgba(0,0,0,0.5)' }} />
           )}
         </button>
-        {canPublish && (
+        {/* Custom Microphone Button instead of ControlBar */}
+        {canPublish ? (
           <button
-            onClick={() => krisp.setNoiseFilterEnabled(!krisp.isNoiseFilterEnabled)}
-            disabled={krisp.isNoiseFilterPending}
-            title={krisp.isNoiseFilterEnabled ? "Выключить ИИ Шумоподавление" : "Включить ИИ Шумоподавление"}
-            className="hidden md:flex items-center justify-center transition-all bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)] rounded-xl"
-            style={{ width: 44, height: 44, color: krisp.isNoiseFilterEnabled ? 'var(--accent-primary)' : '#fff', opacity: krisp.isNoiseFilterPending ? 0.5 : 1 }}
+            onClick={handleMicToggle}
+            className="relative flex items-center justify-center transition-all overflow-hidden"
+            style={{ 
+              width: 56, height: 56, 
+              borderRadius: '50%',
+              background: !isMicOn ? 'rgba(255, 76, 76, 0.15)' : 'var(--accent-primary)',
+              border: `1px solid ${!isMicOn ? 'rgba(255, 76, 76, 0.4)' : 'transparent'}`,
+              color: !isMicOn ? '#ff4c4c' : '#fff',
+              boxShadow: isMicOn ? '0 0 20px rgba(var(--accent-primary-rgb), 0.5)' : '0 0 15px rgba(255, 76, 76, 0.2)'
+            }}
           >
-            {krisp.isNoiseFilterPending ? (
-              <i className="fas fa-circle-notch fa-spin text-lg" />
-            ) : (
-              <i className={`fas fa-wand-magic-sparkles text-lg`} />
+            <i className={`fas fa-microphone${!isMicOn ? '-slash' : ''}`} style={{ fontSize: '1.4rem' }} />
+            {!isMicOn && (
+              <div className="absolute w-[42px] h-[3px] bg-red-500 rotate-45 rounded-full" style={{ boxShadow: '0 0 5px rgba(0,0,0,0.5)' }} />
             )}
           </button>
-        )}
-        {canPublish ? (
-          <ControlBar saveUserChoices={true} controls={{ microphone: true, camera: false, screenShare: false, chat: false, leave: false }} />
         ) : !meta.isOpenMic ? (
           <button 
             onClick={toggleHand}
-            className="flex items-center gap-2 px-6 py-2 rounded-full font-semibold transition-all"
-            style={{
+            className="flex items-center justify-center transition-all"
+            style={{ 
+              width: 56, height: 56, borderRadius: '50%',
               background: handRaised ? 'var(--accent-primary)' : 'rgba(255,255,255,0.1)',
               color: '#fff', border: 'none', cursor: 'pointer',
               boxShadow: handRaised ? '0 0 20px color-mix(in srgb, var(--accent-primary) 50%, transparent)' : 'none'
             }}
           >
-            <i className={`fas fa-hand-paper ${handRaised ? 'animate-bounce' : ''}`} />
-            {handRaised ? 'Рука поднята' : 'Поднять руку'}
+            <i className={`fas fa-hand-paper text-xl ${handRaised ? 'animate-bounce' : ''}`} />
           </button>
         ) : null}
+
+        {/* Krisp wand */}
+        {canPublish && (
+          <button
+            onClick={() => krisp.setNoiseFilterEnabled(!krisp.isNoiseFilterEnabled)}
+            disabled={krisp.isNoiseFilterPending}
+            title={krisp.isNoiseFilterEnabled ? "Выключить ИИ Шумоподавление" : "Включить ИИ Шумоподавление"}
+            className="hidden md:flex items-center justify-center transition-all bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)] rounded-full"
+            style={{ width: 48, height: 48, color: krisp.isNoiseFilterEnabled ? 'var(--accent-primary)' : '#fff', opacity: krisp.isNoiseFilterPending ? 0.5 : 1, border: krisp.isNoiseFilterEnabled ? '1px solid var(--accent-primary)' : '1px solid transparent' }}
+          >
+            {krisp.isNoiseFilterPending ? (
+              <i className="fas fa-circle-notch fa-spin text-lg" />
+            ) : (
+              <i className={`fas fa-wand-magic-sparkles text-lg ${krisp.isNoiseFilterEnabled ? 'drop-shadow-[0_0_8px_var(--accent-primary)]' : ''}`} />
+            )}
+          </button>
+        )}
       </div>
       
       {/* Active Mic Indicator */}
       {canPublish && (
-        <div className="text-xs text-center fade-in bg-[rgba(0,0,0,0.4)] px-3 py-1 rounded-full border border-[rgba(255,255,255,0.05)]" style={{ color: 'var(--text-secondary)' }}>
+        <div className="text-[0.7rem] text-center fade-in bg-[rgba(0,0,0,0.6)] px-4 py-1.5 rounded-full border border-[rgba(255,255,255,0.1)] uppercase font-semibold tracking-wider backdrop-blur-md" style={{ color: 'var(--text-secondary)' }}>
           <i className="fas fa-microphone-lines text-[var(--accent-primary)] mr-2" />
-          {activeMicName}
+          {isMicOn ? 'Микрофон включен' : 'Вас не слышно'}
         </div>
       )}
     </div>
