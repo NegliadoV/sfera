@@ -442,7 +442,7 @@ function RoomControls({ isOpenMicProp, canPublishProp }: { isOpenMicProp?: boole
             onClick={() => krisp.setNoiseFilterEnabled(!krisp.isNoiseFilterEnabled)}
             disabled={krisp.isNoiseFilterPending}
             title={krisp.isNoiseFilterEnabled ? "Выключить ИИ Шумоподавление" : "Включить ИИ Шумоподавление"}
-            className="flex items-center justify-center transition-all bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)] rounded-xl"
+            className="hidden md:flex items-center justify-center transition-all bg-[rgba(255,255,255,0.05)] text-white hover:bg-[rgba(255,255,255,0.1)] rounded-xl"
             style={{ width: 44, height: 44, color: krisp.isNoiseFilterEnabled ? 'var(--accent-primary)' : '#fff', opacity: krisp.isNoiseFilterPending ? 0.5 : 1 }}
           >
             {krisp.isNoiseFilterPending ? (
