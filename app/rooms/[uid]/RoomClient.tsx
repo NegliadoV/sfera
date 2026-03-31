@@ -597,19 +597,23 @@ function RoomControls({ isOpenMicProp, canPublishProp, isDeafened, setIsDeafened
 }
 
 function ScreenShareView() {
-  const tracks = useTracks([Track.Source.ScreenShare]);
+  const tracks = useTracks(
+    [{ source: Track.Source.ScreenShare, withPlaceholder: false }], 
+    { onlySubscribed: false }
+  );
   
   if (tracks.length === 0) return null;
 
   // Отрисовываем первый найденный стрим
   const trackRef = tracks[0];
+  if (!trackRef.publication) return null;
   
   return (
     <div className="w-full relative glass-card p-2 md:p-3 mb-8 rounded-xl shadow-2xl overflow-hidden group border border-[rgba(255,255,255,0.05)] bg-[rgba(0,0,0,0.4)]">
-      <VideoTrack trackRef={trackRef} className="w-full h-auto max-h-[60vh] object-contain rounded-lg" style={{ background: '#000' }} />
+      <VideoTrack trackRef={trackRef as any} className="w-full h-auto max-h-[60vh] object-contain rounded-lg shadow-[0_0_30px_rgba(0,0,0,0.5)]" style={{ background: '#000' }} />
       
       <div className="absolute top-4 left-4 bg-black/60 px-3 py-1.5 rounded-full text-white text-xs font-semibold backdrop-blur-md border border-[rgba(255,255,255,0.1)] flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]" />
         {trackRef.participant.name || trackRef.participant.identity} запустил(а) стрим
       </div>
       
