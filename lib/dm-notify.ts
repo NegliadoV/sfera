@@ -4,6 +4,8 @@
 const WS_SERVER_URL = process.env.WS_SERVER_URL ?? 'http://localhost:3002';
 const WS_NOTIFY_SECRET = process.env.WS_NOTIFY_SECRET;
 
+import { sendPushNotification } from '@/lib/push-notify';
+
 export interface DmNewMessagePayload {
   id: string;
   conversationId: string;
@@ -26,6 +28,16 @@ export async function notifyUser(
   data: DmNewMessagePayload | DmReadReceiptPayload
 ): Promise<void> {
   try {
+    if (event === 'dm_new_message') {
+      const msgData = data as DmNewMessagePayload;
+      const textBody = msgData.body || (msgData.attachmentUrl ? '[Вложение]' : 'Новое сообщение');
+      sendPushNotification(userId, {
+        title: `Новое сообщение от ${msgData.senderName || 'Пользователя'}`,
+        body: textBody.length > 100 ? textBody.slice(0, 100) + '...' : textBody,
+        url: `/messages/${msgData.senderId}`,
+      }).catch(err => console.error('[dm-notify] Push error:', err));
+    }
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
