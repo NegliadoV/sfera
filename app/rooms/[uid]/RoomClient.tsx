@@ -17,10 +17,39 @@ import {
   TrackToggle,
   useTracks,
   VideoTrack,
+  useRoomContext,
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import { useRNNoiseFilter } from '@/hooks/useRNNoiseFilter';
 import '@livekit/components-styles';
+
+function LeaveRoomButton({ className, style, children, onMouseEnter, onMouseLeave }: any) {
+  const room = useRoomContext();
+  const router = useRouter();
+
+  const handleLeave = async () => {
+    try {
+      if (room) {
+        await room.disconnect();
+      }
+    } catch (e) {
+      console.error('Error disconnecting:', e);
+    }
+    router.push('/rooms');
+  };
+
+  return (
+    <button
+      onClick={handleLeave}
+      className={className}
+      style={style}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }: { initialToken: string, rId: string, isOpenMic?: boolean, canPublish?: boolean }) {
   const router = useRouter();
@@ -93,6 +122,7 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
         screen={false} // Мы вручную управляем Share
         token={token}
         serverUrl={liveKitUrl}
+        onDisconnected={() => router.push('/rooms')}
         options={{
           publishDefaults: {
             // High quality voice (Discord standard)
@@ -141,12 +171,11 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
             <div className="flex w-full md:w-auto flex-row items-center justify-between md:justify-start gap-4 shrink-0">
               <h1 className="text-gradient m-0 text-xl md:text-[1.4rem] font-bold truncate">Эфир {roomId.slice(0, 8)}</h1>
               
-              <button
-                onClick={() => router.push('/rooms')}
+              <LeaveRoomButton
                 className="md:hidden shrink-0 flex items-center justify-center p-2 rounded-lg text-red-500 bg-red-500/10 border border-red-500/20 text-sm transition-transform active:scale-95"
               >
                 <i className="fas fa-door-open" />
-              </button>
+              </LeaveRoomButton>
             </div>
             
             <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar gap-2 pb-2 md:pb-0 shrink-0">
@@ -173,8 +202,7 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
                 <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}><i className="fas fa-headphones" /> Слушают</span>
               </div>
               
-              <button
-                onClick={() => router.push('/rooms')}
+              <LeaveRoomButton
                 className="btn-glow shrink-0"
                 style={{
                   background: 'color-mix(in srgb, #ff4c4c 20%, transparent)',
@@ -189,19 +217,19 @@ export default function RoomClient({ initialToken, rId, isOpenMic, canPublish }:
                   gap: 8,
                   transition: 'all 0.2s ease',
                 }}
-                onMouseEnter={(e) => {
+                onMouseEnter={(e: any) => {
                   e.currentTarget.style.background = '#ff4c4c';
                   e.currentTarget.style.color = '#fff';
                   e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 76, 76, 0.5)';
                 }}
-                onMouseLeave={(e) => {
+                onMouseLeave={(e: any) => {
                   e.currentTarget.style.background = 'color-mix(in srgb, #ff4c4c 20%, transparent)';
                   e.currentTarget.style.color = '#ff4c4c';
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 <i className="fas fa-door-open" /> Покинуть
-              </button>
+              </LeaveRoomButton>
             </div>
           </div>
 
