@@ -238,9 +238,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('join_content', (payload: { contentId: string; userId?: string; userName?: string | null }) => {
+  socket.on('join_content', (payload: { contentId: string; userName?: string | null }) => {
     const id = payload?.contentId;
-    const userId = payload?.userId;
+    // userId берём из socket.data — он верифицирован через WS-токен при подключении
+    const userId = (socket.data as { userId?: string }).userId;
     const userName = payload?.userName ?? null;
     if (id && typeof id === 'string') {
       socket.join(contentRoom(id));
@@ -265,23 +266,26 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('typing_start', (payload: { contentId: string; userId: string; userName: string | null }) => {
-    const { contentId, userId, userName } = payload ?? {};
+  socket.on('typing_start', (payload: { contentId: string; userName: string | null }) => {
+    const { contentId, userName } = payload ?? {};
+    const userId = (socket.data as { userId?: string }).userId;
     if (contentId && typeof contentId === 'string' && userId) {
       socket.to(contentRoom(contentId)).emit('user_typing', { userId, userName: userName ?? null });
     }
   });
 
-  socket.on('typing_stop', (payload: { contentId: string; userId: string; userName: string | null }) => {
-    const { contentId, userId, userName } = payload ?? {};
+  socket.on('typing_stop', (payload: { contentId: string }) => {
+    const { contentId } = payload ?? {};
+    const userId = (socket.data as { userId?: string }).userId;
     if (contentId && typeof contentId === 'string' && userId) {
-      socket.to(contentRoom(contentId)).emit('user_stopped_typing', { userId, userName: userName ?? null });
+      socket.to(contentRoom(contentId)).emit('user_stopped_typing', { userId, userName: null });
     }
   });
 
-  socket.on('join_universe', (payload: { slug: string; userId?: string; userName?: string | null }) => {
+  socket.on('join_universe', (payload: { slug: string; userName?: string | null }) => {
     const slug = payload?.slug;
-    const userId = payload?.userId;
+    // userId берём из socket.data — он верифицирован через WS-токен при подключении
+    const userId = (socket.data as { userId?: string }).userId;
     const userName = payload?.userName ?? null;
     if (slug && typeof slug === 'string') {
       socket.join(universeRoom(slug));
