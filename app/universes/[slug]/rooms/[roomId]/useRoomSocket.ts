@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { fetchRoomTicket } from '@/lib/room-ticket';
+
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? 'http://localhost:3002';
 
@@ -64,7 +66,20 @@ export function useRoomSocket(
   useEffect(() => {
     const socket = io(WS_URL, { path: '/socket.io', transports: ['websocket', 'polling'] });
     socketRef.current = socket;
-    socket.emit('join_room', { roomId });
+
+    // Получаем ticket и выполняем join_room
+    fetchRoomTicket(roomId).then((ticket) => {
+      if (!socket.connected) {
+        socket.once('connect', () => socket.emit('join_room', { roomId, ticket }));
+      } else {
+        socket.emit('join_room', { roomId, ticket });
+      }
+    });
+
+    socket.on('room_join_error', (data: { error?: string }) => {
+      console.warn('[useRoomSocket] join_room rejected:', data?.error);
+      socket.disconnect();
+    });
 
     socket.on('participants_updated', (data: { participants?: ParticipantItem[] }) => {
       if (Array.isArray(data?.participants)) {
@@ -100,6 +115,7 @@ export function useRoomSocket(
       setTimeout(() => socket.disconnect(), 50);
     };
   }, [roomId]);
+
 
   return { emitPlaybackState, emitHandRaise, emitRoundLeaderChosen };
 }

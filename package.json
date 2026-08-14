@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run next-dev\" \"npm run ws\"",
-    "next-dev": "next dev --webpack",
+    "next-dev": "next dev --turbo",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
@@ -28,7 +28,8 @@
     "worker:digest": "tsx scripts/worker-digest.ts",
     "clear-worker-cache": "tsx scripts/clear-worker-cache.ts",
     "ws": "tsx scripts/ws-server.ts",
-    "check-redis": "node scripts/check-redis.js"
+    "check-redis": "node scripts/check-redis.js",
+    "split-css": "tsx scripts/split-css.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",

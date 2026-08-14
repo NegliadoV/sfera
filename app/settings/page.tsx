@@ -7,6 +7,8 @@ import { PrivacySettingsForm } from './PrivacySettingsForm';
 import { BlocksSettingsForm } from './BlocksSettingsForm';
 import { UserTagSettingsForm } from './UserTagSettingsForm';
 import { SubscriptionsList } from './SubscriptionsList';
+import { RevokeSessionsForm } from './RevokeSessionsForm';
+
 
 export const metadata = {
   title: 'Настройки | Roominate',
@@ -101,6 +103,16 @@ export default async function SettingsPage(
               Управление подписками на приватные сферы (через ЮKassa).
             </div>
             <SubscriptionsList />
+          </div>
+          <div className="settings-card" style={{ flex: '1 1 100%' }}>
+            <div className="settings-card-title">
+              <i className="fa-solid fa-lock" aria-hidden />
+              <h2>Безопасность</h2>
+            </div>
+            <div className="settings-card-desc">
+              Управление активными сессиями на всех ваших устройствах.
+            </div>
+            <RevokeSessionsForm />
           </div>
         </div>
 

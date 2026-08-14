@@ -1,0 +1,63 @@
+/* Base: html, body, @theme inline, scrollbar */
+
+@theme inline {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+html {
+  background-color: var(--bg-primary);
+  /* Предотвращает белые пятна при растяжении/overscroll на iOS */
+  /* overscroll-behavior-y: none; */ 
+}
+
+body {
+  background: var(--studio-bg-gradient);
+  color: var(--text-primary);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.5;
+  transition: background 0.3s ease, color var(--transition-medium);
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  overscroll-behavior-y: none; /* Убираем эффект "резинки" на iOS (белые пятна) */
+}
+
+/* Убираем подсветку тапа на мобильном для более чистого UX */
+@media (hover: none) and (pointer: coarse) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Scrollbar: зависит от темы */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-accent);
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 50%, transparent);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent);
+}

@@ -1,0 +1,237 @@
+/* Design system — SFERA. Темная/светлая тема + кастомный акцент */
+
+/* Design system — SFERA. Темная/светлая тема + кастомный акцент (см. docs/DESIGN_SYSTEM.md) */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --font-inter: ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-jetbrains-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+  /* Брендовый шрифт логотипа (Sora подключается в layout, переопределяет) */
+  --font-brand: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Акцент: палитра в стиле дизайн-систем (синий базовый); переопределяется пользователем через ThemeProvider */
+  --accent-primary: #2563eb;
+  --accent-primary-hover: #1d4ed8;
+  --accent-primary-muted: #60a5fa;
+
+  /* Тёмная тема — "Стекло" без серых оттенков, глубокий сине-черный космос */
+  --bg-primary: #0b0d13;
+  --bg-secondary: #13161f;
+  --bg-sidebar: rgba(255, 255, 255, 0.02);
+  --bg-accent: rgba(255, 255, 255, 0.05);
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-header: rgba(255, 255, 255, 0.02);
+  --bg-secondary-rgb: 19, 22, 31;
+  --bg-header-rgb: 11, 13, 19;
+  --text-primary: #e4e6e9;
+  --text-secondary: #a8aaaf;
+  --text-muted: #7a7d84;
+  --text-accent: var(--accent-primary);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --shadow: 0 20px 36px -8px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 8px 16px rgba(0, 0, 0, 0.3);
+  --hover-color: rgba(255, 255, 255, 0.06);
+  --hover-accent: rgba(255, 255, 255, 0.1);
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-green: #22c55e;
+  --accent-orange: #f97316;
+  --accent-red: #ef4444;
+
+  /* Единый стиль платформы — 100% стекло */
+  --studio-bg-gradient: linear-gradient(160deg, #090a0f 0%, #11141d 50%, #090a0f 100%);
+  --studio-card-bg: rgba(255, 255, 255, 0.03);
+  --studio-card-border: rgba(255, 255, 255, 0.15);
+  --studio-card-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 1px 1px 0 rgba(255, 255, 255, 0.15), inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+  --studio-header-bg: rgba(255, 255, 255, 0.04);
+  --studio-header-border: rgba(255, 255, 255, 0.1);
+  --studio-title-color: #ffffff;
+  --studio-title-gradient: linear-gradient(130deg, #ffffff, #b0d0ff);
+  --studio-meta-color: #aebfd6;
+  --studio-panel-bg: rgba(255, 255, 255, 0.03);
+  --studio-panel-border: rgba(255, 255, 255, 0.1);
+  --studio-video-bg: transparent;
+  --studio-video-radial: transparent;
+  --studio-participant-bg: rgba(255, 255, 255, 0.05);
+  --studio-participant-hover: rgba(255, 255, 255, 0.08);
+  --studio-participant-border-hover: rgba(255, 255, 255, 0.2);
+  --studio-control-bg: rgba(255, 255, 255, 0.1);
+  --studio-control-border: rgba(255, 255, 255, 0.15);
+  --studio-footer-bg: rgba(255, 255, 255, 0.05);
+  --studio-voice-box-bg: rgba(255, 255, 255, 0.05);
+  --studio-voice-box-border: rgba(255, 255, 255, 0.1);
+  --studio-status-live-bg: rgba(39, 174, 96, 0.2);
+  --studio-status-live-color: #2ecc71;
+  --studio-status-live-border: rgba(46, 204, 113, 0.3);
+  --studio-radial-overlay: radial-gradient(circle at 30% 50%, rgba(75, 130, 200, 0.05) 0%, transparent 50%);
+  --studio-avatar-bg: linear-gradient(145deg, #0f1620, #080d13);
+  --studio-avatar-border: rgba(255, 255, 255, 0.1);
+  --studio-ctrl-icon: var(--accent-primary);
+  --studio-right-info-bg: rgba(0, 0, 0, 0.45);
+  --studio-right-info-border: rgba(255, 255, 255, 0.03);
+  --studio-footer-color: #859dbf;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 30px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --transition-fast: 0.1s ease;
+  --transition-medium: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* Прозрачность фона приложения (0.5–1). Задаётся в Настройки → Внешний вид. */
+  --app-bg-opacity: 0.6;
+  /* Сила размытия фона (0, 12px, 24px, 36px). 0 = выкл. */
+  --app-blur: 32px;
+  /* Оттенок интерфейса: 0 = нейтральный, 1–360 = hue (Настройки → Цвет интерфейса). */
+  --interface-hue: 0;
+
+  /* Неоновая подсветка блоков (цвет акцента) */
+  --neon-glow: 0 0 20px color-mix(in srgb, var(--accent-primary) 18%, transparent), 0 0 40px color-mix(in srgb, var(--accent-primary) 8%, transparent);
+  --neon-glow-strong: 0 0 24px color-mix(in srgb, var(--accent-primary) 28%, transparent), 0 0 48px color-mix(in srgb, var(--accent-primary) 12%, transparent);
+  --neon-border: color-mix(in srgb, var(--accent-primary) 30%, var(--border-color));
+}
+
+/* Светлая тема — по умолчанию «Мягкая» */
+[data-theme="light"],
+[data-theme="light"][data-light-style="soft"] {
+  color-scheme: light;
+  --bg-primary: #f2f3f5;
+  --bg-secondary: #ffffff;
+  --bg-sidebar: #e8e9ec;
+  --bg-accent: #e3e4e8;
+  --bg-card: #ffffff;
+  --bg-header: #f2f3f5;
+  --bg-secondary-rgb: 255, 255, 255;
+  --bg-header-rgb: 242, 243, 245;
+  --text-primary: #1e1f22;
+  --text-secondary: #4e5058;
+  --text-muted: #6d7078;
+  --border-color: #d4d5d9;
+  --border-subtle: #c7c9ce;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --hover-color: #e3e4e8;
+  --hover-accent: #d4d5d9;
+  --neon-glow: 0 0 18px color-mix(in srgb, var(--accent-primary) 14%, transparent), 0 0 36px color-mix(in srgb, var(--accent-primary) 6%, transparent);
+  --neon-glow-strong: 0 0 22px color-mix(in srgb, var(--accent-primary) 22%, transparent), 0 0 44px color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  --neon-border: color-mix(in srgb, var(--accent-primary) 25%, var(--border-color));
+
+  /* Студийный дизайн — светлая тема */
+  --studio-bg-gradient: linear-gradient(145deg, #e8e9ec 0%, #f0f1f3 50%, #f2f3f5 100%);
+  --studio-card-bg: rgba(255, 255, 255, 0.6);
+  --studio-card-border: rgba(255, 255, 255, 0.6);
+  --studio-card-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --studio-header-bg: rgba(242, 243, 245, 0.6);
+  --studio-header-border: rgba(255, 255, 255, 0.5);
+  --studio-title-color: #1e1f22;
+  --studio-title-gradient: linear-gradient(130deg, #1e1f22, #4a6f8a);
+  --studio-meta-color: #4e5058;
+  --studio-panel-bg: rgba(255, 255, 255, 0.6);
+  --studio-panel-border: rgba(255, 255, 255, 0.5);
+  --studio-video-bg: #1a1d21;
+  --studio-video-radial: radial-gradient(circle at 30% 40%, #2a3544 0%, #1a1d21 90%);
+  --studio-participant-bg: rgba(0, 0, 0, 0.03);
+  --studio-participant-hover: rgba(74, 144, 226, 0.12);
+  --studio-participant-border-hover: rgba(74, 144, 226, 0.3);
+  --studio-control-bg: rgba(0, 0, 0, 0.06);
+  --studio-control-border: rgba(0, 0, 0, 0.08);
+  --studio-footer-bg: rgba(0, 0, 0, 0.04);
+  --studio-voice-box-bg: rgba(0, 0, 0, 0.03);
+  --studio-voice-box-border: rgba(0, 0, 0, 0.08);
+  --studio-status-live-bg: rgba(46, 204, 113, 0.2);
+  --studio-status-live-color: #1e8e4a;
+  --studio-status-live-border: rgba(46, 204, 113, 0.35);
+  --studio-radial-overlay: none;
+  --studio-avatar-bg: linear-gradient(145deg, #e0e4e8, #d0d4d9);
+  --studio-avatar-border: rgba(0, 0, 0, 0.1);
+  --studio-ctrl-icon: #2563eb;
+  --studio-right-info-bg: rgba(0, 0, 0, 0.05);
+  --studio-right-info-border: rgba(0, 0, 0, 0.06);
+  --studio-footer-color: #4e5058;
+}
+
+/* Светлая тема — «Яркая» (белый фон, высокий контраст) */
+[data-theme="light"][data-light-style="bright"] {
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-sidebar: #f0f1f3;
+  --bg-accent: #e8e9ec;
+  --bg-card: #ffffff;
+  --bg-header: #ffffff;
+  --bg-secondary-rgb: 255, 255, 255;
+  --bg-header-rgb: 255, 255, 255;
+  --text-primary: #111214;
+  --text-secondary: #3c3e42;
+  --text-muted: #5d6066;
+  --border-color: #cacbcf;
+  --border-subtle: #b9bbbf;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.04);
+  --hover-color: #e8e9ec;
+  --hover-accent: #dcdde1;
+  --studio-bg-gradient: linear-gradient(145deg, #f0f1f3 0%, #f8f9fa 50%, #ffffff 100%);
+  --studio-card-bg: rgba(255, 255, 255, 0.95);
+  --studio-header-bg: rgba(255, 255, 255, 0.98);
+}
+
+/* Светлая тема — «Приглушённая» (тёплый тон, меньше контраста) */
+[data-theme="light"][data-light-style="muted"] {
+  --bg-primary: #f5f4f2;
+  --bg-secondary: #faf9f7;
+  --bg-sidebar: #ebeae8;
+  --bg-accent: #e8e6e3;
+  --bg-card: #faf9f7;
+  --bg-header: #f5f4f2;
+  --bg-secondary-rgb: 250, 249, 247;
+  --bg-header-rgb: 245, 244, 242;
+  --text-primary: #2c2b28;
+  --text-secondary: #5a5854;
+  --text-muted: #787672;
+  --border-color: #dddcd9;
+  --border-subtle: #d0cfcb;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.04);
+  --hover-color: #ebeae8;
+  --hover-accent: #e0dfdc;
+  --studio-bg-gradient: linear-gradient(145deg, #ebeae8 0%, #f2f1ee 50%, #f5f4f2 100%);
+  --studio-card-bg: rgba(250, 249, 247, 0.95);
+  --studio-header-bg: rgba(245, 244, 242, 0.98);
+}
+
+/* Подкрашивание интерфейса по выбранному оттенку (тёмная тема), тона на 50% темнее */
+[data-theme="dark"][data-interface-tint="true"] {
+  --bg-primary: color-mix(in srgb, #0b0d13 85%, hsl(var(--interface-hue), 30%, 12%) 15%);
+  --bg-secondary: color-mix(in srgb, #13161f 82%, hsl(var(--interface-hue), 28%, 15%) 18%);
+  /* Мы НЕ переопределяем --bg-sidebar, hover-color и border-color здесь. 
+     Они теперь используют rgba() из базовой тёмной темы, благодаря чему остаются полностью 
+     прозрачным стеклом, просто ложась поверх цветного --bg-secondary и свещения от blobs! */
+}
+[data-theme="dark"][data-interface-tint="true"] body {
+  background: linear-gradient(160deg, color-mix(in srgb, #0b0d13 85%, hsl(var(--interface-hue), 30%, 12%) 15%) 0%, color-mix(in srgb, #13161f 82%, hsl(var(--interface-hue), 28%, 15%) 18%) 50%, color-mix(in srgb, #0b0d13 85%, hsl(var(--interface-hue), 30%, 12%) 15%) 100%);
+}
+
+/* Подкрашивание интерфейса (светлая тема, база — мягкая), оттенок усилен ~50% */
+[data-theme="light"][data-interface-tint="true"] {
+  --bg-primary: color-mix(in srgb, #f2f3f5 88%, hsl(var(--interface-hue), 25%, 95%) 12%);
+  --bg-secondary: color-mix(in srgb, #ffffff 91%, hsl(var(--interface-hue), 22%, 98%) 9%);
+  --bg-sidebar: color-mix(in srgb, #e8e9ec 85%, hsl(var(--interface-hue), 20%, 94%) 15%);
+  --bg-accent: color-mix(in srgb, #e3e4e8 82%, hsl(var(--interface-hue), 18%, 94%) 18%);
+  --bg-card: color-mix(in srgb, #ffffff 91%, hsl(var(--interface-hue), 22%, 98%) 9%);
+  --bg-header: color-mix(in srgb, #f2f3f5 88%, hsl(var(--interface-hue), 25%, 96%) 12%);
+  --border-color: color-mix(in srgb, #d4d5d9 78%, hsl(var(--interface-hue), 15%, 88%) 22%);
+  --border-subtle: color-mix(in srgb, #c7c9ce 78%, hsl(var(--interface-hue), 12%, 86%) 22%);
+  --hover-color: color-mix(in srgb, #e3e4e8 85%, hsl(var(--interface-hue), 18%, 95%) 15%);
+  --hover-accent: color-mix(in srgb, #d4d5d9 82%, hsl(var(--interface-hue), 15%, 90%) 18%);
+}
+[data-theme="light"][data-interface-tint="true"] body {
+  background: linear-gradient(160deg, color-mix(in srgb, #e8e9ec 88%, hsl(var(--interface-hue), 22%, 95%) 12%) 0%, color-mix(in srgb, #f0f1f3 91%, hsl(var(--interface-hue), 25%, 97%) 9%) 50%, color-mix(in srgb, #f2f3f5 88%, hsl(var(--interface-hue), 25%, 96%) 12%) 100%);
+}

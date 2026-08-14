@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, user } from '@/lib/db';
 import { verificationToken } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
-import { hashPassword } from '@/lib/password';
+import { eq } from 'drizzle-orm';
+import { hashPassword, verifyPassword } from '@/lib/password';
 import { normalizeAndValidateUserTag } from '@/lib/validation';
+import { rateLimit } from '@/lib/rate-limit';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +19,18 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export async function POST(req: NextRequest) {
   try {
+    // 5 регистраций с одного IP за 1 час — защита от массового создания аккаунтов
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? req.headers.get('x-real-ip') ?? 'unknown';
+    const rl = await rateLimit({ key: `reg:ip:${ip}`, limit: 5, windowSec: 3600 });
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: rl.error },
+        { status: 429, headers: { 'Retry-After': String(rl.resetAt - Math.floor(Date.now() / 1000)) } }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
+
     const { email, password, name, userTag: rawUserTag } = body as {
       email?: string;
       password?: string;
@@ -64,19 +77,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Введите проверочный код из Email' }, { status: 400 });
     }
 
-    // Проверяем 6-значный код в базе
+    // Проверяем 6-значный код в базе (хэш сравнение через scrypt)
     const [tokenRecord] = await db
       .select()
       .from(verificationToken)
-      .where(
-        and(
-          eq(verificationToken.identifier, emailStr),
-          eq(verificationToken.token, verificationCode)
-        )
-      )
+      .where(eq(verificationToken.identifier, emailStr))
       .limit(1);
 
     if (!tokenRecord) {
+      return NextResponse.json({ error: 'Неверный или устаревший код подтверждения' }, { status: 400 });
+    }
+
+    const isCodeValid = await verifyPassword(verificationCode, tokenRecord.token);
+    if (!isCodeValid) {
       return NextResponse.json({ error: 'Неверный или устаревший код подтверждения' }, { status: 400 });
     }
     if (new Date() > new Date(tokenRecord.expires)) {

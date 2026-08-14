@@ -4,11 +4,16 @@ import { user, verificationToken } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import nodemailer from 'nodemailer';
 import { normalizeAndValidateUserTag } from '@/lib/validation';
+import { hashPassword } from '@/lib/password';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
-function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+function generateOTP(): string {
+  // Криптографически безопасная генерация 6-значного кода
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  return (100000 + (array[0] % 900000)).toString();
 }
 
 export async function POST(req: NextRequest) {
@@ -26,6 +31,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Некорректный ник' }, { status: 400 });
     }
 
+    // ── Rate limiting ────────────────────────────────────────────────────────
+    // 3 запроса кода с одного email за 10 минут
+    const byEmail = await rateLimit({ key: `rc:email:${emailStr}`, limit: 3, windowSec: 600 });
+    if (!byEmail.ok) {
+      return NextResponse.json(
+        { error: byEmail.error },
+        { status: 429, headers: { 'Retry-After': String(byEmail.resetAt - Math.floor(Date.now() / 1000)) } }
+      );
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     // 1. Проверяем, не занят ли Email
     const [existingEmail] = await db.select({ id: user.id }).from(user).where(eq(user.email, emailStr)).limit(1);
     if (existingEmail) {
@@ -38,8 +54,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Такой ник уже занят. Выберите другой.' }, { status: 409 });
     }
 
-    // 3. Генерируем код и сохраняем в verificationToken
+    // 3. Генерируем код, хэшируем и сохраняем в verificationToken
     const otp = generateOTP();
+    const tokenHash = await hashPassword(otp); // В БД — только хэш (scrypt)
     const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 минут
 
     // Удаляем старые коды для этого email перед генерацией нового
@@ -47,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     await db.insert(verificationToken).values({
       identifier: emailStr,
-      token: otp,
+      token: tokenHash, // Хэш, не plain text
       expires,
     });
 

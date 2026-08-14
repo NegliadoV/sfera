@@ -7,6 +7,27 @@ import { db } from '@/lib/db';
 import { user, account, session, verificationToken } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { verifyPassword } from '@/lib/password';
+import { versionCache, SESSION_VERSION_CACHE_TTL } from '@/lib/session-version';
+
+async function getDbSessionVersion(userId: string): Promise<number | null> {
+  const cached = versionCache.get(userId);
+  if (cached && Date.now() - cached.fetchedAt < SESSION_VERSION_CACHE_TTL) {
+    return cached.version;
+  }
+  try {
+    const [row] = await db
+      .select({ sessionVersion: user.sessionVersion })
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1);
+    if (!row) return null;
+    versionCache.set(userId, { version: row.sessionVersion, fetchedAt: Date.now() });
+    return row.sessionVersion;
+  } catch {
+    return null; // Ошибка БД — пропускаем (грацефул деградейшн)
+  }
+}
+
 
 const hasGoogleOAuth =
   process.env.AUTH_GOOGLE_ID != null &&
@@ -64,8 +85,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!found) return null;
 
-        // Dev: seed-пользователь — вход без пароля
-        if (found.email === 'seed@horizon.local') {
+        // Dev: seed-пользователь — вход без пароля (только в dev-окружении)
+        if (process.env.NODE_ENV !== 'production' && found.email === 'seed@horizon.local') {
           return { id: found.id, email: found.email, name: found.name, image: found.image };
         }
 
@@ -88,8 +109,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
-    jwt({ token, user }) {
-      if (user?.id) token.sub = user.id;
+    async jwt({ token, user: u, trigger }) {
+      // При логине — записываем userId и версию в токен
+      if (u?.id) {
+        token.sub = u.id;
+        const version = await getDbSessionVersion(u.id);
+        token.sv = version ?? 0; // sv = sessionVersion
+      }
+
+      // При каждом обновлении JWT — проверяем версию в БД
+      if (token.sub && typeof token.sv === 'number') {
+        const currentVersion = await getDbSessionVersion(token.sub);
+        // currentVersion === null: ошибка БД — пропускаем
+        if (currentVersion !== null && currentVersion !== token.sv) {
+          // Версия устарела — инвалидируем сессию
+          return null as any;
+        }
+      }
+
       return token;
     },
     session({ session, token }) {
@@ -97,22 +134,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     redirect({ url, baseUrl }) {
-      let finalUrl = url;
+      let target = '/universes';
       try {
-        // Safe encoding for callback URLs that might contain cyrillic chars
-        finalUrl = new URL(url, baseUrl).toString();
+        if (url.startsWith('/')) {
+          target = url;
+        } else {
+          const parsed = new URL(url, baseUrl);
+          if (parsed.origin === new URL(baseUrl).origin) {
+            target = parsed.pathname + parsed.search + parsed.hash;
+          }
+        }
       } catch (e) {}
 
-      if (finalUrl === baseUrl || finalUrl === `${baseUrl}/`) {
+      if (target === '/' || target === '') {
+        target = '/universes';
+      }
+
+      try {
+        const fullUrl = new URL(target, baseUrl).toString();
+        return encodeURI(fullUrl);
+      } catch (e) {
         return `${baseUrl}/universes`;
       }
-      if (finalUrl.startsWith('/')) {
-        return new URL(`${baseUrl}${finalUrl}`).toString();
-      }
-      if (finalUrl.startsWith(baseUrl)) {
-        return finalUrl;
-      }
-      return `${baseUrl}/universes`;
     },
   },
   trustHost: true,
