@@ -10,6 +10,7 @@ export interface CabinetTrackedUniverseItemProps {
   slug: string;
   name: string;
   description: string | null;
+  icon?: string | null;
   sphereColor?: string | null;
   updatedAt: Date;
   unreadCount?: number;
@@ -19,6 +20,7 @@ export function CabinetTrackedUniverseItem({
   slug,
   name,
   description,
+  icon = null,
   sphereColor,
   updatedAt,
   unreadCount = 0,
@@ -61,7 +63,7 @@ export function CabinetTrackedUniverseItem({
         style={{ display: 'flex', alignItems: 'center', flex: 1, textDecoration: 'none', color: 'inherit', gap: '18px' }}
       >
         <div className="cabinet-universe-icon cabinet-universe-icon--sphere">
-          <SferaSphereIcon size="sm" color={sphereColor} />
+          <SferaSphereIcon size="sm" color={sphereColor} icon={icon} name={name} />
         </div>
         <div className="cabinet-universe-info">
           <div className="cabinet-universe-name" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

@@ -47,7 +47,7 @@ export function MobileLayout({
       />
 
       <main className="app-main flex-1 w-full relative" style={{ minWidth: 0, display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
-        <Header session={session} showMenuButton={false} />
+        <Header session={session} showMenuButton={true} onMenuClick={() => setMobileMenuOpen?.(true)} />
         {children}
         {/* Надежный нижний отступ для мобильных, чтобы таб-бар не перекрывал контент */}
         <div className="h-[100px] mobile-safe-bottom shrink-0 w-full pointer-events-none"></div>

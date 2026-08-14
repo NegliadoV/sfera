@@ -1,6 +1,12 @@
 import { ShortsFeed } from "@/components/ShortsFeed";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Шортс | Roominate',
+  description: 'Короткие познавательные видео и клипы в тематических вселенных Roominate.',
+};
 
 export default function ShortsPage() {
   return (

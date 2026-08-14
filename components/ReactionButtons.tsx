@@ -27,7 +27,7 @@ export function ReactionButtons({ targetType, targetId, counts, myReaction, onUp
   };
 
   return (
-    <div className="flex flex-wrap gap-2 mt-3">
+    <div className="flex flex-wrap items-center gap-2 mt-3">
       {(Object.keys(REACTION_LABELS) as ReactionType[]).map((type) => {
         const count = counts[type] ?? 0;
         const isActive = myReaction === type;
@@ -37,14 +37,18 @@ export function ReactionButtons({ targetType, targetId, counts, myReaction, onUp
             type="button"
             disabled={pending}
             onClick={() => setReaction(type)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-md)] text-sm border-0 cursor-pointer transition-all duration-200 hover:scale-105 disabled:opacity-60"
-            style={{
-              backgroundColor: isActive ? 'var(--accent-primary)' : 'var(--bg-accent)',
-              color: isActive ? 'white' : 'var(--text-secondary)',
-            }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 active:scale-95 disabled:opacity-60 cursor-pointer select-none ${
+              isActive
+                ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)] shadow-[0_2px_12px_color-mix(in_srgb,var(--accent-primary)_40%,transparent)] scale-105'
+                : 'bg-white/5 text-[var(--text-secondary)] border-white/10 hover:border-white/20 hover:bg-white/10 hover:text-white'
+            }`}
           >
-            <span>{REACTION_LABELS[type]}</span>
-            {count > 0 && <span className="opacity-80">({count})</span>}
+            <span className="text-sm leading-none">{REACTION_LABELS[type]}</span>
+            {count > 0 && (
+              <span className={`text-xs font-bold ${isActive ? 'text-white' : 'text-[var(--text-secondary)]'}`}>
+                {count}
+              </span>
+            )}
           </button>
         );
       })}

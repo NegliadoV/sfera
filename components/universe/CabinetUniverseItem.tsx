@@ -37,7 +37,7 @@ export function CabinetUniverseItem({
   slug,
   name,
   description,
-  icon: _icon,
+  icon,
   sphereColor,
   updatedAt,
   isOwner = false,
@@ -57,7 +57,7 @@ export function CabinetUniverseItem({
           style={{ display: 'flex', alignItems: 'center', flex: 1, textDecoration: 'none', color: 'inherit', gap: '18px' }}
         >
           <div className="cabinet-universe-icon cabinet-universe-icon--sphere">
-            <SferaSphereIcon size="sm" color={sphereColor} />
+            <SferaSphereIcon size="sm" color={sphereColor} icon={icon} name={name} />
           </div>
           <div className="cabinet-universe-info">
             <div className="cabinet-universe-name">{name}</div>
@@ -81,7 +81,7 @@ export function CabinetUniverseItem({
         style={{ display: 'flex', alignItems: 'center', flex: 1, textDecoration: 'none', color: 'inherit', gap: '18px' }}
       >
         <div className="cabinet-universe-icon cabinet-universe-icon--sphere">
-          <SferaSphereIcon size="sm" color={sphereColor} />
+          <SferaSphereIcon size="sm" color={sphereColor} icon={icon} name={name} />
         </div>
         <div className="cabinet-universe-info">
           <div className="cabinet-universe-name">{name}</div>

@@ -14,14 +14,22 @@ export interface SphereColorPreset {
 }
 
 export const SPHERE_COLOR_PRESETS: SphereColorPreset[] = [
-  { highlight: '#ecf5ff', mid: '#3070bb', dark: '#0f3460', glow: '#4faeff' },
-  { highlight: '#e8f4ff', mid: '#3d6ba8', dark: '#0f2740', glow: '#5a9ef5' },
-  { highlight: '#eef0ff', mid: '#5b6cd4', dark: '#1e2a5c', glow: '#6b7ce8' },
-  { highlight: '#e8f8fc', mid: '#3d9ca8', dark: '#0f3540', glow: '#5bc4d4' },
-  { highlight: '#e6f2ff', mid: '#4a7bc9', dark: '#122a50', glow: '#7ca5e8' },
-  { highlight: '#eef2ff', mid: '#5b6cd4', dark: '#1a2258', glow: '#8b9cf6' },
-  { highlight: '#e0f4f8', mid: '#2d7a8f', dark: '#0d2d38', glow: '#4fb3c4' },
-  { highlight: '#dce8ff', mid: '#2563eb', dark: '#0f2740', glow: '#60a5fa' },
+  // 0: Violet Cosmic Portal (Neon Purple & Cyan)
+  { highlight: '#e9d5ff', mid: '#a855f7', dark: '#3b0764', glow: '#c084fc' },
+  // 1: Supernova Amber (Gold & Crimson)
+  { highlight: '#fef08a', mid: '#f59e0b', dark: '#78350f', glow: '#fbbf24' },
+  // 2: Emerald Cyber (Electric Mint & Cyan)
+  { highlight: '#a7f3d0', mid: '#10b981', dark: '#064e3b', glow: '#34d399' },
+  // 3: Sapphire Hyperdrive (Deep Blue & Ultramarine)
+  { highlight: '#bae6fd', mid: '#0284c7', dark: '#0c4a6e', glow: '#38bdf8' },
+  // 4: Rose Nebula (Neon Pink & Sunset Violet)
+  { highlight: '#fbcfe8', mid: '#ec4899', dark: '#831843', glow: '#f472b6' },
+  // 5: Deep Plasma / Void (Electric Indigo & Amethyst)
+  { highlight: '#c7d2fe', mid: '#6366f1', dark: '#1e1b4b', glow: '#818cf8' },
+  // 6: Solar Flare (Sunburst Gold & Ruby Red)
+  { highlight: '#ffedd5', mid: '#f97316', dark: '#7c2d12', glow: '#fb923c' },
+  // 7: Teal Nexus (Aquamarine & Neon Cyan)
+  { highlight: '#99f6e4', mid: '#14b8a6', dark: '#134e4a', glow: '#2dd4bf' },
 ];
 
 const PRESET_COUNT = SPHERE_COLOR_PRESETS.length;
