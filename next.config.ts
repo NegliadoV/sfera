@@ -75,7 +75,12 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "http://localhost:8081" },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: isProd
+              ? (process.env.NEXT_PUBLIC_APP_URL || "https://roominate.rest")
+              : "http://localhost:8081",
+          },
           { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
           {
             key: "Access-Control-Allow-Headers",
