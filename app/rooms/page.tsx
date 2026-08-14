@@ -126,7 +126,7 @@ export default function GlobalRoomsPage() {
         </div>
       ) : spaces.length === 0 ? (
         <div className="glass-panel" style={{ 
-          textAlign: 'center', padding: '80px 40px', 
+          textAlign: 'center', padding: '60px 30px', 
           borderRadius: 'var(--radius-xl)', 
           background: 'color-mix(in srgb, var(--bg-secondary) 40%, transparent)',
           border: '1px dashed var(--border-color)',
@@ -134,16 +134,38 @@ export default function GlobalRoomsPage() {
         }}>
           <div style={{ 
             width: 80, height: 80, borderRadius: 40, 
-            background: 'color-mix(in srgb, var(--bg-accent) 50%, transparent)', 
+            background: 'color-mix(in srgb, var(--accent-primary) 15%, transparent)', 
             display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            margin: '0 auto 24px auto', fontSize: '2rem', color: 'var(--text-muted)' 
+            margin: '0 auto 24px auto', fontSize: '2rem', color: 'var(--accent-primary)',
+            boxShadow: '0 0 30px color-mix(in srgb, var(--accent-primary) 20%, transparent)'
           }}>
-            <i className="fas fa-microphone-slash" />
+            <i className="fas fa-microphone-alt" />
           </div>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: 12 }}>В эфире пока тихо</h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: 400, margin: '0 auto' }}>
-            Станьте первым: создайте свою комнату и начните обсуждение.
+          <h3 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: 12, color: 'var(--text-primary)' }}>В эфире пока тихо</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: 460, margin: '0 auto 24px auto', lineHeight: 1.5 }}>
+            Станьте первым спикером: создайте свою голосовую комнату для обсуждений, докладов или брейншторма.
           </p>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="btn-glow"
+            style={{
+              margin: '0 auto',
+              background: 'var(--accent-primary)',
+              color: '#fff',
+              padding: '12px 28px',
+              borderRadius: 'var(--radius-lg)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '1rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 10,
+              border: 'none',
+              boxShadow: '0 8px 25px color-mix(in srgb, var(--accent-primary) 40%, transparent)'
+            }}
+          >
+            <i className="fas fa-plus" /> Создать комнату
+          </button>
         </div>
       ) : (
         <div style={{ 

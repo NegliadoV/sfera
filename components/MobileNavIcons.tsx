@@ -15,9 +15,10 @@ const GlowDefs = ({ uid }: { uid: string }) => (
 );
 
 export function ExploreIcon({ size = 26 }: { size?: number }) {
-  const uid = useId().replace(/:/g, '');
+  const rawId = useId();
+  const uid = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }} suppressHydrationWarning>
       <GlowDefs uid={uid} />
       <g filter={`url(#iconGlowNav-${uid})`}>
         {/* Компас / Радар */}
@@ -30,9 +31,10 @@ export function ExploreIcon({ size = 26 }: { size?: number }) {
 }
 
 export function CreateIcon({ size = 26 }: { size?: number }) {
-  const uid = useId().replace(/:/g, '');
+  const rawId = useId();
+  const uid = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }} suppressHydrationWarning>
       <GlowDefs uid={uid} />
       <g filter={`url(#iconGlowNav-${uid})`}>
         {/* Скругленный квадрат (Скворкл) и утолщенный плюс */}
@@ -44,9 +46,10 @@ export function CreateIcon({ size = 26 }: { size?: number }) {
 }
 
 export function MessagesIcon({ size = 26 }: { size?: number }) {
-  const uid = useId().replace(/:/g, '');
+  const rawId = useId();
+  const uid = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }} suppressHydrationWarning>
       <GlowDefs uid={uid} />
       <g filter={`url(#iconGlowNav-${uid})`}>
         {/* Округлые пузыри чата (Chat bubbles) */}
@@ -63,7 +66,8 @@ export function MessagesIcon({ size = 26 }: { size?: number }) {
 }
 
 export function ProfileIcon({ size = 26, avatarUrl }: { size?: number, avatarUrl?: string | null }) {
-  const uid = useId().replace(/:/g, '');
+  const rawId = useId();
+  const uid = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
   if (avatarUrl) {
     return (
       <div style={{ width: size, height: size, borderRadius: '50%', padding: 2, background: 'linear-gradient(135deg, var(--accent-primary, #0ea5e9), var(--accent-purple, #a855f7))', boxShadow: '0 0 8px rgba(168,85,247,0.6)' }}>
@@ -73,7 +77,7 @@ export function ProfileIcon({ size = 26, avatarUrl }: { size?: number, avatarUrl
     );
   }
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }} suppressHydrationWarning>
       <GlowDefs uid={uid} />
       <g filter={`url(#iconGlowNav-${uid})`}>
         {/* Минималистичный силуэт профиля */}
@@ -85,9 +89,10 @@ export function ProfileIcon({ size = 26, avatarUrl }: { size?: number, avatarUrl
 }
 
 export function MenuIcon({ size = 26 }: { size?: number }) {
-  const uid = useId().replace(/:/g, '');
+  const rawId = useId();
+  const uid = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }} suppressHydrationWarning>
       <GlowDefs uid={uid} />
       {/* Используем rect вместо горизонтальных path, чтобы WebKit (iOS) корректно считал размеры 
           для наложения SVG-фильтра свечения. */}
@@ -101,9 +106,10 @@ export function MenuIcon({ size = 26 }: { size?: number }) {
 }
 
 export function ShortsIcon({ size = 26 }: { size?: number }) {
-  const uid = useId().replace(/:/g, '');
+  const rawId = useId();
+  const uid = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }} suppressHydrationWarning>
       <GlowDefs uid={uid} />
       <g filter={`url(#iconGlowNav-${uid})`}>
         {/* Play icon in a rounded vertical rectangle similar to Shorts/Reels */}

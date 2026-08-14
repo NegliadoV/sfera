@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { MindMapCreateButton } from './MindMapCreateButton';
 
+import { DeleteMindMapButton } from '@/components/mind-maps/DeleteMindMapButton';
+
 export const dynamic = 'force-dynamic';
 
 export default async function PersonalMindMapsPage() {
@@ -46,39 +48,45 @@ export default async function PersonalMindMapsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mapsList.map((map) => (
-            <Link 
-              key={map.id} 
-              href={`/me/mind-maps/${map.id}`} 
-              className="group no-underline block"
-            >
-              <div className="platform-card h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-white/10 hover:border-white/20 bg-[var(--studio-panel-bg)] flex flex-col">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-blue-600 flex items-center justify-center text-white shadow-lg shadow-[var(--accent-primary)]/20">
-                      <i className="fa-solid fa-network-wired" aria-hidden />
+            <div key={map.id} className="relative group">
+              <Link 
+                href={`/me/mind-maps/${map.id}`} 
+                className="no-underline block h-full"
+              >
+                <div className="platform-card h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-white/10 hover:border-white/20 bg-[var(--studio-panel-bg)] flex flex-col">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent-primary)] to-blue-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-[var(--accent-primary)]/20">
+                          <i className="fa-solid fa-network-wired" aria-hidden />
+                        </div>
+                        <h3 className="text-lg font-bold text-white leading-tight break-words m-0 group-hover:text-[var(--accent-primary)] transition-colors truncate">
+                          {map.title}
+                        </h3>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-bold text-white leading-tight break-words m-0 group-hover:text-[var(--accent-primary)] transition-colors">
-                      {map.title}
-                    </h3>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5 text-xs text-white/50 font-medium">
+                    {map.universeId ? (
+                      <span className="flex items-center gap-1">
+                        <i className="fa-solid fa-globe" /> Вселенная
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <i className="fa-solid fa-lock" /> Приватная
+                      </span>
+                    )}
+                    <div className="flex items-center gap-3">
+                      <time dateTime={map.updatedAt.toISOString()}>
+                        {map.updatedAt.toLocaleDateString('ru')}
+                      </time>
+                      <DeleteMindMapButton mapId={map.id} mapTitle={map.title} />
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5 text-xs text-white/50 font-medium">
-                  {map.universeId ? (
-                    <span className="flex items-center gap-1">
-                      <i className="fa-solid fa-globe" /> Вселенная
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1">
-                      <i className="fa-solid fa-lock" /> Приватная
-                    </span>
-                  )}
-                  <time dateTime={map.updatedAt.toISOString()}>
-                    Обновлено: {map.updatedAt.toLocaleDateString('ru')}
-                  </time>
-                </div>
-              </div>
-            </Link>
+              </Link>
+            </div>
           ))}
         </div>
       )}

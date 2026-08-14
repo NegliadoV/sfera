@@ -1,7 +1,8 @@
 import React, { useId } from 'react';
 
 export function Logo({ size = 32, className = '' }: { size?: number, className?: string }) {
-  const uid = useId().replace(/:/g, '');
+  const rawId = useId();
+  const uid = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
 
   return (
     <svg 
@@ -12,6 +13,7 @@ export function Logo({ size = 32, className = '' }: { size?: number, className?:
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       style={{ overflow: 'visible' }}
+      suppressHydrationWarning
     >
       <defs>
         <linearGradient id={`neonMain-${uid}`} x1="0%" y1="100%" x2="100%" y2="0%">

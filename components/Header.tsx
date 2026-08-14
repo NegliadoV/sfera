@@ -50,7 +50,18 @@ export function Header({
         {/* Mobile Header (replicates React Native app top bar styles) */}
         <div className="flex md:hidden items-center w-full justify-between mt-1">
           <div className="flex items-center gap-2">
-             <SferaLogo compact href="/" />
+            {onMenuClick && (
+              <button
+                type="button"
+                onClick={onMenuClick}
+                aria-label="Открыть меню"
+                className="flex items-center justify-center w-[40px] h-[40px] relative shrink-0 active:scale-95 transition-transform cursor-pointer"
+                style={{ background: 'var(--bg-accent)', borderRadius: '50%', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+              >
+                <i className="fas fa-bars text-[1.1rem]"></i>
+              </button>
+            )}
+            <SferaLogo compact href="/" />
           </div>
           <div className="flex items-center gap-2">
             <Link href="/explore" aria-label="Поиск" className="flex items-center justify-center w-[40px] h-[40px] relative shrink-0 active:scale-95 transition-transform" style={{ background: 'var(--bg-accent)', borderRadius: '50%', border: '1px solid var(--border-color)' }}>

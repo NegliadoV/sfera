@@ -25,6 +25,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
+import { DeleteMindMapButton } from './DeleteMindMapButton';
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -878,6 +879,7 @@ export function PersonalMindMapInner(props: any) {
         >
           <i className="fas fa-trash-alt mr-1.5" /> Удалить выбранное
         </button>
+        {mapId && <DeleteMindMapButton mapId={mapId} mapTitle="эту карту" redirectOnDelete={true} />}
         <button 
           onClick={onOpenViewer}
           style={{

@@ -793,7 +793,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
                       className={`sidebar-sphere-item ${pathname?.split('/')[2] === u.slug ? 'active' : ''}`}
                     >
                       <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                        <SferaSphereIcon size="sm" color={u.sphereColor} />
+                        <SferaSphereIcon size="sm" color={u.sphereColor} icon={u.icon} name={u.name} />
                       </div>
                       <span style={{ flex: 1, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {u.name}

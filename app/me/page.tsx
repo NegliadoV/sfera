@@ -290,6 +290,7 @@ export default async function MePage(
                         slug={u.slug}
                         name={u.name}
                         description={u.description}
+                        icon={u.icon}
                         sphereColor={u.sphereColor}
                         updatedAt={u.updatedAt}
                         unreadCount={u.unreadCount}

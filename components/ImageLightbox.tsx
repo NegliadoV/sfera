@@ -68,33 +68,7 @@ export function ImageLightbox({ src, originalSrc, alt = '', className = '', styl
       : null;
 
   if (failed) {
-    return (
-      <div
-        className={className}
-        style={{
-          ...style,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 12,
-          backgroundColor: 'var(--bg-accent, #2a2d31)',
-          color: 'var(--text-secondary, #888)',
-          minHeight: 120,
-          padding: 16,
-        }}
-      >
-        <span style={{ fontSize: '0.875rem' }}>Превью недоступно</span>
-        <a
-          href={originalSrc ?? src}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ fontSize: '0.875rem', color: 'var(--accent)', textDecoration: 'underline' }}
-        >
-          Открыть изображение в новой вкладке
-        </a>
-      </div>
-    );
+    return null;
   }
 
   return (

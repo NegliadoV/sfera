@@ -17,7 +17,7 @@ export function UniverseCard({
   slug,
   name,
   description,
-  icon: _icon,
+  icon,
   sphereColor,
   href,
   className = '',
@@ -31,7 +31,7 @@ export function UniverseCard({
       title={description || name}
     >
       <div className="universes-circle-logo">
-        <SferaSphereIcon size="md" color={sphereColor} />
+        <SferaSphereIcon size="md" color={sphereColor} icon={icon} name={name} />
       </div>
       <span className="universes-circle-name">{name}</span>
     </Link>
