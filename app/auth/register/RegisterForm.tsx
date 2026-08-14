@@ -95,7 +95,7 @@ export function RegisterForm() {
       });
 
       if (signRes?.ok) {
-        window.location.href = '/universes';
+        window.location.href = '/onboarding';
       } else {
         router.push(`/auth/signin?registered=1&email=${encodeURIComponent(email.trim().toLowerCase())}`);
       }

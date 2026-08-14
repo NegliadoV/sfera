@@ -36,6 +36,19 @@ export default async function ExplorePage() {
   }> = [];
 
   try {
+    // ── Алгоритмическая лента ────────────────────────────────────────
+    // Скоринг: (saves + 1) / (age_hours + 2)^1.5
+    // Для залогиненных: отслеживаемые сферы ×1.6
+    const userId = session?.user?.id;
+
+    const personalBoost = userId
+      ? sql`CASE WHEN ${universes.slug} IN (
+              SELECT u2.slug FROM universes u2
+              JOIN universe_tracking ut ON ut.universe_id = u2.id
+              WHERE ut.user_id = ${userId}
+            ) THEN 1.6 ELSE 1.0 END`
+      : sql`1.0`;
+
     const list = await db
       .select({
         id: content.id,
@@ -58,7 +71,12 @@ export default async function ExplorePage() {
       .from(content)
       .leftJoin(user, eq(content.authorId, user.id))
       .innerJoin(universes, eq(content.universeId, universes.id))
-      .orderBy(desc(content.savesCount), desc(content.createdAt))
+      .orderBy(sql`
+        (${content.savesCount} + 1.0)
+        / POWER(EXTRACT(EPOCH FROM (NOW() - ${content.createdAt})) / 3600.0 + 2, 1.5)
+        * ${personalBoost}
+        DESC
+      `)
       .limit(50);
 
     contentList = await Promise.all(
@@ -102,10 +120,12 @@ export default async function ExplorePage() {
         <div className="relative z-10">
           <h1 className="platform-hero-title" style={{ fontSize: '2rem', marginBottom: 8 }}>
             <i className="fa-solid fa-fire text-[var(--accent-primary)] mr-3"></i> 
-            В тренде
+            {session?.user ? 'Для тебя' : 'В тренде'}
           </h1>
           <p className="platform-card-desc">
-            Лучшие материалы, идеи и конспекты со всех Сфер, отсортированные по полезности.
+            {session?.user
+              ? 'Лучшие материалы из твоих сфер и со всей платформы — подобраны алгоритмом.'
+              : 'Лучшие материалы со всех Сфер, подобранные по свежести и популярности.'}
           </p>
         </div>
       </div>
@@ -118,10 +138,9 @@ export default async function ExplorePage() {
         <ContentFeedGrid
           items={contentList.map(c => ({
             ...c,
-            // Override title slightly to show which universe it came from
             title: `[${c.universeName}] ${c.title}`
           }))}
-          slug="explore" // not a real universe slug, but required for links
+          slug="explore"
         />
       )}
     </div>
