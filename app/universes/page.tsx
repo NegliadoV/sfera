@@ -2,6 +2,7 @@ import { db, universes } from '@/lib/db';
 import { desc } from 'drizzle-orm';
 import { UniverseCard } from '@/components/universe/UniverseCard';
 import Link from 'next/link';
+import '@/scripts/copy-icons';
 
 export const metadata = {
   title: 'Все комнаты знаний | Roominate',

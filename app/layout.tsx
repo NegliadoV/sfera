@@ -13,6 +13,19 @@ export const metadata: Metadata = {
   title: 'Roominate | Платформа для глубокого познания',
   description:
     'Инструмент для мышления и осмысленного диалога. Тематические вселенные, структурированные дискуссии, совместное познание.',
+  openGraph: {
+    title: 'Roominate | Платформа для глубокого познания',
+    description: 'Инструмент для мышления и осмысленного диалога. Тематические вселенные и структурированные знания.',
+    url: 'https://roominate.rest',
+    siteName: 'Roominate',
+    locale: 'ru_RU',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Roominate | Платформа для глубокого познания',
+    description: 'Инструмент для мышления и осмысленного диалога.',
+  },
   appleWebApp: {
     capable: true,
     title: 'Roominate',

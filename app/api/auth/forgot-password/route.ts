@@ -3,10 +3,15 @@ import { db } from '@/lib/db';
 import { user, passwordResetToken } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import nodemailer from 'nodemailer';
+import { hashPassword } from '@/lib/password';
+import { rateLimit } from '@/lib/rate-limit';
+
 
 function generateOTP() {
-  // Генерация 6-значного кода
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // Генерация 6-значного кода с криптографически безопасным генератором
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  return (100000 + (array[0] % 900000)).toString();
 }
 
 export async function POST(req: NextRequest) {
@@ -18,6 +23,27 @@ export async function POST(req: NextRequest) {
 
     const userEmail = email.trim().toLowerCase();
 
+    // ── Rate limiting ─────────────────────────────────────────────────────────
+    // 3 попытки на email за 10 минут (предотвращает спам конкретному адресу)
+    const byEmail = await rateLimit({ key: `fp:email:${userEmail}`, limit: 3, windowSec: 600 });
+    if (!byEmail.ok) {
+      return NextResponse.json(
+        { error: byEmail.error },
+        { status: 429, headers: { 'Retry-After': String(byEmail.resetAt - Math.floor(Date.now() / 1000)) } }
+      );
+    }
+
+    // 10 попыток с одного IP за 10 минут (предотвращает перебор разных email)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? req.headers.get('x-real-ip') ?? 'unknown';
+    const byIp = await rateLimit({ key: `fp:ip:${ip}`, limit: 10, windowSec: 600 });
+    if (!byIp.ok) {
+      return NextResponse.json(
+        { error: byIp.error },
+        { status: 429, headers: { 'Retry-After': String(byIp.resetAt - Math.floor(Date.now() / 1000)) } }
+      );
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const [found] = await db.select().from(user).where(eq(user.email, userEmail)).limit(1);
 
     if (!found) {
@@ -27,14 +53,18 @@ export async function POST(req: NextRequest) {
     const otp = generateOTP();
     const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 минут
 
+    // Хешируем OTP перед сохранением в БД (scrypt).
+    // В письмо идёт сырой код, в БД — только хеш.
+    const tokenHash = await hashPassword(otp);
+
     // Сохраняем или обновляем токен в базе
     await db.insert(passwordResetToken).values({
       email: userEmail,
-      token: otp,
+      token: tokenHash,
       expires,
     }).onConflictDoUpdate({
       target: passwordResetToken.email,
-      set: { token: otp, expires },
+      set: { token: tokenHash, expires },
     });
 
     // Отправляем код на почту (если настроен SMTP)

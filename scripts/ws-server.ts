@@ -4,6 +4,7 @@
  *
  * - Клиенты подключаются; при auth token входят в user:{userId}.
  * - API вызывает POST /notify (roomId или targetType:user + targetId).
+ * - join_room требует подписанный room ticket (выдаёт POST /api/spaces/room-ticket).
  */
 import 'dotenv/config';
 import { createServer } from 'http';
@@ -20,7 +21,7 @@ function base64UrlDecode(str: string): Buffer {
   return Buffer.from(base64, 'base64');
 }
 
-function verifyWsToken(token: string): string | null {
+function verifySignedToken<T extends object>(token: string): T | null {
   try {
     const [payloadB64, sigB64] = token.split('.');
     if (!payloadB64 || !sigB64) return null;
@@ -29,11 +30,24 @@ function verifyWsToken(token: string): string | null {
     if (expectedSig.length !== actualSig.length || !timingSafeEqual(expectedSig, actualSig)) return null;
     const payload = JSON.parse(Buffer.from(base64UrlDecode(payloadB64)).toString('utf8'));
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
-    return payload.userId ?? null;
+    return payload as T;
   } catch {
     return null;
   }
 }
+
+function verifyWsToken(token: string): string | null {
+  const payload = verifySignedToken<{ userId?: string }>(token);
+  return payload?.userId ?? null;
+}
+
+/** Проверяет room ticket и возвращает { userId, roomId } или null. */
+function verifyRoomTicket(ticket: string): { userId: string; roomId: string } | null {
+  const payload = verifySignedToken<{ userId?: string; roomId?: string }>(ticket);
+  if (!payload?.userId || !payload?.roomId) return null;
+  return { userId: payload.userId, roomId: payload.roomId };
+}
+
 
 const httpServer = createServer((req, res) => {
   if (req.method === 'POST' && req.url === '/notify') {
@@ -135,11 +149,27 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('join_room', (payload: { roomId: string }) => {
+  socket.on('join_room', (payload: { roomId: string; ticket?: string }) => {
     const roomId = payload?.roomId;
-    if (roomId && typeof roomId === 'string') {
-      socket.join(roomId);
+    if (!roomId || typeof roomId !== 'string') return;
+
+    // Верифицируем room ticket
+    const ticket = payload?.ticket;
+    if (ticket) {
+      const verified = verifyRoomTicket(ticket);
+      if (!verified || verified.roomId !== roomId) {
+        socket.emit('room_join_error', { roomId, error: 'invalid_ticket' });
+        return;
+      }
+    } else {
+      // Без тикета — отказываем в продакшне; в dev-режиме пропускаем
+      if (process.env.NODE_ENV === 'production') {
+        socket.emit('room_join_error', { roomId, error: 'ticket_required' });
+        return;
+      }
     }
+
+    socket.join(roomId);
   });
 
   socket.on('leave_room', (payload: { roomId: string }) => {

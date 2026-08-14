@@ -6,6 +6,8 @@ import type { Session } from 'next-auth';
 import { Header } from '@/components/Header';
 import { AppShell } from '@/components/AppShell';
 import { DMBadgeListener } from '@/components/DMBadgeListener';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
 
 function useShowSidebar(isAuthenticated: boolean) {
   const pathname = usePathname();
@@ -58,14 +60,20 @@ export function AppLayout({ session, children }: { session: Session | null; chil
     <div className="app-shell-unified">
       <DMBadgeListener enabled={!!session?.user?.id} />
       <div className="app-shell-content">
-        <AppShell
-          session={session}
-          showSidebar={showSidebar}
-          mobileMenuOpen={mobileMenuOpen}
-          setMobileMenuOpen={setMobileMenuOpen}
-        >
-          {children}
-        </AppShell>
+        {/* Изолируем AppShell (сайдбар + шапка) от ошибок страниц */}
+        <ErrorBoundary name="AppShell">
+          <AppShell
+            session={session}
+            showSidebar={showSidebar}
+            mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
+          >
+            {/* Изолируем контент страниц отдельной границей */}
+            <ErrorBoundary name="PageContent">
+              {children}
+            </ErrorBoundary>
+          </AppShell>
+        </ErrorBoundary>
       </div>
     </div>
   );

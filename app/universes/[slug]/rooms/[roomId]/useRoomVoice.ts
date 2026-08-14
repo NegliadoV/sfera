@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { fetchRoomTicket } from '@/lib/room-ticket';
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? 'http://localhost:3002';
+
 
 /** Собираем один поток из карты потоков по userId */
 function mergeRemoteStreams(streamsMap: Map<string, MediaStream>): MediaStream {
@@ -52,9 +54,21 @@ export function useRoomVoice(
     if (!enabled || !currentUserId || !roomId) return;
     const socket = io(WS_URL, { path: '/socket.io', transports: ['websocket', 'polling'] });
     socketRef.current = socket;
-    const onConnect = () => socket.emit('join_room', { roomId });
-    if (socket.connected) onConnect();
-    else socket.once('connect', onConnect);
+
+    // Получаем ticket и выполняем join_room
+    fetchRoomTicket(roomId).then((ticket) => {
+      const onConnect = () => socket.emit('join_room', { roomId, ticket });
+      if (socket.connected) onConnect();
+      else socket.once('connect', onConnect);
+    });
+
+    socket.on('room_join_error', (data: { error?: string }) => {
+      console.warn('[useRoomVoice] join_room rejected:', data?.error);
+      socket.removeAllListeners();
+      socket.disconnect();
+      socketRef.current = null;
+    });
+
     return () => {
       socket.emit('leave_room', { roomId });
       socket.removeAllListeners();
@@ -62,6 +76,7 @@ export function useRoomVoice(
       setTimeout(() => socket.disconnect(), 50);
     };
   }, [enabled, roomId, currentUserId]);
+
 
   useEffect(() => {
     if (!enabled || !socketRef.current) return;

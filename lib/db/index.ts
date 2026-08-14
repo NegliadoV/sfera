@@ -2,8 +2,12 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from './schema';
 
-const connectionString =
-  process.env.DATABASE_URL ?? 'postgres://horizon:horizon_dev@localhost:5432/horizon';
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error(
+    'DATABASE_URL is not set. Copy .env.example to .env and fill in your database URL.'
+  );
+}
 
 const globalForDb = globalThis as unknown as {
   _dbClient: postgres.Sql | undefined;

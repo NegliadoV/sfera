@@ -25,6 +25,11 @@ export const user = pgTable('user', {
   userTag: text('user_tag').unique(),
   /** Баланс кристаллов SFERA */
   crystals: integer('crystals').notNull().default(0),
+  /**
+   * Версия сессии — инкрементируется при смене пароля или явном выходе со всех устройств.
+   * JWT-токены содержат эту версию; если она устарела — токен отклоняется.
+   */
+  sessionVersion: integer('session_version').notNull().default(0),
 });
 
 export const account = pgTable(
@@ -80,7 +85,7 @@ export const passwordResetToken = pgTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     email: text('email').notNull(),
-    token: text('token').notNull(), // 6-значный OTP-код (лучше хранить хеш для безопасности)
+    token: text('token').notNull(), // scrypt-хэш 6-значного OTP-кода (plain text отправляется только в письме)
     expires: timestamp('expires', { mode: 'date' }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },

@@ -1,0 +1,44 @@
+/* Background Blobs и прочие @keyframes анимации */
+
+/* Background Blobs Animation */
+@keyframes blob-float {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.bg-blob {
+  position: absolute;
+  /* optimized performance: replacing heavy filter: blur(120px) with radial-gradients */
+  border-radius: 50%;
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
+  animation: blob-float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+@media (max-width: 768px) {
+  .bg-blob {
+    animation: none !important; /* disable continuous repaints on mobile */
+  }
+}
+
+.blob-1 {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, var(--accent-primary) 0%, transparent 70%);
+  animation-delay: 0s;
+}
+
+.blob-2 {
+  bottom: -20%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, var(--accent-secondary, var(--accent-purple)) 0%, transparent 70%);
+  animation-delay: -5s;
+}
