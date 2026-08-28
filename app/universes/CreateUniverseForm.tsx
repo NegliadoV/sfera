@@ -45,8 +45,13 @@ export function CreateUniverseForm() {
     setConflictSlug(null);
     try {
       const s = name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      // Нормализуем иконку перед отправкой
-      const normalizedIcon = icon.trim() ? (icon.trim().startsWith('fa-') ? icon.trim() : `fa-${icon.trim()}`) : undefined;
+      // Нормализуем иконку (URL картинки или FontAwesome класс)
+      const rawIcon = icon.trim();
+      const normalizedIcon = rawIcon
+        ? (rawIcon.startsWith('http') || rawIcon.startsWith('/') || rawIcon.endsWith('.svg') || rawIcon.endsWith('.png') || rawIcon.endsWith('.jpg')
+            ? rawIcon
+            : rawIcon.startsWith('fa-') ? rawIcon : `fa-${rawIcon}`)
+        : undefined;
       
       const res = await fetch('/api/universes', {
         method: 'POST',
@@ -131,18 +136,18 @@ export function CreateUniverseForm() {
 
         <div className="universes-field-full">
           <div className="universes-field-label">
-            <i className="fa-solid fa-image" aria-hidden /> ИКОНКА{' '}
-            <span className="universes-field-hint">НЕОБЯЗАТЕЛЬНО</span>
+            <i className="fa-solid fa-image" aria-hidden /> АВАТАР ИЛИ ИКОНКА{' '}
+            <span className="universes-field-hint">ССЫЛКА НА ФОТО ИЛИ ИКОНКА</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div className="universes-input-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <i className={`fa-solid ${icon.trim() || 'fa-globe'}`} style={{ fontSize: '1.2rem', color: 'var(--accent-primary-muted)' }} aria-hidden />
+              <i className={`fa-solid ${icon.trim() && !icon.startsWith('http') ? (icon.startsWith('fa-') ? icon : `fa-${icon}`) : 'fa-image'}`} style={{ fontSize: '1.2rem', color: 'var(--accent-primary-muted)' }} aria-hidden />
               <input
                 type="text"
                 id="universe-icon"
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
-                placeholder="fa-globe (Font Awesome класс)"
+                placeholder="https://example.com/avatar.jpg или fa-atom"
                 style={{ flex: 1 }}
               />
             </div>

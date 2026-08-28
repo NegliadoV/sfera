@@ -23,6 +23,8 @@
     "db:push": "drizzle-kit push",
     "db:seed": "tsx scripts/seed.ts",
     "db:clean-seed": "tsx scripts/clean-and-seed-universes.ts",
+    "seed:rooms": "npx tsx --env-file=.env scripts/seed-real-rooms.ts",
+    "seed:sources": "npx tsx --env-file=.env scripts/seed-rss-sources.ts",
     "worker": "tsx scripts/worker-db.ts",
     "worker:redis": "tsx scripts/worker.ts",
     "worker:digest": "tsx scripts/worker-digest.ts",

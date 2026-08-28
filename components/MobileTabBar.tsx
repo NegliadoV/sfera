@@ -37,10 +37,10 @@ export function MobileTabBar({ onMenuClick, isMenuOpen }: { onMenuClick?: () => 
           {isActive('/rooms') && <div className="nav-indicator"></div>}
         </Link>
 
-        {/* Центральная кнопка: Шортсы (Лента) */}
-        <Link href="/shorts" className="flex flex-col items-center justify-center flex-1 h-full shrink-0 px-2">
-          <div className={`nav-icon-wrapper w-[44px] h-[44px] rounded-full transform active:scale-90 ${isActive('/shorts') ? 'bg-[color-mix(in_srgb,var(--accent-primary)_20%,transparent)] shadow-[0_0_15px_var(--accent-primary)]' : ''}`}>
-            <ShortsIcon size={34} />
+        {/* Центральная кнопка: Комнаты знаний */}
+        <Link href="/universes" className="flex flex-col items-center justify-center flex-1 h-full shrink-0 px-2">
+          <div className={`nav-icon-wrapper w-[44px] h-[44px] rounded-full transform active:scale-90 ${isActive('/universes') ? 'bg-[color-mix(in_srgb,var(--accent-primary)_20%,transparent)] shadow-[0_0_15px_var(--accent-primary)]' : ''}`}>
+            <ExploreIcon size={26} />
           </div>
         </Link>
 

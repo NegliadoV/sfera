@@ -38,7 +38,7 @@ export function OnboardingWizard({ universes }: { universes: Universe[] }) {
       } catch {}
     }
     startTransition(() => {
-      router.push('/explore');
+      router.push('/explore?welcome=1');
     });
   }
 
@@ -85,7 +85,12 @@ export function OnboardingWizard({ universes }: { universes: Universe[] }) {
                   boxShadow: active ? '0 0 16px rgba(37,99,235,0.2)' : 'none',
                 }}
               >
-                <div style={{ fontSize: 28, marginBottom: 8 }}>{u.icon ?? '🌐'}</div>
+                <div style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, fontSize: 22 }}>
+                  {u.icon?.startsWith('fa-')
+                    ? <i className={`fa-solid ${u.icon}`} style={{ color: u.sphereColor ?? '#60a5fa' }} />
+                    : <span style={{ fontSize: 26 }}>{u.icon ?? '🌐'}</span>
+                  }
+                </div>
                 <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.3 }}>{u.name}</div>
                 {active && (
                   <div style={{ marginTop: 8, color: '#60a5fa', fontSize: 18 }}>✓</div>

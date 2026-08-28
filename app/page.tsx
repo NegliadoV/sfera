@@ -14,10 +14,12 @@ export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   // Авторизованных — сразу в приложение
+  let session = null;
   try {
-    const session = await auth();
-    if (session?.user) redirect('/explore');
+    session = await auth();
   } catch {}
+  if (session?.user) redirect('/explore');
+
 
   // Загружаем публичные данные для превью
   let previewUniverses: { name: string; slug: string; icon: string | null; sphereColor: string | null }[] = [];
