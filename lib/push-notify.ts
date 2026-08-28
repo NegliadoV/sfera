@@ -50,9 +50,10 @@ export async function sendPushNotification(
           },
           pushPayload
         );
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Удаляем "мертвые" или отписанные endpoint'ы
-        if (err.statusCode === 404 || err.statusCode === 410) {
+        const statusCode = (err as { statusCode?: number })?.statusCode;
+        if (statusCode === 404 || statusCode === 410) {
           console.log(`[push-notify] Subscription expired for ${userId}, removing endpoint...`);
           await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, sub.endpoint));
         } else {

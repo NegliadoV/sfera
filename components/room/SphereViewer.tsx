@@ -8,7 +8,7 @@ export function SphereViewer() {
   const [inputVal, setInputVal] = useState('/universes');
 
   // Synchronize navigation
-  const onMessage = useCallback((msg: any) => {
+  const onMessage = useCallback((msg: { payload: Uint8Array }) => {
     try {
       const data = JSON.parse(new TextDecoder().decode(msg.payload));
       if (data.type === 'NAV_SPHERE' && data.url) {

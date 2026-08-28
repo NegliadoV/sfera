@@ -1,8 +1,10 @@
 import { db, universes } from '@/lib/db';
-import { desc } from 'drizzle-orm';
+import { desc, sql } from 'drizzle-orm';
 import { UniverseCard } from '@/components/universe/UniverseCard';
 import Link from 'next/link';
 import '@/scripts/copy-icons';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
 
 export const metadata = {
   title: 'Все комнаты знаний | Roominate',
@@ -11,6 +13,20 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function UniversesHubPage() {
+  // Новый пользователь без подписок — показываем онбординг
+  let session = null;
+  try { session = await auth(); } catch {}
+  if (session?.user?.id) {
+    try {
+      const [trackCount] = await db.execute(
+        sql`SELECT COUNT(*)::int as cnt FROM universe_tracking WHERE user_id = ${session.user.id}`
+      ) as unknown as [{ cnt: number }];
+      if (!trackCount || trackCount.cnt === 0) {
+        redirect('/onboarding');
+      }
+    } catch {}
+  }
+
   const allUniverses = await db
     .select({
       slug: universes.slug,
