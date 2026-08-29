@@ -88,6 +88,9 @@ export const en: TranslationSchema = {
     promptPost: 'Paste post link or Roominate post ID:',
     promptMedia: 'Paste image or YouTube video link:',
     myMaps: 'My Maps',
+    deleteMap: 'Delete map',
+    deleteConfirm: 'Are you sure you want to delete this map? This action cannot be undone.',
+    deleteError: 'Error deleting map.',
   },
   sources: {
     addSource: 'Add source',

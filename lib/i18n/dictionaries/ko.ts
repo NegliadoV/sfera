@@ -88,6 +88,9 @@ export const ko: TranslationSchema = {
     promptPost: '게시물 링크 또는 Roominate 게시물 ID 붙여넣기:',
     promptMedia: '이미지 또는 YouTube 동영상 링크 붙여넣기:',
     myMaps: '내 마인드맵',
+    deleteMap: '마인드맵 삭제',
+    deleteConfirm: '이 마인드맵을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.',
+    deleteError: '마인드맵 삭제 중 오류가 발생했습니다.',
   },
   sources: {
     addSource: '소스 추가',

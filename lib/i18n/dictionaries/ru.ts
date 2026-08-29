@@ -88,6 +88,9 @@ export const ru: TranslationSchema = {
     promptPost: 'Вставьте ссылку на пост или ID поста Roominate:',
     promptMedia: 'Вставьте ссылку на картинку или YouTube видео:',
     myMaps: 'Мои Карты',
+    deleteMap: 'Удалить карту',
+    deleteConfirm: 'Вы уверены, что хотите удалить эту карту? Это действие нельзя отменить.',
+    deleteError: 'Ошибка при удалении карты.',
   },
   sources: {
     addSource: 'Добавить источник',
