@@ -5,6 +5,7 @@ import { useTranslation } from '@/components/i18n/LanguageProvider';
 import { AddContentForm } from '../AddContentForm';
 import { ContentFeedGrid } from '../ContentFeedGrid';
 import { TrackUniverseButton } from '@/components/content/TrackUniverseButton';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 import type { Session } from 'next-auth';
 
@@ -54,9 +55,35 @@ export function ContentPageClient({ slug, name, universeId, hasSession, contentL
       )}
 
       {contentList.length === 0 ? (
-        <p className="platform-card-desc">
-          {t('content.feedEmpty', 'Пока нет материалов. Добавьте контент выше или запустите агрегацию в Сборке.')}
-        </p>
+        <div style={{ marginTop: 16 }}>
+          <EmptyState
+            icon="fa-newspaper"
+            variant="feed"
+            title={t('content.emptyTitle', 'В этой комнате пока нет материалов')}
+            description={
+              hasSession
+                ? t('content.emptyDescAuth', 'Станьте первым автором! Поделитесь ссылкой, мыслью или запустите агрегацию источников.')
+                : t('content.emptyDescGuest', 'Здесь скоро появятся материалы. Войдите, чтобы добавить первый пост в эту комнату.')
+            }
+            primaryAction={hasSession ? {
+              label: t('content.emptyAction', 'Добавить первый материал'),
+              icon: 'fa-plus',
+              onClick: () => {
+                const form = document.getElementById('add-content-form');
+                form?.scrollIntoView({ behavior: 'smooth' });
+                (form?.querySelector('input,textarea') as HTMLElement)?.focus();
+              },
+            } : {
+              label: t('auth.signIn', 'Войти'),
+              href: '/auth/signin',
+              icon: 'fa-sign-in-alt',
+            }}
+            secondaryAction={{
+              label: t('rooms.knowledgeRooms', 'Все комнаты'),
+              href: '/rooms',
+            }}
+          />
+        </div>
       ) : (
         <ContentFeedGrid
           items={contentList}

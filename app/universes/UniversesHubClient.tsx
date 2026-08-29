@@ -6,6 +6,7 @@ import type { Session } from 'next-auth';
 import { UniverseCard } from '@/components/universe/UniverseCard';
 import { CreateUniverseDialog } from '@/app/universes/CreateUniverseDialog';
 import { useTranslation } from '@/components/i18n/LanguageProvider';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export interface UniverseItem {
   id?: string;
@@ -193,32 +194,25 @@ export function UniversesHubClient({
 
         {/* Рендеринг списков комнат */}
         {filteredUniverses.length === 0 ? (
-          <div className="text-center py-16 px-4 border border-dashed border-[var(--border-subtle)] rounded-2xl bg-[var(--studio-panel-bg)]/40 flex flex-col items-center justify-center">
-            <div className="w-14 h-14 rounded-2xl bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] flex items-center justify-center text-2xl mb-4">
-              <i className="fa-solid fa-magnifying-glass" />
-            </div>
-            <h4 className="text-base font-semibold text-[var(--text-primary)] mb-1">
-              {hasSearch
-                ? `${t('rooms.search', 'Ничего не найдено')}: «${searchQuery}»`
-                : t('rooms.noRooms', 'Пока нет комнат')}
-            </h4>
-            <p className="text-xs text-[var(--text-muted)] max-w-sm mb-5">
-              {hasSearch
-                ? 'Попробуйте изменить формулировку запроса или проверьте правильность написания названия.'
-                : 'Создайте первую комнату знаний на платформе прямо сейчас!'}
-            </p>
-            {hasSearch ? (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="platform-btn platform-btn-sm cursor-pointer"
-              >
-                <i className="fa-solid fa-rotate-left" /> {t('rooms.resetSearch', 'Сбросить поиск')}
-              </button>
-            ) : session?.user ? (
-              <CreateUniverseDialog compact />
-            ) : null}
-          </div>
+          <EmptyState
+            variant="room"
+            icon={hasSearch ? 'fa-magnifying-glass' : 'fa-shapes'}
+            title={hasSearch
+              ? `${t('sources.nothingFound', 'Ничего не найдено')}: «${searchQuery}»`
+              : t('rooms.noRooms', 'Пока нет комнат')}
+            description={hasSearch
+              ? t('rooms.searchTip', 'Попробуйте изменить формулировку или проверьте написание.')
+              : t('rooms.createFirst', 'Создайте первую тематическую комнату прямо сейчас — объедините людей по общему интересу!')}
+            primaryAction={hasSearch ? {
+              label: t('rooms.resetSearch', 'Сбросить поиск'),
+              icon: 'fa-rotate-left',
+              onClick: () => setSearchQuery(''),
+            } : session?.user ? undefined : {
+              label: t('auth.signIn', 'Войти'),
+              href: '/auth/signin',
+              icon: 'fa-sign-in-alt',
+            }}
+          />
         ) : showSeparatedSections ? (
           <div className="flex flex-col gap-10">
             {/* 1. Отдельный список: Отслеживаемые комнаты */}
