@@ -30,7 +30,7 @@ export default async function AggregatorSettingsPage({
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
-        <Link href="/">Сферы</Link>
+        <Link href="/rooms">Комнаты</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <Link href={`/universes/${slug}`}>{universe.name}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />

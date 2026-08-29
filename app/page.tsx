@@ -40,9 +40,9 @@ export default async function HomePage() {
 
   const features = [
     {
-      icon: 'fa-solid fa-globe',
+      icon: 'fa-solid fa-shapes',
       color: '#3b82f6',
-      title: 'Сферы по интересам',
+      title: 'Тематические комнаты',
       desc: 'Создавай тематические пространства — от философии до квантовой физики. Агрегируй контент из Telegram, RSS и собственных публикаций.',
     },
     {
@@ -102,7 +102,7 @@ export default async function HomePage() {
         </h1>
 
         <p style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'rgba(255,255,255,0.5)', maxWidth: 560, margin: '0 auto 48px', lineHeight: 1.7 }}>
-          Roominate — пространство для тех, кто ценит качественный контент. Создавай сферы, участвуй в дискуссиях, смотри шортсы и общайся в живых комнатах.
+          Roominate — пространство для тех, кто ценит качественный контент. Создавай комнаты, участвуй в дискуссиях, смотри шортсы и общайся в живых комнатах.
         </p>
 
         <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>

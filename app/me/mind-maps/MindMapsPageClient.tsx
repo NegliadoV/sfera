@@ -27,7 +27,7 @@ export function MindMapsPageClient({ mapsList }: MindMapsPageClientProps) {
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
-        <Link href="/">{t('nav.spheres', 'Сферы')}</Link>
+        <Link href="/rooms">{t('nav.rooms', 'Комнаты')}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <Link href="/me/content">{t('nav.myContent', 'Мой контент')}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
