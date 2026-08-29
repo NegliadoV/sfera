@@ -1,63 +1,24 @@
 'use client';
 
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
-
-type NotificationItem = {
-  id: string;
-  contentId: string;
-  slug: string;
-  title: string;
-  type: string;
-  read: boolean;
-  createdAt: string;
-};
+import { useNotifications } from '@/components/providers/NotificationsProvider';
 
 const DROPDOWN_WIDTH = 320;
 const VIEWPORT_PADDING = 8;
 
 export function NotificationsDropdown() {
   const router = useRouter();
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<NotificationItem[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { items, unreadCount, loading, markAllAsRead, markAsRead } = useNotifications();
   const ref = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; maxHeight: number } | null>(null);
 
   const { isSupported, subscription, loading: pushLoading, subscribe, unsubscribe, testPush } = usePushNotifications();
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch('/api/me/notifications', { credentials: 'include' });
-      const data = await res.json();
-      if (res.ok) {
-        setItems(data.items ?? []);
-        setUnreadCount(data.unreadCount ?? 0);
-      }
-    } catch (e) {
-      console.warn('Failed to fetch notifications:', e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60_000);
-    return () => clearInterval(interval);
-  }, [pathname]);
-
-  useEffect(() => {
-    const onFocus = () => fetchNotifications();
-    window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -81,34 +42,6 @@ export function NotificationsDropdown() {
     const maxHeight = Math.min(400, window.innerHeight - top - VIEWPORT_PADDING);
     setDropdownPosition({ top, left, maxHeight });
   }, [open]);
-
-  const markAllAsRead = async () => {
-    const res = await fetch('/api/me/notifications', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ markAll: true }),
-    });
-    if (res.ok) {
-      setItems((prev) => prev.map((n) => ({ ...n, read: true })));
-      setUnreadCount(0);
-    }
-  };
-
-  const markAsRead = async (id: string) => {
-    const res = await fetch('/api/me/notifications', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ id }),
-    });
-    if (res.ok) {
-      setItems((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-      );
-      setUnreadCount((c) => Math.max(0, c - 1));
-    }
-  };
 
   return (
     <div className="relative" ref={ref}>

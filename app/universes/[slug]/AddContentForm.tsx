@@ -2,8 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RichArticleEditor } from '@/components/content/RichArticleEditor';
+import dynamic from 'next/dynamic';
 import { useTranslation } from '@/components/i18n/LanguageProvider';
+
+const RichArticleEditor = dynamic(
+  () => import('@/components/content/RichArticleEditor').then((mod) => mod.RichArticleEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="rich-editor-root" style={{ minHeight: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6 }}>
+        <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: 8 }} />
+        <span>Загрузка редактора…</span>
+      </div>
+    ),
+  }
+);
 
 type Props = { universeId: string; slug: string };
 
