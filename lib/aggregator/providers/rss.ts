@@ -210,6 +210,10 @@ function cleanXmlText(text: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&apos;/gi, "'")
     .replace(/&amp;/gi, '&')
+    // Числовые HTML-сущности (десятичные) — например &#8217; = '
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    // Числовые HTML-сущности (шестнадцатеричные) — например &#x2019; = '
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/p>/gi, '\n')
     .replace(/<\/div>/gi, '\n')
@@ -218,6 +222,7 @@ function cleanXmlText(text: string): string {
     .replace(/[ \t]+/g, ' ')
     .trim();
 }
+
 
 /** Раскомментировать HTML-сущности (RSS экранирует < > " в description) */
 function unescapeHtmlEntities(s: string): string {

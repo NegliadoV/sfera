@@ -160,6 +160,8 @@ export const content = pgTable('content', {
   tags: jsonb('tags'), // Массив строк или объект с тегами
   /** Когда задано — пост закреплён в ленте сферы (отображается сверху) */
   pinnedAt: timestamp('pinned_at', { withTimezone: true }),
+  /** Скрыт модератором — не показывается в лентах */
+  hidden: boolean('hidden').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -675,9 +677,34 @@ export const userHygieneSettings = pgTable('user_hygiene_settings', {
   focusMode: boolean('focus_mode').notNull().default(false),
   dailyTimeLimitMinutes: integer('daily_time_limit_minutes'), // null = без лимита
   digestDelivery: digestDeliveryEnum('digest_delivery').notNull().default('none'),
+  /** Умная персонализированная лента на основе просмотров и интересов (по умолчанию включена) */
+  smartFeedEnabled: boolean('smart_feed_enabled').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+/** История просмотров контента пользователем для умных рекомендаций */
+export const userContentViews = pgTable(
+  'user_content_views',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    universeId: uuid('universe_id')
+      .notNull()
+      .references(() => universes.id, { onDelete: 'cascade' }),
+    viewCount: integer('view_count').notNull().default(1),
+    lastViewedAt: timestamp('last_viewed_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex('idx_user_content_views_user_content').on(t.userId, t.contentId),
+  ]
+);
 
 // --- Фаза 6: Монетизация (ЮKassa) ---
 export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'canceled', 'past_due', 'unpaid', 'pending_payment']);
@@ -787,3 +814,32 @@ export const pushSubscriptions = pgTable('push_subscriptions', {
   auth: text('auth').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+// --- Система «Резонанс» (уникальные реакции на контент) ---
+export const resonanceTypeEnum = pgEnum('resonance_type', [
+  'insight',    // 💡 Озарение — «Открыло новую мысль»
+  'ignite',     // 🔥 Важно — «Это надо знать»
+  'ponder',     // 🤔 Задуматься — «Сложно, надо осмыслить»
+  'resonate',   // ❤️ Отклик — «Тронуло»
+  'inspire',    // 🚀 Вдохновляет — «Хочу действовать»
+  'challenge',  // 🧊 Спорно — «Не согласен, но интересно»
+]);
+
+export const contentResonances = pgTable(
+  'content_resonances',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    contentId: uuid('content_id')
+      .notNull()
+      .references(() => content.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    type: resonanceTypeEnum('type').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    // Один пользователь — один тип резонанса на один пост
+    uniqueIndex('content_resonances_user_content_idx').on(t.contentId, t.userId),
+  ]
+);

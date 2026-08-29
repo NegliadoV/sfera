@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ShareToSphereButton } from '@/components/ShareToSphereButton';
 import { ImageLightbox } from '@/components/ImageLightbox';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 type UserContentItem = {
   id: string;
@@ -18,8 +19,14 @@ type UserContentItem = {
 };
 
 export default function MeContentPage() {
+  const { t, locale } = useTranslation();
   const [items, setItems] = useState<UserContentItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const localeMap: Record<string, string> = {
+    ru: 'ru', en: 'en', zh: 'zh', ja: 'ja', ko: 'ko', vi: 'vi', es: 'es', de: 'de', fr: 'fr'
+  };
+  const dateLocale = localeMap[locale] ?? 'ru';
 
   useEffect(() => {
     fetch('/api/me/content', { credentials: 'include' })
@@ -34,25 +41,25 @@ export default function MeContentPage() {
       <div className="platform-breadcrumb mb-6">
         <Link href="/"><i className="fa-solid fa-globe" style={{ marginRight: 4 }} /> Roominate</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <Link href="/me">Личный кабинет</Link>
+        <Link href="/me">{t('nav.cabinet', 'Личный кабинет')}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <span>Сборка</span>
+        <span>{t('nav.assembly', 'Сборка')}</span>
       </div>
 
       <div className="platform-card mb-6">
         <h1 className="platform-hero-title" style={{ fontSize: '1.75rem', marginBottom: 8 }}>
-          Лента контента
+          {t('content.feedTitle', 'Лента контента')}
         </h1>
         <p className="platform-card-desc">
-          Агрегированный контент из ваших источников. Добавляйте источники в панели «Сборка» и делитесь постами в сферы.
+          {t('content.feedDesc', 'Агрегированный контент из ваших источников. Добавляйте источники в панели «Сборка» и делитесь постами в сферы.')}
         </p>
       </div>
 
       {loading ? (
-        <p className="platform-card-desc">Загрузка…</p>
+        <p className="platform-card-desc">{t('common.loading', 'Загрузка…')}</p>
       ) : items.length === 0 ? (
         <p className="platform-card-desc">
-          Пока нет контента. Добавьте источники в панели «Сборка» и запустите агрегацию.
+          {t('content.feedEmpty', 'Пока нет контента. Добавьте источники в панели «Сборка» и запустите агрегацию.')}
         </p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -81,7 +88,7 @@ export default function MeContentPage() {
                   {c.externalAuthor && <span>{c.externalAuthor}</span>}
                   {(c.publishedAt || c.createdAt) && (
                     <time dateTime={new Date(c.publishedAt || c.createdAt).toISOString()} style={{ marginLeft: c.externalAuthor ? 8 : 0 }}>
-                      {new Date(c.publishedAt || c.createdAt).toLocaleDateString('ru', {
+                      {new Date(c.publishedAt || c.createdAt).toLocaleDateString(dateLocale, {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',

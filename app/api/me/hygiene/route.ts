@@ -23,11 +23,13 @@ export async function GET(req: NextRequest) {
           focusMode: row.focusMode,
           dailyTimeLimitMinutes: row.dailyTimeLimitMinutes,
           digestDelivery: row.digestDelivery,
+          smartFeedEnabled: row.smartFeedEnabled ?? true,
         }
       : {
           focusMode: false,
           dailyTimeLimitMinutes: null as number | null,
           digestDelivery: 'none' as DigestDelivery,
+          smartFeedEnabled: true,
         };
     return NextResponse.json(payload);
   } catch (e) {
@@ -44,6 +46,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
     const focusMode = body.focusMode as boolean | undefined;
+    const smartFeedEnabled = body.smartFeedEnabled as boolean | undefined;
     const rawLimit = body.dailyTimeLimitMinutes;
     const dailyTimeLimitMinutes =
       rawLimit === undefined
@@ -71,9 +74,11 @@ export async function PATCH(req: NextRequest) {
       focusMode?: boolean;
       dailyTimeLimitMinutes?: number | null;
       digestDelivery?: DigestDelivery;
+      smartFeedEnabled?: boolean;
       updatedAt?: Date;
     } = { updatedAt: new Date() };
     if (typeof focusMode === 'boolean') updates.focusMode = focusMode;
+    if (typeof smartFeedEnabled === 'boolean') updates.smartFeedEnabled = smartFeedEnabled;
     if (dailyTimeLimitMinutes !== undefined) {
       updates.dailyTimeLimitMinutes =
         dailyTimeLimitMinutes === null
@@ -93,6 +98,7 @@ export async function PATCH(req: NextRequest) {
         focusMode: updates.focusMode ?? false,
         dailyTimeLimitMinutes: updates.dailyTimeLimitMinutes ?? null,
         digestDelivery: updates.digestDelivery ?? 'none',
+        smartFeedEnabled: updates.smartFeedEnabled ?? true,
       });
     }
 
@@ -101,6 +107,7 @@ export async function PATCH(req: NextRequest) {
         focusMode: userHygieneSettings.focusMode,
         dailyTimeLimitMinutes: userHygieneSettings.dailyTimeLimitMinutes,
         digestDelivery: userHygieneSettings.digestDelivery,
+        smartFeedEnabled: userHygieneSettings.smartFeedEnabled,
       })
       .from(userHygieneSettings)
       .where(eq(userHygieneSettings.userId, session.user.id))
@@ -111,6 +118,7 @@ export async function PATCH(req: NextRequest) {
         focusMode: updates.focusMode ?? false,
         dailyTimeLimitMinutes: updates.dailyTimeLimitMinutes ?? null,
         digestDelivery: updates.digestDelivery ?? 'none',
+        smartFeedEnabled: updates.smartFeedEnabled ?? true,
       }
     );
   } catch (e) {

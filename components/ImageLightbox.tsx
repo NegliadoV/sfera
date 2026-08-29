@@ -10,9 +10,11 @@ type ImageLightboxProps = {
   alt?: string;
   className?: string;
   style?: CSSProperties;
+  /** Вызывается когда изображение не удалось загрузить */
+  onError?: () => void;
 };
 
-export function ImageLightbox({ src, originalSrc, alt = '', className = '', style }: ImageLightboxProps) {
+export function ImageLightbox({ src, originalSrc, alt = '', className = '', style, onError: onErrorProp }: ImageLightboxProps) {
   const [open, setOpen] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -82,7 +84,10 @@ export function ImageLightbox({ src, originalSrc, alt = '', className = '', styl
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
-        onError={() => setFailed(true)}
+        onError={() => {
+          setFailed(true);
+          onErrorProp?.();
+        }}
         onClick={handleClick}
       />
       {overlay}

@@ -30,7 +30,7 @@ function buildPageCSP(): string {
     "media-src": ["'self'", "blob:"].join(" "),
     // blob: для Service Worker (Serwist PWA)
     "worker-src": ["'self'", "blob:"].join(" "),
-    "frame-src": "'none'",
+    "frame-src": ["'self'", "https://www.youtube.com", "https://youtube.com", "https://www.youtube-nocookie.com", "https://player.vimeo.com", "https://*.youtube.com", "https://*.vimeo.com"].join(" "),
     "connect-src": [
       "'self'",
       wsOrigin,

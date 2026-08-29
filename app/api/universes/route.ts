@@ -20,6 +20,7 @@ export async function GET() {
         sphereColor: universes.sphereColor,
         isPrivate: universes.isPrivate,
         monthlyPrice: universes.monthlyPrice,
+        ownerId: universes.ownerId,
         createdAt: universes.createdAt,
       })
       .from(universes)
@@ -33,6 +34,8 @@ export async function GET() {
     );
   }
 }
+
+import { validateUniverseCreation } from '@/lib/moderation/moderator-bot';
 
 export async function POST(req: NextRequest) {
   const session = await getSessionForRequest(req);
@@ -52,6 +55,25 @@ export async function POST(req: NextRequest) {
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json({ error: 'name required' }, { status: 400 });
     }
+
+    // 🤖 Проверка Бот-модератором перед созданием сферы
+    const moderation = validateUniverseCreation({
+      name: name.trim(),
+      description: typeof description === 'string' ? description.trim() : null,
+      slug: typeof slug === 'string' ? slug.trim() : null,
+    });
+
+    if (!moderation.isAllowed) {
+      return NextResponse.json(
+        {
+          error: moderation.reasonRu,
+          botMessage: moderation.botFeedback,
+          category: moderation.category,
+        },
+        { status: 400 }
+      );
+    }
+
     const rawSlug = (typeof slug === 'string' && slug.trim()) ? slug.trim() : name.trim();
     const s = rawSlug.toLowerCase().replace(/\s+/g, '-');
     const [existing] = await db.select().from(universes).where(eq(universes.slug, s));

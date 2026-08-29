@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 type Provider = 'rss' | 'youtube' | 'podcast' | 'telegram' | 'manual';
 
 export function AddUserSourceForm({ onAdded }: { onAdded: () => void }) {
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [provider, setProvider] = useState<Provider>('rss');
   const [name, setName] = useState('');
@@ -15,18 +17,18 @@ export function AddUserSourceForm({ onAdded }: { onAdded: () => void }) {
   const providers: { value: Provider; label: string }[] = [
     { value: 'rss', label: 'RSS' },
     { value: 'youtube', label: 'YouTube' },
-    { value: 'podcast', label: 'Подкаст' },
+    { value: 'podcast', label: t('sources.podcast', 'Подкаст') },
     { value: 'telegram', label: 'Telegram' },
-    { value: 'manual', label: 'Вручную' },
+    { value: 'manual', label: t('sources.manual', 'Вручную') },
   ];
 
   const submit = async () => {
     if (!name.trim()) {
-      setError('Название обязательно');
+      setError(t('sources.nameRequired', 'Название обязательно'));
       return;
     }
     if (provider !== 'manual' && !url.trim()) {
-      setError('URL обязателен');
+      setError(t('sources.urlRequired', 'URL обязателен'));
       return;
     }
     setPending(true);
@@ -40,7 +42,7 @@ export function AddUserSourceForm({ onAdded }: { onAdded: () => void }) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? 'Ошибка');
+        setError(data.error ?? t('common.error', 'Ошибка'));
         return;
       }
       setName('');
@@ -48,7 +50,7 @@ export function AddUserSourceForm({ onAdded }: { onAdded: () => void }) {
       setShowForm(false);
       onAdded();
     } catch {
-      setError('Ошибка сети');
+      setError(t('sources.networkError', 'Ошибка сети'));
     } finally {
       setPending(false);
     }
@@ -75,7 +77,7 @@ export function AddUserSourceForm({ onAdded }: { onAdded: () => void }) {
         }}
       >
         <i className="fas fa-plus" />
-        Добавить источник
+        {t('sources.addSource', 'Добавить источник')}
       </button>
     );
   }
@@ -102,7 +104,7 @@ export function AddUserSourceForm({ onAdded }: { onAdded: () => void }) {
       </select>
       <input
         type="text"
-        placeholder="Название"
+        placeholder={t('sources.namePlaceholder', 'Название')}
         value={name}
         onChange={(e) => setName(e.target.value)}
         style={{
@@ -119,7 +121,7 @@ export function AddUserSourceForm({ onAdded }: { onAdded: () => void }) {
       {provider !== 'manual' && (
         <input
           type="text"
-          placeholder="URL (RSS, канал и т.д.)"
+          placeholder={t('sources.urlPlaceholder', 'URL (RSS, канал и т.д.)')}
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           style={{
@@ -150,7 +152,7 @@ export function AddUserSourceForm({ onAdded }: { onAdded: () => void }) {
             cursor: pending ? 'wait' : 'pointer',
           }}
         >
-          {pending ? '…' : 'Добавить'}
+          {pending ? '…' : t('sources.add', 'Добавить')}
         </button>
         <button
           type="button"
@@ -165,7 +167,7 @@ export function AddUserSourceForm({ onAdded }: { onAdded: () => void }) {
             cursor: 'pointer',
           }}
         >
-          Отмена
+          {t('common.cancel', 'Отмена')}
         </button>
       </div>
     </div>

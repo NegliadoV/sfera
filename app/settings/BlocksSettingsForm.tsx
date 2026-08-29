@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 type BlockedUser = { id: string; name: string | null; image: string | null };
 
 export function BlocksSettingsForm() {
+  const { t } = useTranslation();
   const [list, setList] = useState<BlockedUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,13 +30,13 @@ export function BlocksSettingsForm() {
   }
 
   if (loading) {
-    return <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Загрузка…</p>;
+    return <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('common.loading', 'Загрузка…')}</p>;
   }
 
   if (list.length === 0) {
     return (
       <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-        Нет заблокированных пользователей.
+        {t('settings.noBlocked', 'Нет заблокированных пользователей.')}
       </p>
     );
   }
@@ -75,7 +77,7 @@ export function BlocksSettingsForm() {
                 {(u.name ?? u.id).slice(0, 1).toUpperCase()}
               </div>
             )}
-            <span>{u.name ?? 'Участник'}</span>
+            <span>{u.name ?? t('common.member', 'Участник')}</span>
           </div>
           <button
             type="button"
@@ -83,7 +85,7 @@ export function BlocksSettingsForm() {
             className="platform-btn platform-btn-sm"
             style={{ padding: '6px 12px' }}
           >
-            Разблокировать
+            {t('settings.unblock', 'Разблокировать')}
           </button>
         </li>
       ))}

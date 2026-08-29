@@ -7,6 +7,8 @@ export const dynamic = 'force-dynamic';
 
 const CONTENT_TYPES = ['text', 'video', 'podcast', 'article', 'link'] as const;
 
+import { validateContentCreation } from '@/lib/moderation/moderator-bot';
+
 export async function POST(req: NextRequest) {
   const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
@@ -26,6 +28,26 @@ export async function POST(req: NextRequest) {
     if (!universeId || !title || typeof title !== 'string' || !title.trim()) {
       return NextResponse.json({ error: 'universeId and title required' }, { status: 400 });
     }
+
+    // 🤖 Предварительная проверка Бот-модератором
+    const moderation = validateContentCreation({
+      title: title.trim(),
+      body: typeof text === 'string' ? text.trim() : null,
+      url: typeof url === 'string' ? url.trim() : null,
+      type: typeof type === 'string' ? type : null,
+    });
+
+    if (!moderation.isAllowed) {
+      return NextResponse.json(
+        {
+          error: moderation.reasonRu,
+          botMessage: moderation.botFeedback,
+          category: moderation.category,
+        },
+        { status: 400 }
+      );
+    }
+
     const contentType =
       type && CONTENT_TYPES.includes(type as (typeof CONTENT_TYPES)[number])
         ? (type as (typeof CONTENT_TYPES)[number])
@@ -55,6 +77,11 @@ export async function POST(req: NextRequest) {
         });
       }
     }
+
+    // Ставим в очередь модерации (асинхронно, не блокирует ответ)
+    db.execute(
+      sql`INSERT INTO content_moderation (content_id, status) VALUES (${inserted.id}, 'pending')`
+    ).catch(err => console.error('[moderation] Ошибка постановки в очередь:', err));
 
     return NextResponse.json(inserted);
   } catch (e) {
@@ -88,8 +115,11 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Строим условия фильтрации
-    const conditions = [eq(content.universeId, universeId)];
+    // Строим условия фильтрации — исключаем скрытый модератором контент
+    const conditions = [
+      eq(content.universeId, universeId),
+      eq(content.hidden, false),
+    ];
 
     if (sourceId) {
       conditions.push(eq(content.sourceId, sourceId));

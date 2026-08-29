@@ -7,6 +7,7 @@ import { SessionTimer } from '@/components/SessionTimer';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
 import { SferaLogo } from '@/components/SferaLogo';
 import { buttonVariants } from '@/components/ui/button';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 export function Header({
   session = null,
@@ -18,6 +19,7 @@ export function Header({
   onMenuClick?: () => void;
 }) {
   const { hygiene } = useHygiene();
+  const { t } = useTranslation();
 
   return (
     <header className="w-full flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 relative z-50 pointer-events-none">
@@ -31,9 +33,9 @@ export function Header({
             {session?.user ? (
               <>
                 {hygiene.focusMode && (
-                  <div className="glass-icon-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-[var(--text-secondary)]" title="Режим фокуса включён">
+                  <div className="glass-icon-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-[var(--text-secondary)]" title={t('settings.hygiene', 'Режим фокуса включён')}>
                     <i className="fas fa-circle text-[#22c55e] text-[0.7rem]"></i>
-                    Фокус
+                    {t('settings.hygiene', 'Фокус')}
                   </div>
                 )}
                 <SessionTimer />
@@ -41,7 +43,7 @@ export function Header({
             ) : (
               <Link href="/auth/signin" className={buttonVariants({ variant: 'outline', className: 'rounded-full' })}>
                 <i className="fas fa-sign-in-alt mr-1.5"></i>
-                Войти
+                {t('nav.login', 'Войти')}
               </Link>
             )}
           </div>

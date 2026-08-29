@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 type Space = {
   id: string;
@@ -13,6 +14,7 @@ type Space = {
 };
 
 export default function GlobalRoomsPage() {
+  const { t } = useTranslation();
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,10 +81,10 @@ export default function GlobalRoomsPage() {
       <div className="platform-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
           <h1 className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
-            Голосовые комнаты
+            {t('rooms.title', 'Голосовые комнаты')}
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: 0 }}>
-            Слушайте, обсуждайте и создавайте новые форматы интерактива
+            {t('rooms.subtitle', 'Слушайте, обсуждайте и создавайте новые форматы интерактива')}
           </p>
         </div>
         
@@ -115,14 +117,14 @@ export default function GlobalRoomsPage() {
             e.currentTarget.style.boxShadow = '0 0 20px color-mix(in srgb, var(--accent-primary) 30%, transparent)';
           }}
         >
-          <i className="fas fa-plus" /> Создать эфир
+          <i className="fas fa-plus" /> {t('rooms.createBroadcast', 'Создать эфир')}
         </button>
       </div>
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px', color: 'var(--accent-primary)' }}>
           <div className="spinner" style={{ margin: '0 auto 16px auto', width: 40, height: 40, borderTopColor: 'var(--accent-primary)' }} />
-          <p>Синхронизация пространств...</p>
+          <p>{t('common.loading', 'Синхронизация пространств...')}</p>
         </div>
       ) : spaces.length === 0 ? (
         <div className="glass-panel" style={{ 

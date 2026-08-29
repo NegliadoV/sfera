@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 interface TrackUniverseButtonProps {
   universeSlug: string;
@@ -10,9 +11,13 @@ interface TrackUniverseButtonProps {
   labelActive?: string;
 }
 
-export function TrackUniverseButton({ universeSlug, className = '', label = 'Отслеживать', labelActive = 'Отслеживаю' }: TrackUniverseButtonProps) {
+export function TrackUniverseButton({ universeSlug, className = '', label, labelActive }: TrackUniverseButtonProps) {
+  const { t } = useTranslation();
   const [tracking, setTracking] = useState<boolean | null>(null);
   const [pending, setPending] = useState(false);
+
+  const displayLabel = label ?? t('rooms.follow', 'Отслеживать');
+  const displayLabelActive = labelActive ?? t('rooms.following', 'Отслеживаю');
 
   useEffect(() => {
     if (!universeSlug) return;
@@ -55,9 +60,9 @@ export function TrackUniverseButton({ universeSlug, className = '', label = 'О�
       onClick={handleClick}
       disabled={pending}
       className={`platform-btn platform-btn-sm ${className}`}
-      title={tracking ? 'Вы получите уведомление о новых постах' : 'Уведомлять о новых постах'}
+      title={tracking ? t('rooms.notifyNewPostsActive', 'Вы получите уведомление о новых постах') : t('rooms.notifyNewPosts', 'Уведомлять о новых постах')}
     >
-      {tracking ? labelActive : label}
+      {tracking ? displayLabelActive : displayLabel}
     </button>
   );
 }

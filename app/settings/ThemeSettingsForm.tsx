@@ -1,6 +1,7 @@
 'use client';
 
 import { useTheme } from '@/components/ThemeProvider';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 export function ThemeSettingsForm() {
   const {
@@ -17,6 +18,7 @@ export function ThemeSettingsForm() {
     setInterfaceTint,
     interfaceTintPresets,
   } = useTheme();
+  const { t } = useTranslation();
 
   const mainBlockPercent = Math.round(backgroundOpacity * 100);
 
@@ -26,15 +28,15 @@ export function ThemeSettingsForm() {
       <div className="settings-card">
         <div className="settings-card-title">
           <i className="fa-solid fa-palette" aria-hidden />
-          <h2>Внешний вид</h2>
+          <h2>{t('settings.appearance', 'Внешний вид')}</h2>
         </div>
         <div className="settings-card-desc">
-          Тема, цвет интерфейса, прозрачность и акцент.
+          {t('settings.appearanceDesc', 'Тема, цвет интерфейса, прозрачность и акцент.')}
         </div>
 
         <div>
           <div className="settings-color-label" style={{ marginTop: 0 }}>
-            Акцентный цвет
+            {t('settings.accentColor', 'Акцентный цвет')}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 12 }}>
             {accentPresets.map((preset) => {
@@ -64,7 +66,7 @@ export function ThemeSettingsForm() {
         </div>
 
         <div className="settings-note-muted">
-          <i className="fa-regular fa-clock" aria-hidden /> цвет применяется сразу
+          <i className="fa-regular fa-clock" aria-hidden /> {t('settings.colorApplied', 'цвет применяется сразу')}
         </div>
       </div>
 
@@ -72,15 +74,22 @@ export function ThemeSettingsForm() {
       <div className="settings-card">
         <div className="settings-card-title">
           <i className="fa-regular fa-glass" aria-hidden />
-          <h2>Фон и стекло</h2>
+          <h2>{t('settings.glassPanel', 'Фон и стекло')}</h2>
         </div>
         <div className="settings-card-desc">
-          Прозрачность основного блока. «Стекло» даёт эффект размытия фона.
+          {t('settings.glassPanelDesc', 'Прозрачность основного блока. «Стекло» даёт эффект размытия фона.')}
         </div>
 
         <div className="settings-glass-presets">
           {backgroundOpacityPresets.map((preset) => {
             const isActive = Math.abs(backgroundOpacity - preset.value) < 0.01;
+            const glassLabelMap: Record<number, string> = {
+              1: t('settings.glassSolid', 'Сплошной'),
+              0.95: t('settings.glassNearSolid', 'Почти сплошной'),
+              0.8: t('settings.glassGlass', 'Стекло'),
+              0.6: t('settings.glassStrong', 'Сильное'),
+              0.35: t('settings.glassUltra', 'Ультра-стекло'),
+            };
             return (
               <button
                 key={preset.value}
@@ -88,7 +97,7 @@ export function ThemeSettingsForm() {
                 onClick={() => setBackgroundOpacity(preset.value)}
                 className={`settings-glass-btn ${isActive ? 'active' : ''}`}
               >
-                {preset.label}
+                {glassLabelMap[preset.value] ?? preset.label}
               </button>
             );
           })}
@@ -96,7 +105,7 @@ export function ThemeSettingsForm() {
 
         <div className="settings-transparency-section">
           <div className="settings-transparency-label">
-            <span><i className="fa-regular fa-square" aria-hidden /> Основной блок</span>
+            <span><i className="fa-regular fa-square" aria-hidden /> {t('settings.mainBlock', 'Основной блок')}</span>
             <span>{mainBlockPercent}%</span>
           </div>
           <input

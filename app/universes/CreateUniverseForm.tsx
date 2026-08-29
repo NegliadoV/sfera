@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { generateSlug } from '@/lib/utils/slug';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 export function CreateUniverseForm() {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [icon, setIcon] = useState('');
@@ -44,7 +47,7 @@ export function CreateUniverseForm() {
     setError('');
     setConflictSlug(null);
     try {
-      const s = name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const s = generateSlug(name.trim());
       // Нормализуем иконку (URL картинки или FontAwesome класс)
       const rawIcon = icon.trim();
       const normalizedIcon = rawIcon
@@ -69,26 +72,27 @@ export function CreateUniverseForm() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         if (res.status === 401) {
-          setError('Сессия истекла или вы не авторизованы. Войдите снова.');
+          setError(t('rooms.sessionExpired', 'Сессия истекла или вы не авторизованы. Войдите снова.'));
         } else if (res.status === 409) {
-          setError('Комната с таким адресом (slug) уже существует. Перейдите к ней или измените slug.');
+          setError(t('rooms.roomAlreadyExists', 'Комната с таким адресом (slug) уже существует. Перейдите к ней или измените slug.'));
           setConflictSlug(typeof data?.slug === 'string' ? data.slug.trim() : s || null);
         } else {
-          setError(data?.error ?? 'Ошибка создания');
+          setError(data?.botMessage || data?.error || t('rooms.createError', 'Ошибка создания'));
         }
         setPending(false);
         return;
       }
+
       const targetSlug = typeof data?.slug === 'string' && data.slug.trim() ? data.slug.trim() : s;
       if (!targetSlug) {
-        setError('Не удалось определить адрес комнаты.');
+        setError(t('rooms.cantDetermineSlug', 'Не удалось определить адрес комнаты.'));
         setPending(false);
         return;
       }
       window.location.href = `/universes/${encodeURIComponent(targetSlug)}`;
       return;
     } catch {
-      setError('Ошибка создания');
+      setError(t('rooms.createError', 'Ошибка создания'));
     }
     setPending(false);
   };
@@ -97,14 +101,14 @@ export function CreateUniverseForm() {
     <form onSubmit={submit}>
       <div className="universes-create-header">
         <i className="fa-solid fa-shapes" aria-hidden />
-        <h2>Создать комнату</h2>
+        <h2>{t('rooms.createTitle', 'Создать комнату')}</h2>
       </div>
 
       <div className="universes-form-grid">
         <div className="universes-field-full">
           <div className="universes-field-label">
-            <i className="fa-solid fa-heading" aria-hidden /> НАЗВАНИЕ{' '}
-            <span className="universes-field-hint">Например: Квантовая физика</span>
+            <i className="fa-solid fa-heading" aria-hidden /> {t('rooms.roomName', 'НАЗВАНИЕ').toUpperCase()}{' '}
+            <span className="universes-field-hint">{t('rooms.roomNamePlaceholder', 'Например: Квантовая физика')}</span>
           </div>
           <div className="universes-input-wrapper">
             <input
@@ -112,7 +116,7 @@ export function CreateUniverseForm() {
               id="universe-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Например: Квантовая физика"
+              placeholder={t('rooms.roomNamePlaceholder', 'Например: Квантовая физика')}
               required
             />
           </div>
@@ -120,15 +124,15 @@ export function CreateUniverseForm() {
 
         <div className="universes-field-full">
           <div className="universes-field-label">
-            <i className="fa-solid fa-file-lines" aria-hidden /> ОПИСАНИЕ{' '}
-            <span className="universes-field-hint">НЕОБЯЗАТЕЛЬНО</span>
+            <i className="fa-solid fa-file-lines" aria-hidden /> {t('rooms.description', 'ОПИСАНИЕ').toUpperCase()}{' '}
+            <span className="universes-field-hint">{t('common.optional', 'ОПЦИОНАЛЬНО').toUpperCase()}</span>
           </div>
           <div className="universes-input-wrapper">
             <textarea
               id="universe-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Краткое описание комнаты"
+              placeholder={t('rooms.descriptionPlaceholder', 'Краткое описание комнаты')}
               rows={2}
             />
           </div>
@@ -136,8 +140,8 @@ export function CreateUniverseForm() {
 
         <div className="universes-field-full">
           <div className="universes-field-label">
-            <i className="fa-solid fa-image" aria-hidden /> АВАТАР ИЛИ ИКОНКА{' '}
-            <span className="universes-field-hint">ССЫЛКА НА ФОТО ИЛИ ИКОНКА</span>
+            <i className="fa-solid fa-image" aria-hidden /> {t('rooms.avatarOrIcon', 'АВАТАР ИЛИ ИКОНКА')}{' '}
+            <span className="universes-field-hint">{t('rooms.avatarOrIconHint', 'ССЫЛКА НА ФОТО ИЛИ ИКОНКА')}</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div className="universes-input-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -147,7 +151,7 @@ export function CreateUniverseForm() {
                 id="universe-icon"
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
-                placeholder="https://example.com/avatar.jpg или fa-atom"
+                placeholder={t('rooms.avatarPlaceholder', 'https://example.com/avatar.jpg или fa-atom')}
                 style={{ flex: 1 }}
               />
             </div>
@@ -183,16 +187,16 @@ export function CreateUniverseForm() {
               onChange={(e) => setIsPrivate(e.target.checked)}
               style={{ width: 18, height: 18, cursor: 'pointer' }}
             />
-            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Сделать комнату закрытой (по подписке)</span>
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t('rooms.makePrivate', 'Сделать комнату закрытой (по подписке)')}</span>
           </label>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: 4, marginLeft: 28 }}>
-            Доступ к комнате будет только у подписчиков после оплаты через ЮKassa.
+            {t('rooms.makePrivateDesc', 'Доступ к комнате будет только у подписчиков после оплаты через ЮKassa.')}
           </div>
           
           {isPrivate && (
             <div style={{ marginTop: 12, marginLeft: 28 }}>
               <div className="universes-field-label" style={{ marginBottom: 6 }}>
-                <i className="fa-solid fa-ruble-sign" aria-hidden /> СТОИМОСТЬ В МЕСЯЦ (RUB)
+                <i className="fa-solid fa-ruble-sign" aria-hidden /> {t('rooms.monthlyPriceLabel', 'СТОИМОСТЬ В МЕСЯЦ (RUB)')}
               </div>
               <div className="universes-input-wrapper">
                 <input
@@ -201,7 +205,7 @@ export function CreateUniverseForm() {
                   step="1"
                   value={monthlyPrice}
                   onChange={(e) => setMonthlyPrice(e.target.value)}
-                  placeholder="Например: 500"
+                  placeholder={t('rooms.pricePlaceholder', 'Например: 500')}
                   required={isPrivate}
                 />
               </div>
@@ -215,7 +219,7 @@ export function CreateUniverseForm() {
           className="universes-create-btn"
         >
           <i className={`fa-regular ${pending ? 'fa-spinner fa-spin' : 'fa-star'}`} aria-hidden />
-          {pending ? 'Создание...' : 'Создать комнату'}
+          {pending ? t('common.creating', 'Создание...') : t('rooms.createTitle', 'Создать комнату')}
           <i className="fa-solid fa-plus" aria-hidden />
         </button>
       </div>
@@ -228,7 +232,7 @@ export function CreateUniverseForm() {
               href={`/auth/signin?callbackUrl=${encodeURIComponent('/')}`}
               style={{ display: 'inline-block', marginTop: 8, textDecoration: 'underline', color: '#79a6ff' }}
             >
-              Перейти на страницу входа
+              {t('rooms.goToLogin', 'Перейти на страницу входа')}
             </Link>
           )}
           {conflictSlug && (
@@ -236,7 +240,7 @@ export function CreateUniverseForm() {
               href={`/universes/${encodeURIComponent(conflictSlug)}`}
               style={{ display: 'inline-block', marginTop: 8, textDecoration: 'underline', color: '#79a6ff' }}
             >
-              Перейти к существующей комнате
+              {t('rooms.goToExistingRoom', 'Перейти к существующей комнате')}
             </Link>
           )}
         </div>

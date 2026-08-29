@@ -19,6 +19,7 @@ export async function GET(
         contentId: comments.contentId,
         authorId: comments.authorId,
         authorName: user.name,
+        authorImage: user.image,
         parentId: comments.parentId,
         type: comments.type,
         body: comments.body,
@@ -34,6 +35,8 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to load comments' }, { status: 500 });
   }
 }
+
+import { validateCommentCreation } from '@/lib/moderation/moderator-bot';
 
 export async function POST(
   req: NextRequest,
@@ -54,6 +57,20 @@ export async function POST(
     if (!text || typeof text !== 'string' || !text.trim()) {
       return NextResponse.json({ error: 'Body required' }, { status: 400 });
     }
+
+    // 🤖 Проверка комментария Бот-модератором
+    const moderation = validateCommentCreation(text.trim());
+    if (!moderation.isAllowed) {
+      return NextResponse.json(
+        {
+          error: moderation.reasonRu,
+          botMessage: moderation.botFeedback,
+          category: moderation.category,
+        },
+        { status: 400 }
+      );
+    }
+
     const commentType =
       type && COMMENT_TYPES.includes(type as (typeof COMMENT_TYPES)[number])
         ? (type as (typeof COMMENT_TYPES)[number])
