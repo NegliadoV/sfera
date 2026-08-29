@@ -60,11 +60,11 @@ export function DigestContent() {
           </div>
           <h2>{t('digest.noContent', 'Нет нового контента за последние 24 часа')}</h2>
           <div className="digest-description">
-            {t('digest.noContentDesc', 'Подпишитесь на сферы или добавьте источники в Сборку — как только появится новый контент, он отобразится здесь.')}
+            {t('digest.noContentDesc', 'Подпишитесь на комнаты или добавьте источники в Сборку — как только появится новый контент, он отобразится здесь.')}
           </div>
           <div className="digest-actions">
-            <Link href="/" className="digest-action-btn">
-              <i className="fa-regular fa-compass" aria-hidden /> {t('digest.toSpheres', 'К сферам')}
+            <Link href="/rooms" className="digest-action-btn">
+              <i className="fa-solid fa-shapes" aria-hidden /> {t('digest.toSpheres', 'К комнатам')}
             </Link>
             <Link href="/me/content" className="digest-action-btn">
               <i className="fa-solid fa-layer-group" aria-hidden /> {t('nav.assembly', 'Сборка')}
@@ -79,7 +79,7 @@ export function DigestContent() {
     <div className="digest-content">
       <div style={{ marginBottom: 24 }}>
         <h3 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: 12 }}>
-          {t('digest.bySpheres', 'Сводка по сферам')}
+          {t('digest.bySpheres', 'Сводка по комнатам')}
         </h3>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
           {byUniverse.map((u) => (

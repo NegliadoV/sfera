@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 type Universe = { id: string; slug: string; name: string };
 
 export function ShareToSphereButton({ userContentId }: { userContentId: string }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [universes, setUniverses] = useState<Universe[]>([]);
   const [loading, setLoading] = useState(false);
@@ -95,7 +97,7 @@ export function ShareToSphereButton({ userContentId }: { userContentId: string }
         }}
       >
         <i className="fas fa-share" />
-        Поделиться в сферу
+        {t('common.share', 'Поделиться в комнату')}
       </button>
       {open &&
         dropdownRect &&
@@ -109,7 +111,7 @@ export function ShareToSphereButton({ userContentId }: { userContentId: string }
             />
             <div
               role="dialog"
-              aria-label="Выберите сферу"
+              aria-label={t('rooms.title', 'Выберите комнату')}
               style={{
                 position: 'fixed',
                 top: dropdownRect.top,
@@ -124,11 +126,11 @@ export function ShareToSphereButton({ userContentId }: { userContentId: string }
               }}
             >
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 8 }}>
-                Выберите сферу
+                {t('rooms.title', 'Выберите комнату')}
               </p>
               <input
                 type="search"
-                placeholder="Поиск сферы…"
+                placeholder={t('rooms.search', 'Поиск комнаты…')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.stopPropagation()}
@@ -144,11 +146,11 @@ export function ShareToSphereButton({ userContentId }: { userContentId: string }
                 }}
               />
               {loading ? (
-                <p style={{ fontSize: '0.85rem' }}>Загрузка…</p>
+                <p style={{ fontSize: '0.85rem' }}>{t('common.loading', 'Загрузка…')}</p>
               ) : universes.length === 0 ? (
-                <p style={{ fontSize: '0.85rem' }}>Нет доступных сфер</p>
+                <p style={{ fontSize: '0.85rem' }}>{t('rooms.noRooms', 'Нет доступных комнат')}</p>
               ) : filtered.length === 0 ? (
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Ничего не найдено</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('sources.nothingFound', 'Ничего не найдено')}</p>
               ) : (
                 <ul
                   style={{
