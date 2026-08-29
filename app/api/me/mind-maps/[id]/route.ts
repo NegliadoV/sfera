@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSessionForServerComponent } from '@/lib/session';
+import { getSessionForRequest } from '@/lib/session';
 import { db, mindMaps, mindMapNodes, mindMapEdges } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
 
@@ -7,7 +7,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSessionForServerComponent();
+  const session = await getSessionForRequest(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -37,4 +37,27 @@ export async function DELETE(
     console.error('[DELETE /api/me/mind-maps/[id]]', error);
     return NextResponse.json({ error: 'Не удалось удалить карту' }, { status: 500 });
   }
+}
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getSessionForRequest(req);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  const [map] = await db
+    .select()
+    .from(mindMaps)
+    .where(and(eq(mindMaps.id, id), eq(mindMaps.createdById, session.user.id)));
+
+  if (!map) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  return NextResponse.json(map);
 }

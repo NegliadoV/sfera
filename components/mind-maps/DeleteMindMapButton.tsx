@@ -31,10 +31,16 @@ export function DeleteMindMapButton({
     try {
       const res = await fetch(`/api/me/mind-maps/${mapId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!res.ok) {
-        throw new Error('Failed to delete map');
+        let errMsg = `HTTP ${res.status}`;
+        try {
+          const body = await res.json();
+          errMsg = body?.error ?? errMsg;
+        } catch {}
+        throw new Error(errMsg);
       }
 
       if (redirectOnDelete) {
@@ -42,9 +48,9 @@ export function DeleteMindMapButton({
       } else {
         router.refresh();
       }
-    } catch (err) {
-      console.error(err);
-      alert(t('mindMaps.deleteError', 'Ошибка при удалении карты.'));
+    } catch (err: any) {
+      console.error('[DeleteMindMap]', err);
+      alert(`${t('mindMaps.deleteError', 'Ошибка при удалении карты.')}\n${err?.message ?? ''}`);
       setLoading(false);
     }
   }
