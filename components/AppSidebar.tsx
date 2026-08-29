@@ -864,7 +864,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
                 }}
               >
                 <i className="fas fa-rss" style={{ marginRight: 6 }} />
-                {t('content.feedTitle', 'Лента контента')}
+                {t('content.feedTitle', 'Лента')}
               </Link>
               {userSourcesLoading ? (
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('common.loading', 'Загрузка…')}</p>

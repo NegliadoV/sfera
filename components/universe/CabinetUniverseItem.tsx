@@ -22,7 +22,7 @@ function QuickActions({ slug }: { slug: string }) {
       <Link
         href={`/universes/${encodeURIComponent(slug)}/content`}
         className="cabinet-quick-action"
-        title="Лента контента"
+        title="Лента"
       >
         <i className="fas fa-folder-open" aria-hidden />
       </Link>
