@@ -79,7 +79,7 @@ const REAL_ROOMS = [
   },
   {
     slug: 'learning',
-    name: 'Обучение',
+    name: 'Образование',
     description: 'Онлайн-курсы, подкасты, образовательные ресурсы. Учимся новому каждый день — делимся находками.',
     icon: 'fa-graduation-cap',
     sphereColor: '#7c3aed',

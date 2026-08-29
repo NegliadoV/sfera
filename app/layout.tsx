@@ -7,6 +7,8 @@ import { HygieneProvider } from '@/components/HygieneProvider';
 import { SessionProvider } from '@/components/SessionProvider';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
+import { LanguageProvider } from '@/components/i18n/LanguageProvider';
+
 const sora = Sora({ subsets: ['latin', 'latin-ext'], variable: '--font-brand' });
 
 export const metadata: Metadata = {
@@ -77,34 +79,37 @@ export default async function RootLayout({
         style={{ fontFamily: 'var(--font-inter)' }}
         suppressHydrationWarning
       >
-        <HygieneProvider session={session}>
-          <SessionProvider>
-          <ThemeProvider>
-          {/* Глобальное свечение (Blobs) для единообразия всего фона */}
-          <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
-             <div className="bg-blob blob-1"></div>
-             <div className="bg-blob blob-2"></div>
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vh] opacity-20 pointer-events-none" style={{ background: 'radial-gradient(circle, var(--accent-primary) 0%, transparent 60%)', filter: 'blur(100px)' }}></div>
-          </div>
-          <div
-            className="app-container-glass studio-card"
-            style={{
-              maxWidth: '1440px',
-              width: '100%',
-              margin: '0 auto',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100dvh',
-              maxHeight: '100dvh',
-            }}
-          >
-            <AppLayout session={session}>{children}</AppLayout>
-          </div>
-          </ThemeProvider>
-          </SessionProvider>
-        </HygieneProvider>
+        <LanguageProvider>
+          <HygieneProvider session={session}>
+            <SessionProvider>
+              <ThemeProvider>
+                {/* Глобальное свечение (Blobs) для единообразия всего фона */}
+                <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+                  <div className="bg-blob blob-1"></div>
+                  <div className="bg-blob blob-2"></div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vh] opacity-20 pointer-events-none" style={{ background: 'radial-gradient(circle, var(--accent-primary) 0%, transparent 60%)', filter: 'blur(100px)' }}></div>
+                </div>
+                <div
+                  className="app-container-glass studio-card"
+                  style={{
+                    maxWidth: '1440px',
+                    width: '100%',
+                    margin: '0 auto',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100dvh',
+                    maxHeight: '100dvh',
+                  }}
+                >
+                  <AppLayout session={session}>{children}</AppLayout>
+                </div>
+              </ThemeProvider>
+            </SessionProvider>
+          </HygieneProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
 }
+

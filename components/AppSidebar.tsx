@@ -2,16 +2,17 @@
 
 import { useEffect, useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { createPortal } from 'react-dom';
 import type { Session } from 'next-auth';
 import { CreateUniverseDialog } from '@/app/universes/CreateUniverseDialog';
 import { SferaSphereIcon } from '@/components/SferaSphereIcon';
 import { AddUserSourceForm } from '@/components/AddUserSourceForm';
 
-import { MiniAppModal } from '@/components/MiniAppModal';
 import { SidebarNavLinks } from '@/components/sidebar/SidebarNavLinks';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
-type UniverseRow = { slug: string; name: string; description: string | null; icon: string | null; sphereColor: string | null };
+type UniverseRow = { slug: string; name: string; description: string | null; icon: string | null; sphereColor: string | null; ownerId?: string | null };
 type Contact = { id: string; name: string | null; email: string | null; image: string | null };
 
 type GroupChat = {
@@ -43,13 +44,21 @@ function matchesSphereQuery(u: UniverseRow, q: string): boolean {
 }
 
 export function AppSidebar({ session = null }: { session?: Session | null }) {
+  const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation();
   const [spheresOpen, setSpheresOpen] = useState(false);
   const [contactsOpen, setContactsOpen] = useState(false);
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [universes, setUniverses] = useState<UniverseRow[]>([]);
   const [spheresSearchQuery, setSpheresSearchQuery] = useState('');
   const [universesLoading, setUniversesLoading] = useState(false);
+  const [contextUniverse, setContextUniverse] = useState<UniverseRow | null>(null);
+  const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
+  const [trackedSlugs, setTrackedSlugs] = useState<Set<string>>(new Set());
+  const [deletePromptUniverse, setDeletePromptUniverse] = useState<UniverseRow | null>(null);
+  const [deletingUniverse, setDeletingUniverse] = useState(false);
+  const [copiedToast, setCopiedToast] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [groups, setGroups] = useState<GroupChat[]>([]);
   const [requests, setRequests] = useState<{ incoming: RequestItem[]; outgoing: RequestItem[] }>({ incoming: [], outgoing: [] });
@@ -62,8 +71,8 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
   const [userSourcesLoading, setUserSourcesLoading] = useState(false);
   const [collectionSearchQuery, setCollectionSearchQuery] = useState('');
   const [collectionAggregating, setCollectionAggregating] = useState(false);
-  const [miniAppOpen, setMiniAppOpen] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const fetchRequests = () => {
     if (!session?.user?.id) return;
@@ -119,12 +128,117 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
       })
       .catch(() => setUniverses([]))
       .finally(() => setUniversesLoading(false));
-  }, []);
 
-  const filteredUniverses = useMemo(
-    () => (spheresSearchQuery.trim() ? universes.filter((u) => matchesSphereQuery(u, spheresSearchQuery)) : universes),
-    [universes, spheresSearchQuery]
-  );
+    if (session?.user?.id) {
+      fetch('/api/me/universes', { credentials: 'include' })
+        .then((r) => r.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setTrackedSlugs(new Set(data.map((u: any) => u.slug)));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (!contextUniverse) return;
+    const handleClick = (e: Event) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
+        setContextUniverse(null);
+      }
+    };
+    const handleScroll = () => setContextUniverse(null);
+    document.addEventListener('click', handleClick, true);
+    document.addEventListener('contextmenu', handleClick, true);
+    window.addEventListener('scroll', handleScroll, true);
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('contextmenu', handleClick, true);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [contextUniverse]);
+
+  const handleUniverseContextMenu = (e: React.MouseEvent, u: UniverseRow) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const x = Math.min(e.clientX, window.innerWidth - 220);
+    const y = Math.min(e.clientY, window.innerHeight - 200);
+    setContextMenuPos({ x, y });
+    setContextUniverse(u);
+  };
+
+  const handleShareUniverse = (u: UniverseRow) => {
+    setContextUniverse(null);
+    const url = `${window.location.origin}/universes/${encodeURIComponent(u.slug)}`;
+    navigator.clipboard.writeText(url).catch(() => {});
+    setCopiedToast(true);
+    setTimeout(() => setCopiedToast(false), 2200);
+  };
+
+  const handleToggleTrackUniverse = async (u: UniverseRow) => {
+    setContextUniverse(null);
+    if (!session?.user?.id) {
+      router.push(`/auth/signin?callbackUrl=${encodeURIComponent(pathname || '/')}`);
+      return;
+    }
+    const isTracked = trackedSlugs.has(u.slug);
+    try {
+      const res = await fetch(`/api/universes/${encodeURIComponent(u.slug)}/track`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setTrackedSlugs((prev) => {
+          const next = new Set(prev);
+          if (isTracked) next.delete(u.slug);
+          else next.add(u.slug);
+          return next;
+        });
+      }
+    } catch (err) {
+      console.error('Failed to toggle track', err);
+    }
+  };
+
+  const handleConfirmDeleteUniverse = async () => {
+    if (!deletePromptUniverse || deletingUniverse) return;
+    setDeletingUniverse(true);
+    try {
+      const res = await fetch(`/api/universes/${encodeURIComponent(deletePromptUniverse.slug)}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setUniverses((prev) => prev.filter((u) => u.slug !== deletePromptUniverse.slug));
+        if (pathname?.includes(`/universes/${deletePromptUniverse.slug}`)) {
+          router.push('/');
+        }
+        setDeletePromptUniverse(null);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data?.error || t('common.error', 'Ошибка при удалении'));
+      }
+    } catch (e) {
+      console.error(e);
+      alert(t('common.error', 'Ошибка при удалении'));
+    } finally {
+      setDeletingUniverse(false);
+    }
+  };
+
+  const filteredUniverses = useMemo(() => {
+    if (spheresSearchQuery.trim()) {
+      return universes.filter((u) => matchesSphereQuery(u, spheresSearchQuery));
+    }
+    const currentUserId = session?.user?.id;
+    if (currentUserId) {
+      return universes.filter(
+        (u) => trackedSlugs.has(u.slug) || (u.ownerId && u.ownerId === currentUserId)
+      );
+    }
+    return universes;
+  }, [universes, spheresSearchQuery, session?.user?.id, trackedSlugs]);
 
   const fetchUserSources = () => {
     if (!session?.user?.id) return;
@@ -265,7 +379,6 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
         setCollectionOpen={setCollectionOpen}
         unreadCount={totalUnread}
         universeSlug={universeSlug}
-        setMiniAppOpen={setMiniAppOpen}
       />
 
     {/* Панель контактов справа от навигации */}
@@ -285,11 +398,11 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
       >
         <div style={{ width: 260, minWidth: 260, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '16px 14px', borderBottom: '1px solid var(--studio-panel-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <span className="sidebar-nav-label" style={{ marginBottom: 0 }}>Контакты и чаты</span>
+            <span className="sidebar-nav-label" style={{ marginBottom: 0 }}>{t('contacts.title', 'Контакты и чаты')}</span>
             <button
               type="button"
               onClick={() => setContactsOpen(false)}
-              aria-label="Скрыть контакты"
+              aria-label={t('common.hide', 'Скрыть')}
               style={{
                 width: 32,
                 height: 32,
@@ -311,7 +424,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
             <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--studio-panel-border)', flexShrink: 0 }}>
               <input
                 type="text"
-                placeholder="Поиск по тегу (@user)"
+                placeholder={t('contacts.search', 'Поиск по тегу (@user)')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -328,18 +441,18 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
             <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '12px 14px' }}>
               {searchQuery.trim().length >= 2 && (
                 <div style={{ marginBottom: 16 }}>
-                  <p className="sidebar-nav-label" style={{ marginBottom: 8, fontSize: '0.75rem' }}>Результаты поиска</p>
+                  <p className="sidebar-nav-label" style={{ marginBottom: 8, fontSize: '0.75rem' }}>{t('contacts.searchResults', 'Результаты поиска')}</p>
                   {searching ? (
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Поиск…</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('contacts.searching', 'Поиск…')}</p>
                   ) : searchResults.length === 0 ? (
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Ничего не найдено</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('contacts.nothingFound', 'Ничего не найдено')}</p>
                   ) : (
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                       {searchResults.map((u) => {
                         const isContact = contacts.some((c) => c.id === u.id);
                         const isOutgoing = requests.outgoing.some((r) => r.toUser?.id === u.id);
                         const canAdd = !isContact && !isOutgoing && u.id !== session?.user?.id;
-                        const displayName = u.name || u.userTag || 'Пользователь';
+                        const displayName = u.name || u.userTag || t('contentCard.member', 'Пользователь');
                         return (
                           <li key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0', borderBottom: '1px solid var(--studio-panel-border)' }}>
                             {u.image ? (
@@ -356,7 +469,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
                               <button
                                 type="button"
                                 onClick={() => handleAddContact(u.id)}
-                                title="Добавить в друзья"
+                                title={t('contacts.addToFriends', 'Добавить в друзья')}
                                 style={{
                                   width: 28,
                                   height: 28,
@@ -375,9 +488,9 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
                                 +
                               </button>
                             ) : isContact ? (
-                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0 }}>в контактах</span>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0 }}>{t('contacts.inContacts', 'в контактах')}</span>
                             ) : isOutgoing ? (
-                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0 }}>запрос отправлен</span>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0 }}>{t('contacts.requestSent', 'запрос отправлен')}</span>
                             ) : null}
                           </li>
                         );
@@ -388,12 +501,12 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
               )}
               {requests.incoming.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
-                  <p className="sidebar-nav-label" style={{ marginBottom: 8, fontSize: '0.75rem' }}>Входящие запросы</p>
+                  <p className="sidebar-nav-label" style={{ marginBottom: 8, fontSize: '0.75rem' }}>{t('contacts.incoming', 'Входящие запросы')}</p>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {requests.incoming.map((r) => (
                       <li key={r.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--studio-panel-border)' }}>
                         <p style={{ fontSize: '0.85rem', marginBottom: 8 }}>
-                          Пользователь <strong>@{r.fromUser?.userTag ?? r.fromUser?.name ?? 'пользователь'}</strong> хочет добавить вас в друзья.
+                          {t('contentCard.member', 'Пользователь')} <strong>@{r.fromUser?.userTag ?? r.fromUser?.name ?? t('contentCard.member', 'пользователь')}</strong> {t('contacts.incomingText', 'хочет добавить вас в друзья.')}
                         </p>
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button
@@ -432,10 +545,10 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
                 </div>
               )}
               {contactsLoading ? (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Загрузка…</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('common.loading', 'Загрузка…')}</p>
               ) : contacts.length === 0 && groups.length === 0 && searchQuery.trim().length < 2 && requests.incoming.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  Введите тег в поиске (например @user), чтобы найти и добавить контакты
+                  {t('contacts.noContacts', 'Введите тег в поиске (например @user), чтобы найти и добавить контакты')}
                 </p>
               ) : (
                 <ul className="sidebar-contacts-list">
@@ -535,11 +648,11 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
     >
       <div style={{ width: 260, minWidth: 260, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '16px 14px', borderBottom: '1px solid var(--studio-panel-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <span className="sidebar-nav-label" style={{ marginBottom: 0 }}>Комнаты</span>
+          <span className="sidebar-nav-label" style={{ marginBottom: 0 }}>{t('rooms.title', 'Комнаты')}</span>
           <button
             type="button"
             onClick={() => setSpheresOpen(false)}
-            aria-label="Скрыть комнаты"
+            aria-label={t('common.hide', 'Скрыть')}
             style={{
               width: 32,
               height: 32,
@@ -561,7 +674,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
           <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--studio-panel-border)', flexShrink: 0 }}>
             <input
               type="text"
-              placeholder="Поиск по названию"
+              placeholder={t('rooms.search', 'Поиск по названию')}
               value={spheresSearchQuery}
               onChange={(e) => setSpheresSearchQuery(e.target.value)}
               style={{
@@ -582,28 +695,69 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
               </div>
             )}
             {universesLoading ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Загрузка…</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('common.loading', 'Загрузка…')}</p>
             ) : filteredUniverses.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                {spheresSearchQuery.trim() ? 'Ничего не найдено' : 'Пока нет комнат'}
-              </p>
+              spheresSearchQuery.trim() ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  {t('rooms.search', 'Ничего не найдено')}
+                </p>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '24px 8px', color: 'var(--text-muted)' }}>
+                  <i className="fas fa-shapes mb-2 text-2xl opacity-40 block" aria-hidden />
+                  <p style={{ fontSize: '0.85rem', margin: '0 0 14px' }}>
+                    {t('rooms.noTrackedRooms', 'Вы пока не отслеживаете ни одной комнаты')}
+                  </p>
+                  <Link
+                    href="/explore"
+                    onClick={() => setSpheresOpen(false)}
+                    className="platform-btn platform-btn-sm"
+                    style={{ fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <i className="fa-solid fa-compass" /> {t('nav.feed', 'Найти в Ленте')}
+                  </Link>
+                </div>
+              )
             ) : (
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                {filteredUniverses.map((u) => (
-                  <li key={u.slug} style={{ marginBottom: 2 }}>
-                    <Link
-                      href={`/universes/${encodeURIComponent(u.slug)}`}
-                      className={`sidebar-sphere-item ${pathname?.split('/')[2] === u.slug ? 'active' : ''}`}
-                    >
-                      <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                        <SferaSphereIcon size="sm" color={u.sphereColor} icon={u.icon} name={u.name} />
-                      </div>
-                      <span style={{ flex: 1, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {u.name}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                {filteredUniverses.map((u) => {
+                  const isOwner = Boolean(session?.user?.id && u.ownerId === session.user.id);
+                  return (
+                    <li key={u.slug} style={{ marginBottom: 2 }}>
+                      <Link
+                        href={`/universes/${encodeURIComponent(u.slug)}`}
+                        className={`sidebar-sphere-item ${pathname?.split('/')[2] === u.slug ? 'active' : ''}`}
+                        onContextMenu={(e) => handleUniverseContextMenu(e, u)}
+                        style={isOwner ? { borderLeft: '2px solid var(--accent-primary)' } : undefined}
+                      >
+                        <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                          <SferaSphereIcon size="sm" color={u.sphereColor} icon={u.icon} name={u.name} />
+                        </div>
+                        <span style={{ flex: 1, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {u.name}
+                        </span>
+                        {isOwner && (
+                          <span
+                            style={{
+                              fontSize: '0.65rem',
+                              padding: '1px 5px',
+                              borderRadius: '4px',
+                              background: 'rgba(var(--accent-primary-rgb, 139, 92, 246), 0.15)',
+                              color: 'var(--accent-primary)',
+                              border: '1px solid rgba(var(--accent-primary-rgb, 139, 92, 246), 0.3)',
+                              fontWeight: 700,
+                              letterSpacing: '0.02em',
+                              flexShrink: 0,
+                              marginLeft: 6,
+                            }}
+                            title={t('common.owner', 'Автор')}
+                          >
+                            ★ {t('common.owner', 'Автор')}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
@@ -628,11 +782,11 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
       >
         <div style={{ width: 260, minWidth: 260, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '16px 14px', borderBottom: '1px solid var(--studio-panel-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <span className="sidebar-nav-label" style={{ marginBottom: 0 }}>Сборка</span>
+            <span className="sidebar-nav-label" style={{ marginBottom: 0 }}>{t('nav.assembly', 'Сборка')}</span>
             <button
               type="button"
               onClick={() => setCollectionOpen(false)}
-              aria-label="Скрыть"
+              aria-label={t('common.hide', 'Скрыть')}
               style={{
                 width: 32,
                 height: 32,
@@ -654,7 +808,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
             <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--studio-panel-border)', flexShrink: 0 }}>
               <input
                 type="text"
-                placeholder="Поиск по названию"
+                placeholder={t('sources.search', 'Поиск по названию')}
                 value={collectionSearchQuery}
                 onChange={(e) => setCollectionSearchQuery(e.target.value)}
                 style={{
@@ -697,7 +851,7 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
                   opacity: userSources.length === 0 ? 0.6 : 1,
                 }}
               >
-                {collectionAggregating ? 'Агрегация…' : 'Запустить агрегацию'}
+                {collectionAggregating ? t('sources.aggregating', 'Агрегация…') : t('sources.runAggregation', 'Запустить агрегацию')}
               </button>
               <Link
                 href="/me/content"
@@ -710,13 +864,13 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
                 }}
               >
                 <i className="fas fa-rss" style={{ marginRight: 6 }} />
-                Лента контента
+                {t('content.feedTitle', 'Лента контента')}
               </Link>
               {userSourcesLoading ? (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Загрузка…</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('common.loading', 'Загрузка…')}</p>
               ) : filteredUserSources.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  {collectionSearchQuery.trim() ? 'Ничего не найдено' : 'Добавьте источники (RSS, YouTube, Telegram и т.д.)'}
+                  {collectionSearchQuery.trim() ? t('sources.nothingFound', 'Ничего не найдено') : t('sources.addHint', 'Добавьте источники (RSS, YouTube, Telegram и т.д.)')}
                 </p>
               ) : (
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -803,13 +957,173 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
       </div>
     )}
 
-      {miniAppOpen && (
-        <MiniAppModal 
-          url="https://pomofocus.io" 
-          title="Таймер Фокуса" 
-          onClose={() => setMiniAppOpen(false)} 
+    {/* Кастомное контекстное меню по ПКМ для комнат */}
+    {contextUniverse && typeof document !== 'undefined' && createPortal(
+      <>
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 99998 }}
+          onClick={() => setContextUniverse(null)}
+          onContextMenu={(e) => { e.preventDefault(); setContextUniverse(null); }}
         />
-      )}
+        <div
+          ref={contextMenuRef}
+          className="glass-panel"
+          style={{
+            position: 'fixed',
+            left: contextMenuPos.x,
+            top: contextMenuPos.y,
+            zIndex: 99999,
+            minWidth: 200,
+            padding: '6px',
+            borderRadius: 12,
+            background: 'var(--studio-panel-bg)',
+            border: '1px solid var(--studio-panel-border)',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div style={{ padding: '6px 10px 4px', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--studio-panel-border)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {contextUniverse.name}
+          </div>
+
+          {/* 1. Поделиться */}
+          <button
+            type="button"
+            className="platform-btn platform-btn-sm w-full justify-start gap-2.5"
+            style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', textAlign: 'left', padding: '8px 10px', fontSize: '0.85rem' }}
+            onClick={() => handleShareUniverse(contextUniverse)}
+          >
+            <i className="fa-solid fa-share-nodes text-[var(--accent-primary)]" aria-hidden />
+            {t('rooms.share', 'Поделиться')}
+          </button>
+
+          {/* 2. Отслеживать / Не отслеживать */}
+          <button
+            type="button"
+            className="platform-btn platform-btn-sm w-full justify-start gap-2.5"
+            style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', textAlign: 'left', padding: '8px 10px', fontSize: '0.85rem' }}
+            onClick={() => handleToggleTrackUniverse(contextUniverse)}
+          >
+            <i className={`fa-solid ${trackedSlugs.has(contextUniverse.slug) ? 'fa-bell-slash text-amber-400' : 'fa-bell text-[var(--accent-primary)]'}`} aria-hidden />
+            {trackedSlugs.has(contextUniverse.slug)
+              ? t('rooms.unfollow', 'Не отслеживать')
+              : t('rooms.follow', 'Отслеживать')}
+          </button>
+
+          {/* 3. Удалить (если владелец или сид) */}
+          {(session?.user?.id && (contextUniverse.ownerId === session.user.id || !contextUniverse.ownerId)) && (
+            <button
+              type="button"
+              className="platform-btn platform-btn-sm w-full justify-start gap-2.5"
+              style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', textAlign: 'left', padding: '8px 10px', fontSize: '0.85rem', color: 'var(--text-danger, #e5534b)' }}
+              onClick={() => {
+                const u = contextUniverse;
+                setContextUniverse(null);
+                setDeletePromptUniverse(u);
+              }}
+            >
+              <i className="fa-solid fa-trash text-red-500" aria-hidden />
+              {t('rooms.deleteRoom', 'Удалить')}
+            </button>
+          )}
+        </div>
+      </>,
+      document.body
+    )}
+
+    {/* Модальное окно подтверждения удаления комнаты */}
+    {deletePromptUniverse && typeof document !== 'undefined' && createPortal(
+      <>
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 99998, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={() => !deletingUniverse && setDeletePromptUniverse(null)}
+          aria-hidden
+        />
+        <div
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 99999,
+            background: 'var(--studio-panel-bg)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 16,
+            padding: '24px',
+            minWidth: 320,
+            maxWidth: 420,
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', fontSize: '1.2rem', flexShrink: 0 }}>
+              <i className="fa-solid fa-triangle-exclamation" />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-primary)' }}>
+                {t('rooms.deleteRoomConfirm', 'Удалить комнату')}?
+              </h3>
+              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                «{deletePromptUniverse.name}»
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+            <button
+              type="button"
+              onClick={handleConfirmDeleteUniverse}
+              disabled={deletingUniverse}
+              className="platform-btn platform-btn-primary platform-btn-sm"
+              style={{ flex: 1, background: '#ef4444', borderColor: '#ef4444' }}
+            >
+              {deletingUniverse ? '…' : t('rooms.deleteRoom', 'Удалить')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeletePromptUniverse(null)}
+              disabled={deletingUniverse}
+              className="platform-btn platform-btn-sm"
+              style={{ flex: 1 }}
+            >
+              {t('common.cancel', 'Отмена')}
+            </button>
+          </div>
+        </div>
+      </>,
+      document.body
+    )}
+
+    {/* Уведомление о скопированной ссылке */}
+    {copiedToast && typeof document !== 'undefined' && createPortal(
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 100000,
+          background: 'var(--accent-primary)',
+          color: '#fff',
+          padding: '10px 18px',
+          borderRadius: 12,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          animation: 'fadeIn 0.2s ease',
+        }}
+      >
+        <i className="fa-solid fa-check" />
+        {t('rooms.copiedLink', 'Ссылка скопирована')}
+      </div>,
+      document.body
+    )}
     </>
   );
 }

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 export function UserTagSettingsForm() {
+  const { t } = useTranslation();
   const [userTag, setUserTag] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(true);
@@ -45,20 +47,20 @@ export function UserTagSettingsForm() {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
       } else {
-        setError(data.error ?? 'Ошибка сохранения');
+        setError(data.error ?? t('common.error', 'Ошибка сохранения'));
       }
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Загрузка…</p>;
+  if (loading) return <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('common.loading', 'Загрузка…')}</p>;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="user-tag-input" className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-          Личный тег
+          {t('settings.userTag', 'Личный тег')}
         </label>
         <input
           id="user-tag-input"
@@ -70,14 +72,14 @@ export function UserTagSettingsForm() {
           style={{ fontFamily: 'monospace' }}
         />
         <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-          Ваш тег для поиска. 3–30 символов: буквы, цифры, подчёркивание. По нему вас смогут найти в разделе контактов.
+          {t('settings.userTagDesc', 'Ваш уникальный тег для поиска в контактах (@username).')}
         </p>
       </div>
       {error && <p className="text-sm" style={{ color: 'var(--accent-red, #e53e3e)' }}>{error}</p>}
       <button type="submit" disabled={saving} className="platform-btn platform-btn-sm">
-        {saving ? 'Сохранение…' : 'Сохранить'}
+        {saving ? t('common.saving', 'Сохранение…') : t('common.save', 'Сохранить')}
       </button>
-      {saved && <span className="text-sm ml-2" style={{ color: 'var(--accent-green)' }}>Сохранено</span>}
+      {saved && <span className="text-sm ml-2" style={{ color: 'var(--accent-green)' }}>{t('common.saved', 'Сохранено')}</span>}
     </form>
   );
 }

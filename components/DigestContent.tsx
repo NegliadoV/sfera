@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
+import { useLanguage } from '@/components/i18n/LanguageProvider';
 
 type DigestItem = {
   id: string;
@@ -19,6 +21,8 @@ type DigestResponse = {
 };
 
 export function DigestContent() {
+  const { t } = useTranslation();
+  const { locale } = useLanguage();
   const [data, setData] = useState<DigestResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -33,13 +37,19 @@ export function DigestContent() {
   if (loading) {
     return (
       <div className="digest-content">
-        <p style={{ color: 'var(--text-muted)' }}>Загрузка дайджеста…</p>
+        <p style={{ color: 'var(--text-muted)' }}>{t('digest.loading', 'Загрузка дайджеста…')}</p>
       </div>
     );
   }
 
   const items = data?.items ?? [];
   const byUniverse = data?.byUniverse ?? [];
+
+  // Map locale to BCP 47 language tag for date formatting
+  const localeMap: Record<string, string> = {
+    ru: 'ru', en: 'en', zh: 'zh', ja: 'ja', ko: 'ko', vi: 'vi', es: 'es', de: 'de', fr: 'fr'
+  };
+  const dateLocale = localeMap[locale] ?? 'ru';
 
   if (items.length === 0) {
     return (
@@ -48,16 +58,16 @@ export function DigestContent() {
           <div className="digest-icon">
             <i className="fa-regular fa-sun" aria-hidden />
           </div>
-          <h2>Нет нового контента за последние 24 часа</h2>
+          <h2>{t('digest.noContent', 'Нет нового контента за последние 24 часа')}</h2>
           <div className="digest-description">
-            Подпишитесь на сферы или добавьте источники в Сборку — как только появится новый контент, он отобразится здесь.
+            {t('digest.noContentDesc', 'Подпишитесь на сферы или добавьте источники в Сборку — как только появится новый контент, он отобразится здесь.')}
           </div>
           <div className="digest-actions">
             <Link href="/" className="digest-action-btn">
-              <i className="fa-regular fa-compass" aria-hidden /> К сферам
+              <i className="fa-regular fa-compass" aria-hidden /> {t('digest.toSpheres', 'К сферам')}
             </Link>
             <Link href="/me/content" className="digest-action-btn">
-              <i className="fa-solid fa-layer-group" aria-hidden /> Сборка
+              <i className="fa-solid fa-layer-group" aria-hidden /> {t('nav.assembly', 'Сборка')}
             </Link>
           </div>
         </div>
@@ -69,7 +79,7 @@ export function DigestContent() {
     <div className="digest-content">
       <div style={{ marginBottom: 24 }}>
         <h3 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: 12 }}>
-          Сводка по сферам
+          {t('digest.bySpheres', 'Сводка по сферам')}
         </h3>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
           {byUniverse.map((u) => (
@@ -93,7 +103,7 @@ export function DigestContent() {
       </div>
 
       <h3 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: 12 }}>
-        Новый контент ({items.length})
+        {t('digest.newContent', 'Новый контент')} ({items.length})
       </h3>
       <ul className="list-none p-0 m-0" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {items.map((item) => (
@@ -117,7 +127,7 @@ export function DigestContent() {
                 {item.universeName}
                 {' · '}
                 <time dateTime={new Date(item.publishedAt ?? item.createdAt).toISOString()}>
-                  {new Date(item.publishedAt ?? item.createdAt).toLocaleDateString('ru', {
+                  {new Date(item.publishedAt ?? item.createdAt).toLocaleDateString(dateLocale, {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',

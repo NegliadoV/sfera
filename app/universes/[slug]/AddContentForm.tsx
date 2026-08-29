@@ -1,15 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MarkdownBody } from '@/components/MarkdownBody';
+import { RichArticleEditor } from '@/components/content/RichArticleEditor';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 type Props = { universeId: string; slug: string };
 
 type ContentType = 'link' | 'article' | 'telegram';
 
-export function AddContentForm({ universeId }: Props) {
+export function AddContentForm({ universeId, slug }: Props) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [contentType, setContentType] = useState<ContentType>('link');
   const [title, setTitle] = useState('');
@@ -20,6 +22,85 @@ export function AddContentForm({ universeId }: Props) {
   const [pending, setPending] = useState(false);
   const [parsePending, setParsePending] = useState(false);
   const [error, setError] = useState('');
+
+  // Восстановление состояния формы и черновиков при загрузке
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const savedOpen = localStorage.getItem(`draft_form_open_${slug}`);
+    const savedType = localStorage.getItem(`draft_type_${slug}`) as ContentType | null;
+    const savedTitle = localStorage.getItem(`draft_title_${slug}`);
+    const savedUrl = localStorage.getItem(`draft_url_${slug}`);
+    const savedBody = localStorage.getItem(`draft_body_${slug}`);
+    const hasArticleDraft =
+      !!localStorage.getItem(`draft_article_${slug}`) ||
+      !!localStorage.getItem(`draft_article_${slug}_json`);
+
+    if (savedOpen === '1' || hasArticleDraft || savedTitle) {
+      setIsOpen(true);
+    }
+    if (savedType && ['link', 'article', 'telegram'].includes(savedType)) {
+      setContentType(savedType);
+    } else if (hasArticleDraft) {
+      setContentType('article');
+    }
+    if (savedTitle) setTitle(savedTitle);
+    if (savedUrl) setUrl(savedUrl);
+    if (savedBody && savedType !== 'article') setBody(savedBody);
+  }, [slug]);
+
+  // Сохранение состояния формы при изменениях
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (isOpen) {
+      localStorage.setItem(`draft_form_open_${slug}`, '1');
+    } else {
+      localStorage.removeItem(`draft_form_open_${slug}`);
+    }
+  }, [isOpen, slug]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(`draft_type_${slug}`, contentType);
+  }, [contentType, slug]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (title) {
+      localStorage.setItem(`draft_title_${slug}`, title);
+    } else {
+      localStorage.removeItem(`draft_title_${slug}`);
+    }
+  }, [title, slug]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (url) {
+      localStorage.setItem(`draft_url_${slug}`, url);
+    } else {
+      localStorage.removeItem(`draft_url_${slug}`);
+    }
+  }, [url, slug]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (contentType !== 'article') {
+      if (body) {
+        localStorage.setItem(`draft_body_${slug}`, body);
+      } else {
+        localStorage.removeItem(`draft_body_${slug}`);
+      }
+    }
+  }, [body, contentType, slug]);
+
+  const clearAllDrafts = () => {
+    localStorage.removeItem(`draft_form_open_${slug}`);
+    localStorage.removeItem(`draft_type_${slug}`);
+    localStorage.removeItem(`draft_title_${slug}`);
+    localStorage.removeItem(`draft_url_${slug}`);
+    localStorage.removeItem(`draft_body_${slug}`);
+    localStorage.removeItem(`draft_article_${slug}`);
+    localStorage.removeItem(`draft_article_${slug}_json`);
+  };
 
   const handleAddOption = () => {
     if (pollOptions.length < 4) setPollOptions([...pollOptions, '']);
@@ -117,7 +198,7 @@ export function AddContentForm({ universeId }: Props) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? 'Ошибка сохранения');
+        setError(data.botMessage || data.error || 'Ошибка сохранения');
         return;
       }
       setTitle('');
@@ -126,6 +207,8 @@ export function AddContentForm({ universeId }: Props) {
       setHasPoll(false);
       setPollOptions(['', '']);
       setIsOpen(false);
+      // Очищаем черновики после успешной отправки
+      clearAllDrafts();
       router.refresh();
     } finally {
       setPending(false);
@@ -142,7 +225,7 @@ export function AddContentForm({ universeId }: Props) {
             className="add-content-form-open-btn"
           >
             <i className="fa-solid fa-plus" aria-hidden />
-            Добавить материал
+            {t('rooms.addMaterial', 'Добавить материал')}
           </button>
         </div>
       )}
@@ -155,7 +238,7 @@ export function AddContentForm({ universeId }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
         <h2 className="add-content-form-title">
           <i className="fa-solid fa-file-plus" aria-hidden />
-          Добавить материал
+          {t('rooms.addMaterial', 'Добавить материал')}
         </h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div className="add-content-form-toggle">
@@ -165,7 +248,7 @@ export function AddContentForm({ universeId }: Props) {
               data-active={contentType === 'link'}
               aria-pressed={contentType === 'link'}
             >
-              <i className="fa-solid fa-link" aria-hidden /> Ссылка
+              <i className="fa-solid fa-link" aria-hidden /> {t('content.typeLink', 'Ссылка')}
             </button>
             <button
               type="button"
@@ -173,7 +256,7 @@ export function AddContentForm({ universeId }: Props) {
               data-active={contentType === 'telegram'}
               aria-pressed={contentType === 'telegram'}
             >
-              <i className="fa-brands fa-telegram" aria-hidden /> Telegram
+              <i className="fa-brands fa-telegram" aria-hidden /> {t('content.typeTelegram', 'Telegram')}
             </button>
             <button
               type="button"
@@ -181,7 +264,7 @@ export function AddContentForm({ universeId }: Props) {
               data-active={contentType === 'article'}
               aria-pressed={contentType === 'article'}
             >
-              <i className="fa-solid fa-file-alt" aria-hidden /> Статья
+              <i className="fa-solid fa-file-alt" aria-hidden /> {t('content.typeArticle', 'Статья')}
             </button>
           </div>
           <button
@@ -194,11 +277,12 @@ export function AddContentForm({ universeId }: Props) {
               setBody('');
               setHasPoll(false);
               setPollOptions(['', '']);
+              clearAllDrafts();
             }}
             className="add-content-form-close-btn"
-            aria-label="Закрыть форму"
+            aria-label={t('common.close', 'Закрыть')}
           >
-            <i className="fa-solid fa-times" aria-hidden />
+            <i className="fa-solid fa-xmark" aria-hidden />
           </button>
         </div>
       </div>
@@ -218,7 +302,7 @@ export function AddContentForm({ universeId }: Props) {
                 required
               />
               <label htmlFor="add-content-title" className="add-content-form-float-label">
-                Название
+                {t('content.materialTitle', 'Название')}
               </label>
             </div>
           </div>
@@ -235,7 +319,7 @@ export function AddContentForm({ universeId }: Props) {
                   placeholder=" "
                 />
                 <label htmlFor="add-content-url" className="add-content-form-float-label">
-                  {contentType === 'telegram' ? 'Ссылка на канал или пост (t.me/...)' : 'Ссылка (необязательно)'}
+                  {contentType === 'telegram' ? 'Telegram (t.me/...)' : t('content.url', 'Ссылка на источник')}
                 </label>
               </div>
               {contentType === 'telegram' && (
@@ -247,7 +331,7 @@ export function AddContentForm({ universeId }: Props) {
                   style={{ marginTop: 12, alignSelf: 'flex-start' }}
                 >
                   <i className={`fa-solid ${parsePending ? 'fa-spinner fa-pulse' : 'fa-download'}`} aria-hidden />
-                  {parsePending ? 'Загрузка…' : 'Загрузить данные из Telegram'}
+                  {parsePending ? t('common.loading', 'Загрузка…') : 'Telegram'}
                 </button>
               )}
             </div>
@@ -268,7 +352,7 @@ export function AddContentForm({ universeId }: Props) {
                 rows={2}
               />
               <label htmlFor="add-content-desc" className="add-content-form-float-label">
-                {contentType === 'telegram' ? 'Описание (поддерживает Markdown)' : 'Описание (необязательно, поддерживает Markdown)'}
+                {t('content.body', 'Описание (поддерживает Markdown)')}
               </label>
             </div>
           </div>
@@ -276,36 +360,7 @@ export function AddContentForm({ universeId }: Props) {
 
         {contentType === 'article' && (
           <div className="add-content-form-field add-content-form-field--no-float" style={{ minWidth: '100%' }}>
-            <label className="add-content-form-label">
-              <i className="fa-solid fa-align-left" aria-hidden />
-              Текст статьи
-            </label>
-            <div className="add-content-form-editor-wrap">
-              <div className="add-content-form-editor-panel">
-                <div className="add-content-form-editor-panel-header">Редактор</div>
-                <textarea
-                  className="add-content-form-textarea add-content-form-textarea-editor"
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  onPaste={handlePaste}
-                  placeholder="Напишите статью в Markdown…"
-                  rows={16}
-                  required
-                />
-              </div>
-              <div className="add-content-form-editor-panel add-content-form-preview-wrap">
-                <div className="add-content-form-editor-panel-header" style={{ position: 'sticky', top: 0, zIndex: 10 }}>Превью</div>
-                <div style={{ padding: '16px', minHeight: 280 }}>
-                  {body.trim() ? (
-                    <MarkdownBody content={body} />
-                  ) : (
-                    <p className="add-content-form-preview-placeholder">
-                      Превью появится здесь при вводе текста.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+            <RichArticleEditor value={body} onChange={setBody} draftKey={`draft_article_${slug}`} />
           </div>
         )}
 
@@ -313,7 +368,7 @@ export function AddContentForm({ universeId }: Props) {
         <div className="add-content-form-field" style={{ minWidth: '100%' }}>
            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 500, color: 'var(--text-primary)' }}>
              <input type="checkbox" checked={hasPoll} onChange={(e) => setHasPoll(e.target.checked)} className="form-checkbox h-5 w-5 text-[var(--accent-primary)] rounded bg-white/5 border-white/20" />
-             <i className="fa-solid fa-chart-pie text-[var(--accent-primary)]"></i> Прикрепить опрос
+             <i className="fa-solid fa-chart-pie text-[var(--accent-primary)]"></i> {t('content.addPoll', 'Прикрепить опрос')}
            </label>
 
            {hasPoll && (
@@ -322,7 +377,7 @@ export function AddContentForm({ universeId }: Props) {
                  <div key={idx} className="flex gap-2 w-full">
                    <input
                      type="text"
-                     placeholder={`Опция ${idx + 1}`}
+                     placeholder={`${t('content.pollOption', 'Опция')} ${idx + 1}`}
                      value={opt}
                      onChange={(e) => handleOptionChange(idx, e.target.value)}
                      className="add-content-form-input w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2"
@@ -338,7 +393,7 @@ export function AddContentForm({ universeId }: Props) {
                ))}
                {pollOptions.length < 4 && (
                  <button type="button" onClick={handleAddOption} className="text-sm font-medium px-4 py-2 mt-2 rounded-lg border border-[var(--accent-primary)] text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-white transition self-start">
-                   <i className="fa-solid fa-plus mr-2"></i> Добавить опцию (max 4)
+                   <i className="fa-solid fa-plus mr-2"></i> {t('content.addOption', '+ Добавить вариант')} (max 4)
                  </button>
                )}
              </div>
@@ -354,7 +409,7 @@ export function AddContentForm({ universeId }: Props) {
             className="add-content-form-submit"
           >
             <i className={`fa-solid ${pending ? 'fa-spinner fa-pulse' : 'fa-plus'}`} aria-hidden />
-            {pending ? 'Добавление…' : 'Добавить'}
+            {pending ? t('common.saving', 'Добавление…') : t('common.submit', 'Добавить')}
           </button>
         </div>
       </div>
@@ -363,3 +418,4 @@ export function AddContentForm({ universeId }: Props) {
     </>
   );
 }
+

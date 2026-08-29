@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom';
 import { useHygiene } from '@/components/HygieneProvider';
 import { ContentPreview } from '@/components/content/ContentPreview';
 import { DeleteContentButton } from './content/DeleteContentButton';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 interface ContentCardProps {
   id: string;
@@ -30,6 +31,8 @@ interface ContentCardProps {
   canEdit?: boolean;
   canPin?: boolean;
   onOpenModal?: () => void;
+  universeName?: string | null;
+  universeSlug?: string | null;
 }
 
 export function ContentCard({
@@ -54,8 +57,11 @@ export function ContentCard({
   canEdit = false,
   canPin = false,
   onOpenModal,
+  universeName,
+  universeSlug,
 }: ContentCardProps) {
   useHygiene();
+  const { t, locale } = useTranslation();
   const router = useRouter();
   const [links, setLinks] = useState<Array<{ id: string; linkType: string; toContentId: string; note?: string }>>([]);
   const [showDeletePrompt, setShowDeletePrompt] = useState(false);
@@ -89,8 +95,10 @@ export function ContentCard({
     };
   }, [id, hasLinks]);
 
-  const displayAuthor = externalAuthor || authorName || 'Участник';
+  const displayAuthor = externalAuthor || authorName || t('contentCard.member', 'Участник');
   const displayDate = publishedAt ? new Date(publishedAt) : new Date(createdAt);
+  const localeMap: Record<string, string> = { ru: 'ru', en: 'en', zh: 'zh', ja: 'ja', ko: 'ko', vi: 'vi', es: 'es', de: 'de', fr: 'fr' };
+  const dateLocale = localeMap[locale] ?? 'ru';
 
   const hasPreview = url || imageUrl;
 
@@ -197,6 +205,12 @@ export function ContentCard({
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a, button')) return;
+    fetch(`/api/content/${id}/view`, { method: 'POST' }).catch(() => {});
+    if (onOpenModal) onOpenModal();
+  };
+
   return (
     <div
       className={`content-card glass-panel content-card-hover-wrap flex flex-col ${
@@ -208,29 +222,36 @@ export function ContentCard({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={clearLongPressTimer}
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest('a, button')) return;
-        if (onOpenModal) onOpenModal();
-      }}
+      onClick={handleCardClick}
     >
       <button
         type="button"
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (onOpenModal) onOpenModal(); }}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          fetch(`/api/content/${id}/view`, { method: 'POST' }).catch(() => {});
+          if (onOpenModal) onOpenModal();
+        }}
         className="content-card-discussion-btn z-10"
       >
-        Читать
+        {t('rooms.read', 'Читать')}
       </button>
       <div className="content-card-header flex-none w-full">
         <div className="content-card-info">
           {!isDuplicate ? (
             <div className="content-card-title-row">
               {isPinned && (
-                <span className="content-card-pin-icon" title="Закреплён">
+                <span className="content-card-pin-icon" title={t('contentCard.pinTitle', 'Закреплён')}>
                   📌
                 </span>
               )}
+              {universeName && (
+                <span className="content-card-universe-tag">
+                  {universeName}
+                </span>
+              )}
               <a
-                href={`/universes/${slug}/content/${id}`}
+                href={`/universes/${universeSlug ?? slug}/content/${id}`}
                 className="content-card-title cursor-pointer"
                 onClick={(e) => { 
                   if (onOpenModal) {
@@ -250,13 +271,13 @@ export function ContentCard({
           ) : (
             <div className="content-card-title-row" style={{ minHeight: 'auto', marginBottom: 4 }}>
               {isPinned && (
-                <span className="content-card-pin-icon" title="Закреплён">
+                <span className="content-card-pin-icon" title={t('contentCard.pinTitle', 'Закреплён')}>
                   📌
                 </span>
               )}
               {type === 'article' && (
                 <span className="platform-tag content-card-tag">
-                  Статья
+                  {t('contentCard.article', 'Статья')}
                 </span>
               )}
             </div>
@@ -272,25 +293,25 @@ export function ContentCard({
           </div>
           <div className="content-card-footer" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
             {commentCount !== undefined && commentCount > 0 && (
-              <div className="flex items-center gap-1.5 opacity-80" aria-label={`Комментариев: ${commentCount}`}>
+              <div className="flex items-center gap-1.5 opacity-80" aria-label={`${t('contentCard.article', 'Комментариев')}: ${commentCount}`}>
                 <i className="fa-solid fa-comment text-[0.8rem]" />
                 <span className="font-medium text-xs">{commentCount}</span>
               </div>
             )}
             {savesCount !== undefined && savesCount > 0 && (
-              <div className="flex items-center gap-1.5 opacity-90 text-[var(--accent-primary)] drop-shadow-[0_0_8px_rgba(var(--accent-primary-rgb,139,92,246),0.5)]" title={`Сохранено в Карты: ${savesCount}`}>
+              <div className="flex items-center gap-1.5 opacity-90 text-[var(--accent-primary)] drop-shadow-[0_0_8px_rgba(var(--accent-primary-rgb,139,92,246),0.5)]" title={`${t('contentCard.savedToMaps', 'Сохранено в Карты')}: ${savesCount}`}>
                 <i className="fa-solid fa-project-diagram text-[0.8rem]" />
                 <span className="font-bold text-xs">{savesCount}</span>
               </div>
             )}
             {sourceId && (
-              <span>Агрегировано</span>
+              <span>{t('contentCard.aggregated', 'Агрегировано')}</span>
             )}
             {hasLinks && links.length > 0 && (
-              <span>{links.length} связей</span>
+              <span>{links.length} {t('contentCard.connections', 'связей')}</span>
             )}
-            <time dateTime={displayDate.toISOString()} title={displayDate.toLocaleString('ru')}>
-              {displayDate.toLocaleDateString('ru', {
+            <time dateTime={displayDate.toISOString()} title={displayDate.toLocaleString(dateLocale)}>
+              {displayDate.toLocaleDateString(dateLocale, {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
@@ -303,7 +324,7 @@ export function ContentCard({
       </div>
       {(hasPreview || body) && (
         <div className="content-card-preview-wrap pointer-events-none">
-          {hasPreview && (
+          {hasPreview && (imageUrl || url?.includes('youtube') || url?.includes('youtu.be')) && (
             <div className="content-card-preview">
               <ContentPreview
                 url={url ?? null}
@@ -387,7 +408,7 @@ export function ContentCard({
                 onClick={() => setShowContextMenu(false)}
               >
                 <i className="fa-solid fa-pen" aria-hidden />
-                Изменить
+                {t('contentCard.deletePost', 'Изменить')}
               </Link>
             )}
             {canPin && (
@@ -403,7 +424,7 @@ export function ContentCard({
                 style={{ display: 'flex', marginBottom: 4 }}
               >
                 <i className="fa-solid fa-thumbtack" aria-hidden />
-                {pinning ? '…' : isPinned ? 'Открепить' : 'Закрепить'}
+                {pinning ? '…' : isPinned ? t('contentCard.unpin', 'Открепить') : t('contentCard.pin', 'Закрепить')}
               </button>
             )}
             <Link
@@ -413,7 +434,7 @@ export function ContentCard({
               onClick={() => setShowContextMenu(false)}
             >
               <i className="fa-solid fa-paper-plane" aria-hidden />
-              Переслать
+              {t('contentCard.forward', 'Переслать')}
             </Link>
             <button
               type="button"
@@ -428,7 +449,7 @@ export function ContentCard({
               }}
             >
               <i className="fa-solid fa-link" aria-hidden />
-              Ск/Ссылка
+              {t('contentCard.copyLink', 'Ск/Ссылка')}
             </button>
             <button
               type="button"
@@ -441,7 +462,7 @@ export function ContentCard({
               }}
             >
               <i className="fa-solid fa-fingerprint" aria-hidden />
-              Ск/ID (для Карты)
+              {t('contentCard.copyId', 'Ск/ID (для Карты)')}
             </button>
             {canDelete && (
               <button
@@ -454,7 +475,7 @@ export function ContentCard({
                 }}
               >
                 <i className="fa-solid fa-trash" aria-hidden />
-                Удалить
+                {t('contentCard.deletePost', 'Удалить')}
               </button>
             )}
           </div>
@@ -485,7 +506,7 @@ export function ContentCard({
             onContextMenu={(e) => e.preventDefault()}
           >
             <p style={{ marginBottom: 12, fontSize: '0.9rem' }}>
-              Удалить пост «{title}»?
+              {t('contentCard.deleteConfirm', 'Удалить пост')} «{title}»?
             </p>
             <DeleteContentButton
               contentId={id}
@@ -500,7 +521,7 @@ export function ContentCard({
               className="platform-btn platform-btn-sm w-full"
               style={{ marginTop: 8 }}
             >
-              Отмена
+              {t('common.cancel', 'Отмена')}
             </button>
           </div>
         </>

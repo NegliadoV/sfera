@@ -16,12 +16,14 @@ export interface HygieneState {
   focusMode: boolean;
   dailyTimeLimitMinutes: number | null;
   digestDelivery: DigestDelivery;
+  smartFeedEnabled: boolean;
 }
 
 const defaultState: HygieneState = {
   focusMode: false,
   dailyTimeLimitMinutes: null,
   digestDelivery: 'none',
+  smartFeedEnabled: true,
 };
 
 const HygieneContext = createContext<{
@@ -67,6 +69,7 @@ export function HygieneProvider({
           dailyTimeLimitMinutes:
             data.dailyTimeLimitMinutes != null ? Number(data.dailyTimeLimitMinutes) : null,
           digestDelivery: data.digestDelivery === 'email' || data.digestDelivery === 'in_app' ? data.digestDelivery : 'none',
+          smartFeedEnabled: data.smartFeedEnabled ?? true,
         });
       }
     } catch {
@@ -97,21 +100,19 @@ export function HygieneProvider({
             dailyTimeLimitMinutes:
               data.dailyTimeLimitMinutes != null ? Number(data.dailyTimeLimitMinutes) : null,
             digestDelivery: data.digestDelivery === 'email' || data.digestDelivery === 'in_app' ? data.digestDelivery : 'none',
+            smartFeedEnabled: data.smartFeedEnabled ?? true,
           });
         }
       } catch {
-        // ignore
+        // error handling
       }
     },
     [session?.user?.id]
   );
 
-  const value = {
-    hygiene,
-    loading,
-    setHygiene,
-    refetch,
-  };
-
-  return <HygieneContext.Provider value={value}>{children}</HygieneContext.Provider>;
+  return (
+    <HygieneContext.Provider value={{ hygiene, loading, setHygiene, refetch }}>
+      {children}
+    </HygieneContext.Provider>
+  );
 }

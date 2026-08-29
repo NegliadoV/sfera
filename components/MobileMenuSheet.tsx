@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import type { Session } from 'next-auth';
 import { CrystalBalance } from '@/components/CrystalBalance';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
-import { MiniAppModal } from '@/components/MiniAppModal';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
+import { LanguageBar } from '@/components/i18n/LanguageBar';
 
 export function MobileMenuSheet({
   session,
@@ -14,7 +15,7 @@ export function MobileMenuSheet({
   open: boolean;
   onClose: () => void;
 }) {
-  const [miniAppOpen, setMiniAppOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <>
@@ -47,7 +48,7 @@ export function MobileMenuSheet({
           
           {/* Header Identity */}
           {session?.user && (
-            <div className="flex items-center gap-4 mb-8 shrink-0 pb-6 border-b border-[var(--studio-panel-border)]">
+            <div className="flex items-center gap-4 mb-6 shrink-0 pb-6 border-b border-[var(--studio-panel-border)]">
               <Link href="/me" onClick={onClose} className="rounded-[18px] overflow-hidden shadow-lg border border-[var(--border-color)] shrink-0 w-[56px] h-[56px] bg-[var(--bg-accent)] flex items-center justify-center font-bold text-xl relative group">
                 {session.user.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -82,39 +83,31 @@ export function MobileMenuSheet({
               <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)] group-active:bg-[color-mix(in_srgb,var(--accent-primary)_25%,transparent)] transition-colors">
                 <i className="fas fa-rss text-xl text-[var(--accent-primary)] drop-shadow-[0_0_8px_var(--accent-primary)]" />
               </div>
-              <span className="text-[15px] font-semibold tracking-wide">Сборка</span>
-              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">RSS и авторы</span>
+              <span className="text-[15px] font-semibold tracking-wide">{t('nav.collection', 'Сборка')}</span>
+              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">{t('nav.mySources', 'RSS и авторы')}</span>
             </Link>
 
             <Link href="/me/mind-maps" onClick={onClose} className="mobile-sheet-btn group">
               <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,var(--accent-purple)_15%,transparent)] group-active:bg-[color-mix(in_srgb,var(--accent-purple)_25%,transparent)] transition-colors">
                 <i className="fas fa-project-diagram text-xl text-[var(--accent-purple)] drop-shadow-[0_0_8px_var(--accent-purple)]" />
               </div>
-              <span className="text-[15px] font-semibold tracking-wide">Карты</span>
-              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">База знаний</span>
+              <span className="text-[15px] font-semibold tracking-wide">{t('nav.mindMaps', 'Карты')}</span>
+              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">{t('rooms.mindMap', 'База знаний')}</span>
             </Link>
 
             <Link href="/digest" onClick={onClose} className="mobile-sheet-btn group">
               <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,#10b981_15%,transparent)] group-active:bg-[color-mix(in_srgb,#10b981_25%,transparent)] transition-colors">
                 <i className="fas fa-newspaper text-xl text-[#10b981] drop-shadow-[0_0_8px_#10b981]" />
               </div>
-              <span className="text-[15px] font-semibold tracking-wide">Дайджест</span>
+              <span className="text-[15px] font-semibold tracking-wide">{t('nav.digest', 'Дайджест')}</span>
               <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Главное за день</span>
             </Link>
-
-            <button type="button" onClick={() => { setMiniAppOpen(true); }} className="mobile-sheet-btn group">
-              <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,#f43f5e_15%,transparent)] group-active:bg-[color-mix(in_srgb,#f43f5e_25%,transparent)] transition-colors">
-                <i className="fas fa-layer-group text-xl text-[#f43f5e] drop-shadow-[0_0_8px_#f43f5e]" />
-              </div>
-              <span className="text-[15px] font-semibold tracking-wide">Приложения</span>
-              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Полезные утилиты</span>
-            </button>
 
             <Link href="/contacts" onClick={onClose} className="mobile-sheet-btn group">
               <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,#3b82f6_15%,transparent)] group-active:bg-[color-mix(in_srgb,#3b82f6_25%,transparent)] transition-colors">
                 <i className="fas fa-users text-xl text-[#3b82f6] drop-shadow-[0_0_8px_#3b82f6]" />
               </div>
-              <span className="text-[15px] font-semibold tracking-wide">Контакты</span>
+              <span className="text-[15px] font-semibold tracking-wide">{t('nav.contacts', 'Контакты')}</span>
               <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Поиск друзей</span>
             </Link>
             
@@ -123,24 +116,22 @@ export function MobileMenuSheet({
                 <i className="fas fa-gear text-[17px] text-[var(--text-secondary)]" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-[15px] font-semibold tracking-wide">Настройки аккаунта</span>
-                <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Тема, приватность, токены</span>
+                <span className="text-[15px] font-semibold tracking-wide">{t('nav.settings', 'Настройки')}</span>
+                <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">{t('settings.appearance', 'Тема, приватность, язык')}</span>
               </div>
               <i className="fas fa-chevron-right ml-auto text-[var(--border-color)] text-sm" />
             </Link>
           </div>
+
+          {/* Выбор языка в мобильном меню */}
+          <div className="pt-3 border-t border-[var(--studio-panel-border)]">
+            <div style={{ marginBottom: 8, fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+              {t('settings.language', 'Язык интерфейса / Language')}
+            </div>
+            <LanguageBar />
+          </div>
         </div>
       </div>
-
-      {miniAppOpen && (
-        <div className="z-[250] relative">
-          <MiniAppModal 
-            url="https://pomofocus.io" 
-            title="Таймер Фокуса" 
-            onClose={() => setMiniAppOpen(false)} 
-          />
-        </div>
-      )}
     </>
   );
 }

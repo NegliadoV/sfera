@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { Session } from 'next-auth';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
 import { CrystalBalance } from '@/components/CrystalBalance';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 interface SidebarNavLinksProps {
   session?: Session | null;
@@ -16,7 +17,6 @@ interface SidebarNavLinksProps {
   setCollectionOpen: React.Dispatch<React.SetStateAction<boolean>>;
   unreadCount: number;
   universeSlug: string | null;
-  setMiniAppOpen: (open: boolean) => void;
 }
 
 export function SidebarNavLinks({
@@ -30,8 +30,8 @@ export function SidebarNavLinks({
   setCollectionOpen,
   unreadCount,
   universeSlug,
-  setMiniAppOpen,
 }: SidebarNavLinksProps) {
+  const { t } = useTranslation();
   const isContentSection = Boolean(universeSlug);
 
   return (
@@ -66,7 +66,7 @@ export function SidebarNavLinks({
               textDecoration: 'none',
               flexShrink: 0,
             }}
-            title={session.user.name ?? session.user.email ?? 'Личный кабинет'}
+            title={session.user.name ?? session.user.email ?? t('nav.profile', 'Личный кабинет')}
           >
             {session.user.image ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -86,7 +86,36 @@ export function SidebarNavLinks({
         </div>
       )}
       <nav style={{ flex: 1, overflowY: 'auto' }}>
-        <div className="sidebar-nav-label">Комнаты</div>
+        <div className="sidebar-nav-label">{t('nav.rooms', 'Комнаты')}</div>
+        {/* Лента со всеми материалами платформы */}
+        <div style={{ marginBottom: 16 }}>
+          <Link
+            href="/explore"
+            onClick={() => {
+              setSpheresOpen(false);
+              setContactsOpen(false);
+              setCollectionOpen(false);
+            }}
+            className={`sidebar-nav-link ${pathname === '/explore' ? 'active' : ''}`}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              cursor: 'pointer',
+              border: 'none',
+              background: 'transparent',
+              font: 'inherit',
+              color: 'inherit',
+              padding: 0,
+              textAlign: 'left',
+            }}
+          >
+            <i className="fas fa-fire" />
+            {t('nav.feed', 'Лента')}
+          </Link>
+        </div>
+
         <div style={{ marginBottom: 16 }}>
           <button
             type="button"
@@ -111,7 +140,7 @@ export function SidebarNavLinks({
             }}
           >
             <i className="fas fa-shapes" />
-            {universeSlug ? '← Выбор комнаты' : 'Комнаты'}
+            {universeSlug ? `← ${t('nav.rooms', 'Выбор комнаты')}` : t('nav.rooms', 'Комнаты')}
             <i className={`fas fa-chevron-${spheresOpen ? 'left' : 'right'}`} style={{ fontSize: '0.75rem', marginLeft: 'auto' }} />
           </button>
         </div>
@@ -141,7 +170,7 @@ export function SidebarNavLinks({
               }}
             >
               <i className="fas fa-layer-group" />
-              Сборка
+              {t('nav.collection', 'Сборка')}
               <i className={`fas fa-chevron-${collectionOpen ? 'left' : 'right'}`} style={{ fontSize: '0.75rem', marginLeft: 'auto' }} />
             </button>
           </div>
@@ -171,7 +200,7 @@ export function SidebarNavLinks({
               }}
             >
               <i className="fas fa-address-book" />
-              Контакты и чаты
+              {t('nav.contacts', 'Контакты и чаты')}
               {unreadCount > 0 && (
                 <span
                   className="sidebar-contact-badge"
@@ -199,10 +228,10 @@ export function SidebarNavLinks({
 
         {universeSlug && (
           <>
-            <div className="sidebar-nav-label">Разделы</div>
+            <div className="sidebar-nav-label">{t('rooms.materials', 'Разделы')}</div>
             <div style={{ marginBottom: 16 }}>
               {[
-                { href: `/universes/${universeSlug}`, label: 'Контент', icon: 'fa-folder-open', active: isContentSection },
+                { href: `/universes/${universeSlug}`, label: t('rooms.materials', 'Контент'), icon: 'fa-folder-open', active: isContentSection },
               ].map((item) => (
                 <Link
                   key={item.href}
@@ -217,14 +246,14 @@ export function SidebarNavLinks({
           </>
         )}
 
-        <div className="sidebar-nav-label">Общее</div>
+        <div className="sidebar-nav-label">{t('common.all', 'Общее')}</div>
         <div>
           {[
-            { href: '/explore', label: 'Лента (В тренде)', icon: 'fa-fire', active: pathname === '/explore' },
-            { href: '/rooms', label: 'Аудио-комнаты', icon: 'fa-microphone-alt', active: pathname === '/rooms' },
-            { href: '/me/mind-maps', label: 'Мои карты', icon: 'fa-project-diagram', active: pathname?.startsWith('/me/mind-maps') },
-            { href: '/settings', label: 'Настройки', icon: 'fa-gear', active: pathname === '/settings' },
-            { href: '/digest', label: 'Дайджест', icon: 'fa-newspaper', active: pathname === '/digest' },
+            { href: '/explore', label: t('nav.feed', 'Лента (В тренде)'), icon: 'fa-fire', active: pathname === '/explore' },
+            { href: '/rooms', label: t('rooms.title', 'Аудио-комнаты'), icon: 'fa-microphone-alt', active: pathname === '/rooms' },
+            { href: '/me/mind-maps', label: t('nav.mindMaps', 'Мои карты'), icon: 'fa-project-diagram', active: pathname?.startsWith('/me/mind-maps') },
+            { href: '/settings', label: t('nav.settings', 'Настройки'), icon: 'fa-gear', active: pathname === '/settings' },
+            { href: '/digest', label: t('nav.digest', 'Дайджест'), icon: 'fa-newspaper', active: pathname === '/digest' },
           ].map((item) => (
             <Link
               key={item.href}
@@ -235,15 +264,10 @@ export function SidebarNavLinks({
               {item.label}
             </Link>
           ))}
-          <button
-            onClick={() => setMiniAppOpen(true)}
-            className="sidebar-nav-link w-full text-left"
-          >
-            <i className="fas fa-layer-group" />
-            Приложения (Mini-App)
-          </button>
         </div>
       </nav>
     </aside>
   );
 }
+
+

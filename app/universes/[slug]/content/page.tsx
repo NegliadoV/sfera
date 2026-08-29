@@ -4,9 +4,7 @@ import { auth } from '@/auth';
 import { db, universes, content, user, comments, contentLinks, universeMembers, contentPolls } from '@/lib/db';
 import { eq, desc, sql, and } from 'drizzle-orm';
 import { normalizeUniverseSlug } from '@/lib/universe-slug';
-import { AddContentForm } from '../AddContentForm';
-import { ContentFeedGrid } from '../ContentFeedGrid';
-import { TrackUniverseButton } from '@/components/content/TrackUniverseButton';
+import { ContentPageClient } from './ContentPageClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -149,64 +147,14 @@ export default async function ContentFeedPage({
   const name = universeRow?.name ?? FALLBACK[slug]?.name ?? slug.replace(/-/g, ' ');
 
   return (
-    <div className="platform-page">
-      <div className="platform-breadcrumb mb-6">
-        <Link href="/"><i className="fa-solid fa-shapes" style={{ marginRight: 4 }} /> Roominate</Link>
-        <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <Link href="/">Комнаты знаний</Link>
-        <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <Link href={`/universes/${slug}`}>{name}</Link>
-        <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <span>Лента</span>
-      </div>
-
-      <div className="platform-card mb-6">
-        <h1 className="platform-hero-title" style={{ fontSize: '1.75rem', marginBottom: 8 }}>
-          Лента контента: {name}
-        </h1>
-        <p className="platform-card-desc">
-          Материалы из источников и добавленные вручную.
-        </p>
-        {session?.user?.id && (
-          <div className="mt-4">
-            <TrackUniverseButton universeSlug={slug} />
-          </div>
-        )}
-      </div>
-
-      {session?.user?.id && (
-        <div style={{ marginBottom: '16px' }}>
-          <AddContentForm universeId={universeRow.id} slug={slug} />
-        </div>
-      )}
-
-      {contentList.length === 0 ? (
-        <p className="platform-card-desc">
-          Пока нет материалов.{' '}
-          {session?.user?.id ? (
-            <>Добавьте контент выше или запустите агрегацию в{' '}
-              <Link href="/me/content" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
-                Сборке
-              </Link>.
-            </>
-          ) : (
-            <>
-              <Link href={`/auth/signin?callbackUrl=${encodeURIComponent(`/universes/${slug}/content`)}`} style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
-                Войдите
-              </Link>
-              , чтобы добавлять контент.
-            </>
-          )}
-        </p>
-      ) : (
-        <ContentFeedGrid
-          items={contentList}
-          slug={slug}
-          canDelete={canDelete}
-          canEdit={canDelete}
-          canPin={canDelete}
-        />
-      )}
-    </div>
+    <ContentPageClient
+      slug={slug}
+      name={name}
+      universeId={universeRow.id}
+      hasSession={!!session?.user?.id}
+      contentList={contentList}
+      canDelete={canDelete}
+      session={session}
+    />
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { getYouTubeVideoId } from '@/lib/youtube';
 import { isDirectVideoUrl } from '@/lib/video-url';
@@ -16,10 +17,15 @@ export interface ContentPreviewProps {
 }
 
 export function ContentPreview({ url, imageUrl, type, title, contentHref }: ContentPreviewProps) {
+  const [imgFailed, setImgFailed] = useState(false);
+
   const youtubeVideoId = url ? getYouTubeVideoId(url) : null;
   const directVideoUrl = url && isDirectVideoUrl(url) ? url : null;
   const isVideo = type === 'video' || youtubeVideoId || directVideoUrl;
   const showPlayOverlay = isVideo && (youtubeVideoId || imageUrl);
+
+  // Картинка не загрузилась — скрываем весь блок
+  if (imgFailed) return null;
 
   const previewContent = (
     <>
@@ -33,7 +39,12 @@ export function ContentPreview({ url, imageUrl, type, title, contentHref }: Cont
           decoding="async"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg`;
+            // Пробуем hqdefault, потом скрываем
+            if (target.src.includes('maxresdefault')) {
+              target.src = `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg`;
+            } else {
+              setImgFailed(true);
+            }
           }}
         />
       ) : imageUrl ? (
@@ -42,6 +53,7 @@ export function ContentPreview({ url, imageUrl, type, title, contentHref }: Cont
           originalSrc={imageUrl}
           alt={title}
           className="content-preview-image"
+          onError={() => setImgFailed(true)}
         />
       ) : null}
       {showPlayOverlay && (
@@ -94,20 +106,6 @@ export function ContentPreview({ url, imageUrl, type, title, contentHref }: Cont
     );
   }
 
-  if (isVideo && url && contentHref) {
-    return (
-      <Link href={contentHref} className="content-preview content-preview-video content-preview-clickable content-preview-placeholder">
-        <div className="content-preview-overlay content-preview-play-overlay" aria-hidden>
-          <i className="fa-solid fa-play" style={{ fontSize: '2rem', color: 'white' }} />
-        </div>
-        <span className="content-preview-placeholder-text">Видео</span>
-      </Link>
-    );
-  }
-
-  if (type === 'article' || type === 'text') {
-    return null;
-  }
-
+  // Ничего не рендерим — нет ни картинки, ни видео
   return null;
 }

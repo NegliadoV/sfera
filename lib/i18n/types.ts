@@ -1,0 +1,386 @@
+/**
+ * Типы и схемы мультиязычной локализации Roominate.
+ */
+
+export type Locale = 'ru' | 'en' | 'zh' | 'ja' | 'ko' | 'vi' | 'es' | 'de' | 'fr';
+
+export interface LocaleMeta {
+  code: Locale;
+  name: string;
+  nativeName: string;
+  flag: string;
+}
+
+export const SUPPORTED_LOCALES: LocaleMeta[] = [
+  { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
+  { code: 'zh', name: 'Chinese', nativeName: '中文 (简体)', flag: '🇨🇳' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
+  { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
+  { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+];
+
+export interface TranslationSchema {
+  common: {
+    appName: string;
+    tagline: string;
+    loading: string;
+    error: string;
+    save: string;
+    saving: string;
+    saved: string;
+    cancel: string;
+    hide: string;
+    create: string;
+    creating: string;
+    delete: string;
+    edit: string;
+    back: string;
+    search: string;
+    searchPlaceholder: string;
+    notFound: string;
+    yes: string;
+    no: string;
+    close: string;
+    submit: string;
+    more: string;
+    all: string;
+    filter: string;
+    sort: string;
+    newest: string;
+    popular: string;
+    discuss: string;
+    profile: string;
+    profileDesc: string;
+    new: string;
+    recentComments: string;
+    noComments: string;
+    spheres: string;
+    goToDiscussions: string;
+    owner: string;
+    member: string;
+    tracking: string;
+    and: string;
+    optional: string;
+  };
+  nav: {
+    explore: string;
+    feed: string;
+    rooms: string;
+    mindMaps: string;
+    messages: string;
+    contacts: string;
+    digest: string;
+    settings: string;
+    profile: string;
+    mySources: string;
+    collection: string;
+    createRoom: string;
+    login: string;
+    logout: string;
+    register: string;
+    cabinet: string;
+    myContent: string;
+    spheres: string;
+    assembly: string;
+  };
+  sources: {
+    addSource: string;
+    add: string;
+    podcast: string;
+    manual: string;
+    nameRequired: string;
+    urlRequired: string;
+    networkError: string;
+    namePlaceholder: string;
+    urlPlaceholder: string;
+    search: string;
+    runAggregation: string;
+    aggregating: string;
+    nothingFound: string;
+    addHint: string;
+  };
+  contacts: {
+    title: string;
+    search: string;
+    searchResults: string;
+    searching: string;
+    nothingFound: string;
+    inContacts: string;
+    requestSent: string;
+    addToFriends: string;
+    incoming: string;
+    incomingText: string;
+    accept: string;
+    decline: string;
+    noContacts: string;
+  };
+  contentCard: {
+    article: string;
+    aggregated: string;
+    pinned: string;
+    pinTitle: string;
+    unpin: string;
+    pin: string;
+    forward: string;
+    copyLink: string;
+    copyId: string;
+    deletePost: string;
+    deleteConfirm: string;
+    member: string;
+    connections: string;
+    savedToMaps: string;
+  };
+  explore: {
+    welcome: string;
+    welcomeDesc: string;
+    forYou: string;
+    trending: string;
+    feedDesc: string;
+    feedDescGuest: string;
+    noContent: string;
+  };
+  mindMaps: {
+    title: string;
+    empty: string;
+    emptyDesc: string;
+    create: string;
+    newMapTitle: string;
+    createError: string;
+    universe: string;
+    private: string;
+  };
+  digest: {
+    last24h: string;
+    description: string;
+    configureIn: string;
+    loading: string;
+    noContent: string;
+    noContentDesc: string;
+    toSpheres: string;
+    bySpheres: string;
+    newContent: string;
+  };
+  rooms: {
+    title: string;
+    createTitle: string;
+    roomName: string;
+    roomNamePlaceholder: string;
+    description: string;
+    descriptionPlaceholder: string;
+    icon: string;
+    privateRoom: string;
+    privateRoomDesc: string;
+    monthlyPrice: string;
+    track: string;
+    untrack: string;
+    members: string;
+    chat: string;
+    materials: string;
+    mindMap: string;
+    sources: string;
+    addMaterial: string;
+    noMaterials: string;
+    roomNotFound: string;
+    mySpheres: string;
+    noSpheres: string;
+    chooseOrCreate: string;
+    createSphere: string;
+    trackSphere: string;
+    subtitle: string;
+    createBroadcast: string;
+    search: string;
+    create: string;
+    noRooms: string;
+    knowledgeRooms: string;
+    feed: string;
+    feedDesc: string;
+    noMaterialsLogin: string;
+    noMaterialsAdd: string;
+    assembly: string;
+    pinnedFirst: string;
+    follow: string;
+    unfollow: string;
+    discussion: string;
+    toMyMap: string;
+    read: string;
+    following: string;
+    notifyNewPosts: string;
+    notifyNewPostsActive: string;
+    avatarOrIcon: string;
+    avatarOrIconHint: string;
+    avatarPlaceholder: string;
+    makePrivate: string;
+    makePrivateDesc: string;
+    monthlyPriceLabel: string;
+    pricePlaceholder: string;
+    sessionExpired: string;
+    roomAlreadyExists: string;
+    createError: string;
+    cantDetermineSlug: string;
+    goToLogin: string;
+    goToExistingRoom: string;
+    share: string;
+    deleteRoom: string;
+    deleteRoomConfirm: string;
+    copiedLink: string;
+    noTrackedRooms: string;
+    allKnowledgeRooms: string;
+    allKnowledgeRoomsDesc: string;
+    searchRoomsPlaceholder: string;
+    roomsFound: string;
+    resetSearch: string;
+    trackedSection: string;
+    allRoomsSection: string;
+    goToRoom: string;
+    scrollNext: string;
+  };
+  content: {
+    feedTitle: string;
+    feedDesc: string;
+    feedEmpty: string;
+    addTitle: string;
+    materialTitle: string;
+    titlePlaceholder: string;
+    url: string;
+    urlPlaceholder: string;
+    body: string;
+    bodyPlaceholder: string;
+    typeLink: string;
+    typeArticle: string;
+    typeVideo: string;
+    typePodcast: string;
+    typeTelegram: string;
+    poll: string;
+    addPoll: string;
+    pollOption: string;
+    addOption: string;
+    comments: string;
+    addComment: string;
+    commentPlaceholder: string;
+    thesis: string;
+    counterargument: string;
+    question: string;
+    saveToBookmarks: string;
+    savedToBookmarks: string;
+    readOriginal: string;
+    views: string;
+    shares: string;
+    viewAllComments: string;
+    hideComments: string;
+    noCommentsYet: string;
+    loginToComment: string;
+    resonance: string;
+    resonanceInsight: string;
+    resonanceIgnite: string;
+    resonancePonder: string;
+    resonanceResonate: string;
+    resonanceInspire: string;
+    resonanceChallenge: string;
+    resonanceYou: string;
+    resonanceLogin: string;
+    feedContent: string;
+  };
+  settings: {
+    title: string;
+    appearance: string;
+    hygiene: string;
+    privacy: string;
+    language: string;
+    languageDesc: string;
+    selectLanguage: string;
+    userTag: string;
+    userTagDesc: string;
+    blockedUsers: string;
+    subscriptions: string;
+    sessions: string;
+    themeDark: string;
+    themeLight: string;
+    themeSystem: string;
+    setTag: string;
+    hygieneDesc: string;
+    privacyDesc: string;
+    blockedDesc: string;
+    subscriptionsDesc: string;
+    sessionsDesc: string;
+    savedNote: string;
+    appearanceDesc: string;
+    accentColor: string;
+    colorApplied: string;
+    glassPanel: string;
+    glassPanelDesc: string;
+    mainBlock: string;
+    noBlocked: string;
+    unblock: string;
+    glassSolid: string;
+    glassNearSolid: string;
+    glassGlass: string;
+    glassStrong: string;
+    glassUltra: string;
+  };
+  hygiene: {
+    focusMode: string;
+    focusModeDesc: string;
+    dailyLimit: string;
+    noLimit: string;
+    dailyLimitDesc: string;
+    dailyDigest: string;
+    digestNone: string;
+    digestInApp: string;
+    digestEmail: string;
+    digestDesc: string;
+    goToDigest: string;
+    smartFeed: string;
+    smartFeedDesc: string;
+  };
+  privacy: {
+    dmOnlyContacts: string;
+    dmOnlyContactsDesc: string;
+  };
+  security: {
+    confirmRevoke: string;
+    signingOut: string;
+    revokeAll: string;
+    revokeDesc: string;
+  };
+  moderation: {
+    botName: string;
+    rejectedTitle: string;
+    needsReviewTitle: string;
+    approvedTitle: string;
+    profanityWarning: string;
+    spamWarning: string;
+    nsfwWarning: string;
+    invalidSlugWarning: string;
+  };
+  editor: {
+    editor: string;
+    preview: string;
+    code: string;
+    media: string;
+    youtube: string;
+    progLanguage: string;
+    videoPickerTitle: string;
+    insertVideo: string;
+    draftRestored: string;
+    discardDraft: string;
+    emptyPreview: string;
+    hint: string;
+    bold: string;
+    italic: string;
+    strike: string;
+    h1: string;
+    h2: string;
+    h3: string;
+    bulletList: string;
+    orderedList: string;
+    divider: string;
+    alignLeft: string;
+    alignCenter: string;
+    alignRight: string;
+    uploadMedia: string;
+  };
+}

@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { db, universes, content, user, comments, contentLinks, contentPolls } from '@/lib/db';
+import { db, universes, content, user, comments, contentLinks, contentPolls, userHygieneSettings, userContentViews } from '@/lib/db';
 import { eq, desc, sql, count } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { ContentFeedGrid } from '@/app/universes/[slug]/ContentFeedGrid';
+import { ExploreHero, ExploreEmpty } from './ExploreHero';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,48 +56,116 @@ export default async function ExplorePage({
   }> = [];
 
   try {
-    // ── Алгоритмическая лента ────────────────────────────────────────
-    // Скоринг: (saves + 1) / (age_hours + 2)^1.5
-    // Для залогиненных: отслеживаемые сферы ×1.6
     const userId = session?.user?.id;
 
-    const personalBoost = userId
-      ? sql`CASE WHEN ${universes.slug} IN (
-              SELECT u2.slug FROM universes u2
-              JOIN universe_tracking ut ON ut.universe_id = u2.id
-              WHERE ut.user_id = ${userId}
-            ) THEN 1.6 ELSE 1.0 END`
-      : sql`1.0`;
+    // 1. Проверяем настройку умной ленты
+    let smartFeedEnabled = true;
+    if (userId) {
+      const [settingsRow] = await db
+        .select({ smartFeedEnabled: userHygieneSettings.smartFeedEnabled })
+        .from(userHygieneSettings)
+        .where(eq(userHygieneSettings.userId, userId))
+        .limit(1);
+      if (settingsRow && settingsRow.smartFeedEnabled === false) {
+        smartFeedEnabled = false;
+      }
+    }
 
-    const list = await db
-      .select({
-        id: content.id,
-        title: content.title,
-        type: content.type,
-        url: content.url,
-        imageUrl: content.imageUrl,
-        body: content.body,
-        authorName: user.name,
-        externalAuthor: content.externalAuthor,
-        createdAt: content.createdAt,
-        publishedAt: content.publishedAt,
-        pinnedAt: content.pinnedAt,
-        sourceId: content.sourceId,
-        tags: content.tags,
-        savesCount: content.savesCount,
-        universeSlug: universes.slug,
-        universeName: universes.name,
-      })
-      .from(content)
-      .leftJoin(user, eq(content.authorId, user.id))
-      .innerJoin(universes, eq(content.universeId, universes.id))
-      .orderBy(sql`
-        (${content.savesCount} + 1.0)
-        / POWER(EXTRACT(EPOCH FROM (NOW() - ${content.createdAt})) / 3600.0 + 2, 1.5)
-        * ${personalBoost}
-        DESC
-      `)
-      .limit(50);
+    let listQuery;
+
+    if (smartFeedEnabled && userId) {
+      // ── Умный рекомендательный алгоритм на основе интересов и просмотров ──
+      // 1. Бонус за отслеживаемые сферы (x1.7)
+      const trackedBoost = sql`
+        CASE WHEN ${universes.slug} IN (
+          SELECT u2.slug FROM universes u2
+          JOIN universe_tracking ut ON ut.universe_id = u2.id
+          WHERE ut.user_id = ${userId}
+        ) THEN 1.7 ELSE 1.0 END
+      `;
+
+      // 2. Бонус за сферы, из которых пользователь активно смотрит материалы (до +100% / x2.0)
+      const viewHistoryBoost = sql`
+        COALESCE(
+          (SELECT 1.0 + LEAST(COUNT(*)::float * 0.15, 1.0)
+           FROM user_content_views ucv
+           WHERE ucv.user_id = ${userId} AND ucv.universe_id = ${universes.id}),
+          1.0
+        )
+      `;
+
+      // 3. Дебуст уже просмотренных постов (x0.7), чтобы лента предлагала новый контент
+      const unreadBoost = sql`
+        CASE WHEN EXISTS (
+          SELECT 1 FROM user_content_views ucv2
+          WHERE ucv2.user_id = ${userId} AND ucv2.content_id = ${content.id}
+        ) THEN 0.7 ELSE 1.2 END
+      `;
+
+      // Итоговый скоринг интересов и свежести
+      const smartScore = sql`
+        (${content.savesCount} * 1.5 + 1.0)
+        / POWER(EXTRACT(EPOCH FROM (NOW() - COALESCE(${content.publishedAt}, ${content.createdAt}))) / 3600.0 + 2.0, 1.35)
+        * ${trackedBoost}
+        * ${viewHistoryBoost}
+        * ${unreadBoost}
+      `;
+
+      listQuery = db
+        .select({
+          id: content.id,
+          title: content.title,
+          type: content.type,
+          url: content.url,
+          imageUrl: content.imageUrl,
+          body: content.body,
+          authorName: user.name,
+          externalAuthor: content.externalAuthor,
+          createdAt: content.createdAt,
+          publishedAt: content.publishedAt,
+          pinnedAt: content.pinnedAt,
+          sourceId: content.sourceId,
+          tags: content.tags,
+          savesCount: content.savesCount,
+          universeSlug: universes.slug,
+          universeName: universes.name,
+        })
+        .from(content)
+        .leftJoin(user, eq(content.authorId, user.id))
+        .innerJoin(universes, eq(content.universeId, universes.id))
+        .where(eq(content.hidden, false))
+        .orderBy(sql`${smartScore} DESC`)
+        .limit(60);
+    } else {
+      // ── Классическая хронологическая лента (без персонализации) ──
+      listQuery = db
+        .select({
+          id: content.id,
+          title: content.title,
+          type: content.type,
+          url: content.url,
+          imageUrl: content.imageUrl,
+          body: content.body,
+          authorName: user.name,
+          externalAuthor: content.externalAuthor,
+          createdAt: content.createdAt,
+          publishedAt: content.publishedAt,
+          pinnedAt: content.pinnedAt,
+          sourceId: content.sourceId,
+          tags: content.tags,
+          savesCount: content.savesCount,
+          universeSlug: universes.slug,
+          universeName: universes.name,
+        })
+        .from(content)
+        .leftJoin(user, eq(content.authorId, user.id))
+        .innerJoin(universes, eq(content.universeId, universes.id))
+        .where(eq(content.hidden, false))
+        .orderBy(sql`COALESCE(${content.publishedAt}, ${content.createdAt}) DESC`)
+        .limit(60);
+    }
+
+    const list = await listQuery;
 
     contentList = await Promise.all(
       list.map(async (item) => {
@@ -134,47 +203,22 @@ export default async function ExplorePage({
 
   return (
     <div className="platform-page">
-      {showWelcome && (
-        <div className="platform-card mb-4 overflow-hidden relative" style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.15), rgba(124,58,237,0.15))', border: '1px solid rgba(37,99,235,0.3)' }}>
-          <div className="relative z-10 flex items-center gap-4">
-            <div style={{ fontSize: 36 }}>🎉</div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4 }}>
-                Добро пожаловать в Roominate{session?.user?.name ? `, ${session.user.name.split(' ')[0]}` : ''}!
-              </div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0 }}>
-                Лента персонализирована под твои интересы. Изучай материалы, вступай в обсуждения и слушай аудио-комнаты 🚀
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className="platform-card mb-6 overflow-hidden relative">
-        <div className="absolute inset-0 z-0 opacity-20" style={{ background: 'radial-gradient(circle at top right, var(--accent-primary), transparent 60%)' }}></div>
-        <div className="relative z-10">
-          <h1 className="platform-hero-title" style={{ fontSize: '2rem', marginBottom: 8 }}>
-            <i className="fa-solid fa-fire text-[var(--accent-primary)] mr-3"></i> 
-            {session?.user ? 'Для тебя' : 'В тренде'}
-          </h1>
-          <p className="platform-card-desc">
-            {session?.user
-              ? 'Лучшие материалы из твоих сфер и со всей платформы — подобраны алгоритмом.'
-              : 'Лучшие материалы со всех Сфер, подобранные по свежести и популярности.'}
-          </p>
-        </div>
-      </div>
+      <ExploreHero
+        isLoggedIn={!!session?.user}
+        userName={session?.user?.name}
+        showWelcome={showWelcome}
+      />
 
       {contentList.length === 0 ? (
-        <p className="platform-card-desc">
-          Пока нет материалов.
-        </p>
+        <ExploreEmpty />
       ) : (
         <ContentFeedGrid
           items={contentList.map(c => ({
             ...c,
-            title: `[${c.universeName}] ${c.title}`
+            title: c.title
           }))}
           slug="explore"
+          session={session}
         />
       )}
     </div>

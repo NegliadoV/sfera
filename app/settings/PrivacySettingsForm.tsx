@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 export function PrivacySettingsForm() {
+  const { t } = useTranslation();
   const [dmOnlyContacts, setDmOnlyContacts] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -34,20 +36,22 @@ export function PrivacySettingsForm() {
     }
   }
 
-  if (loading) return <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Загрузка…</p>;
+  if (loading) return <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('common.loading', 'Загрузка…')}</p>;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <label className="settings-checkbox-wrap">
         <input type="checkbox" checked={dmOnlyContacts} onChange={(e) => setDmOnlyContacts(e.target.checked)} className="settings-checkbox" />
         <span className="settings-checkbox-visual" aria-hidden />
-        <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Писать могут только друзья</span>
+        <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{t('privacy.dmOnlyContacts', 'Писать могут только друзья')}</span>
       </label>
       <p className="text-sm ml-8" style={{ color: 'var(--text-secondary)' }}>
-        Если включено, личные сообщения смогут отправлять только пользователи из списка контактов.
+        {t('privacy.dmOnlyContactsDesc', 'Если включено, личные сообщения смогут отправлять только пользователи из списка контактов.')}
       </p>
-      <button type="submit" disabled={saving} className="platform-btn platform-btn-sm">{saving ? 'Сохранение…' : 'Сохранить'}</button>
-      {saved && <span className="text-sm ml-2" style={{ color: 'var(--accent-green)' }}>Сохранено</span>}
+      <button type="submit" disabled={saving} className="platform-btn platform-btn-sm">
+        {saving ? t('common.saving', 'Сохранение…') : t('common.save', 'Сохранить')}
+      </button>
+      {saved && <span className="text-sm ml-2" style={{ color: 'var(--accent-green)' }}>{t('common.saved', 'Сохранено')}</span>}
     </form>
   );
 }

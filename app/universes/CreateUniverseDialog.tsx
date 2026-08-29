@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 import { CreateUniverseForm } from './CreateUniverseForm';
 
 export function CreateUniverseDialog({ compact = false }: { compact?: boolean }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -17,7 +19,7 @@ export function CreateUniverseDialog({ compact = false }: { compact?: boolean })
       className="universes-create-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="Создать комнату"
+      aria-label={t('rooms.createTitle', 'Создать комнату')}
       onClick={(e) => e.target === e.currentTarget && setOpen(false)}
     >
       <div className="universes-create-modal" onClick={(e) => e.stopPropagation()}>
@@ -25,7 +27,7 @@ export function CreateUniverseDialog({ compact = false }: { compact?: boolean })
           type="button"
           onClick={() => setOpen(false)}
           className="universes-create-close"
-          aria-label="Закрыть"
+          aria-label={t('common.close', 'Закрыть')}
         >
           <i className="fas fa-times" aria-hidden />
         </button>
@@ -45,7 +47,7 @@ export function CreateUniverseDialog({ compact = false }: { compact?: boolean })
         style={compact ? undefined : { marginBottom: 24 }}
       >
         <i className="fa-solid fa-plus" aria-hidden />
-        Создать комнату
+        {t('rooms.create', 'Создать комнату')}
       </button>
 
       {mounted && typeof document !== 'undefined' && overlay && createPortal(overlay, document.body)}

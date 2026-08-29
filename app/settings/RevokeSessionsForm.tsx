@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { signOut } from 'next-auth/react';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 type State = 'idle' | 'loading' | 'done' | 'error';
 
@@ -12,18 +13,18 @@ type State = 'idle' | 'loading' | 'done' | 'error';
  * Текущий пользователь тоже разлогинивается (signOut).
  */
 export function RevokeSessionsForm() {
+  const { t } = useTranslation();
   const [state, setState] = useState<State>('idle');
 
   const handleRevoke = async () => {
     if (state === 'loading') return;
-    if (!confirm('Вы уверены? Вы выйдете из аккаунта на всех устройствах, включая это.')) return;
+    if (!confirm(t('security.confirmRevoke', 'Вы уверены? Вы выйдете из аккаунта на всех устройствах, включая это.'))) return;
 
     setState('loading');
     try {
       const res = await fetch('/api/auth/revoke-sessions', { method: 'POST' });
       if (!res.ok) throw new Error('server error');
       setState('done');
-      // Разлогиниваем текущее устройство — сессия уже невалидна в БД
       await signOut({ callbackUrl: '/auth/signin' });
     } catch {
       setState('error');
@@ -67,17 +68,17 @@ export function RevokeSessionsForm() {
         {state === 'loading' ? (
           <>
             <i className="fas fa-circle-notch fa-spin" />
-            Выход...
+            {t('security.signingOut', 'Выход...')}
           </>
         ) : state === 'done' ? (
           <>
             <i className="fas fa-check" style={{ color: 'var(--accent-green)' }} />
-            Готово
+            {t('common.saved', 'Готово')}
           </>
         ) : (
           <>
             <i className="fas fa-right-from-bracket" />
-            Выйти со всех устройств
+            {t('security.revokeAll', 'Выйти со всех устройств')}
           </>
         )}
       </button>
@@ -85,13 +86,12 @@ export function RevokeSessionsForm() {
       {state === 'error' && (
         <p style={{ fontSize: '0.85rem', color: '#ef4444', margin: 0 }}>
           <i className="fas fa-triangle-exclamation" style={{ marginRight: 6 }} />
-          Не удалось выполнить операцию. Попробуйте снова.
+          {t('common.error', 'Не удалось выполнить операцию. Попробуйте снова.')}
         </p>
       )}
 
       <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
-        Все активные сессии на других устройствах будут немедленно завершены.
-        Вам потребуется войти заново.
+        {t('security.revokeDesc', 'Все активные сессии на других устройствах будут немедленно завершены. Вам потребуется войти заново.')}
       </p>
     </div>
   );
