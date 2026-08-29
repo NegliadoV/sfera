@@ -454,7 +454,9 @@ function ReaderModal({
           {/* Кнопки действий */}
           <div className="w-full mt-4 flex flex-wrap justify-start items-center gap-3 pt-4 border-t border-white/10">
             <Link
-              href={`/universes/${encodeURIComponent(item.universeSlug || slug)}`}
+              href={`/universes/${encodeURIComponent(
+                item.universeSlug && item.universeSlug !== slug ? item.universeSlug : slug
+              )}/content`}
               onClick={onClose}
               className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-center text-sm font-semibold transition flex items-center justify-center gap-2 border border-white/15 shadow-md"
             >
