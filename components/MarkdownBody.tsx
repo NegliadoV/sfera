@@ -65,6 +65,7 @@ function VideoBlock({ url }: { url: string }) {
         src={embed}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
+        loading="lazy"
         className="w-full h-full border-0"
         title="Video"
       />
