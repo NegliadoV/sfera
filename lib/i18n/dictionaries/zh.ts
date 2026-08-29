@@ -88,6 +88,9 @@ export const zh: TranslationSchema = {
     promptPost: '粘贴帖子链接或 Roominate 帖子 ID：',
     promptMedia: '粘贴图片或 YouTube 视频链接：',
     myMaps: '我的导图',
+    deleteMap: '删除导图',
+    deleteConfirm: '您确定要删除此思维导图吗？此操作无法撤消。',
+    deleteError: '删除思维导图时出错。',
   },
   sources: {
     addSource: '添加来源',

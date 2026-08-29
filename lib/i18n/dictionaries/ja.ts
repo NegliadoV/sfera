@@ -88,6 +88,9 @@ export const ja: TranslationSchema = {
     promptPost: '投稿リンクまたはRoominate投稿IDを貼り付け：',
     promptMedia: '画像またはYouTube動画のリンクを貼り付け：',
     myMaps: 'マイマップ',
+    deleteMap: 'マップを削除',
+    deleteConfirm: 'このマップを削除してもよろしいですか？この操作は取り消せません。',
+    deleteError: 'マップの削除中にエラーが発生しました。',
   },
   sources: {
     addSource: 'ソースを追加',

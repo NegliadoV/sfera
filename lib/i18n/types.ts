@@ -167,6 +167,9 @@ export interface TranslationSchema {
     promptPost: string;
     promptMedia: string;
     myMaps: string;
+    deleteMap: string;
+    deleteConfirm: string;
+    deleteError: string;
   };
   digest: {
     last24h: string;

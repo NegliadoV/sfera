@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 export function DeleteMindMapButton({
   mapId,
@@ -14,6 +15,7 @@ export function DeleteMindMapButton({
   redirectOnDelete?: boolean;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -21,7 +23,7 @@ export function DeleteMindMapButton({
     e.preventDefault();
     e.stopPropagation();
 
-    if (!confirm(`Вы уверены, что хотите удалить карту «${mapTitle}»? Это действие нельзя отменить.`)) {
+    if (!confirm(t('mindMaps.deleteConfirm', `Вы уверены, что хотите удалить карту «${mapTitle}»? Это действие нельзя отменить.`))) {
       return;
     }
 
@@ -42,7 +44,7 @@ export function DeleteMindMapButton({
       }
     } catch (err) {
       console.error(err);
-      alert('Ошибка при удалении карты.');
+      alert(t('mindMaps.deleteError', 'Ошибка при удалении карты.'));
       setLoading(false);
     }
   }
@@ -52,7 +54,7 @@ export function DeleteMindMapButton({
       type="button"
       onClick={handleDelete}
       disabled={loading}
-      title="Удалить карту"
+      title={t('mindMaps.deleteMap', 'Удалить карту')}
       className={`transition-all duration-200 opacity-70 hover:opacity-100 disabled:opacity-30 ${className}`}
       style={{
         background: 'rgba(255, 76, 76, 0.1)',
@@ -69,7 +71,7 @@ export function DeleteMindMapButton({
       }}
     >
       <i className={`fa-solid ${loading ? 'fa-spinner fa-spin' : 'fa-trash-can'}`} />
-      <span>{loading ? 'Удаление…' : 'Удалить'}</span>
+      <span>{loading ? t('common.loading', 'Удаление…') : t('common.delete', 'Удалить')}</span>
     </button>
   );
 }

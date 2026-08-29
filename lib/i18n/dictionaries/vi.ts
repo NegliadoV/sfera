@@ -88,6 +88,9 @@ export const vi: TranslationSchema = {
     promptPost: 'Dán liên kết bài viết hoặc ID bài viết Roominate:',
     promptMedia: 'Dán liên kết hình ảnh hoặc video YouTube:',
     myMaps: 'Sơ đồ của tôi',
+    deleteMap: 'Xóa sơ đồ',
+    deleteConfirm: 'Bạn có chắc chắn muốn xóa sơ đồ này không? Hành động này không thể hoàn tác.',
+    deleteError: 'Lỗi khi xóa sơ đồ.',
   },
   sources: {
     addSource: 'Thêm nguồn',

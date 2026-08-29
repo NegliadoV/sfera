@@ -88,6 +88,9 @@ export const es: TranslationSchema = {
     promptPost: 'Pega el enlace o ID de publicación de Roominate:',
     promptMedia: 'Pega el enlace de imagen o vídeo de YouTube:',
     myMaps: 'Mis Mapas',
+    deleteMap: 'Eliminar mapa',
+    deleteConfirm: '¿Estás seguro de que deseas eliminar este mapa? Esta acción no se puede deshacer.',
+    deleteError: 'Error al eliminar el mapa.',
   },
   sources: {
     addSource: 'Agregar fuente',
