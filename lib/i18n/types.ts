@@ -152,6 +152,21 @@ export interface TranslationSchema {
     createError: string;
     universe: string;
     private: string;
+    addNode: string;
+    draw: string;
+    stopDraw: string;
+    addPost: string;
+    media: string;
+    organize: string;
+    deleteSelected: string;
+    room: string;
+    roomPlaceholder: string;
+    fullscreen: string;
+    collapse: string;
+    newIdea: string;
+    promptPost: string;
+    promptMedia: string;
+    myMaps: string;
   };
   digest: {
     last24h: string;

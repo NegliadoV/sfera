@@ -25,6 +25,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 import { DeleteMindMapButton } from './DeleteMindMapButton';
 
 const dagreGraph = new dagre.graphlib.Graph();
@@ -540,6 +541,7 @@ const generateDefaultElements = () => {
 
 export function PersonalMindMapInner(props: any) {
   const { mapId, initialNodes, initialEdges, onOpenViewer, isViewerOpen } = props;
+  const { t } = useTranslation();
   
   const [initialDefaults] = useState(() => generateDefaultElements());
   
@@ -659,7 +661,7 @@ export function PersonalMindMapInner(props: any) {
       id: crypto.randomUUID(),
       type: 'custom',
       position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
-      data: { label: `Новая идея`, bgColor: 'rgba(20, 20, 25, 0.6)', type: 'custom' },
+      data: { label: t('mindMaps.newIdea', 'Новая мысль'), bgColor: 'rgba(20, 20, 25, 0.6)', type: 'custom' },
     };
     setNodes((nds) => {
       const next = [...nds, newNode];
@@ -669,7 +671,7 @@ export function PersonalMindMapInner(props: any) {
   };
 
   const addPostNode = () => {
-    const input = window.prompt('Вставьте ссылку на пост или ID поста Roominate:');
+    const input = window.prompt(t('mindMaps.promptPost', 'Вставьте ссылку на пост или ID поста Roominate:'));
     if (!input) return;
 
     const match = input.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/);
@@ -690,7 +692,7 @@ export function PersonalMindMapInner(props: any) {
   };
 
   const addMediaNode = () => {
-    const url = window.prompt('Вставьте ссылку на картинку или YouTube видео:');
+    const url = window.prompt(t('mindMaps.promptMedia', 'Вставьте ссылку на картинку или YouTube видео:'));
     if (!url) return;
 
     const newNode: Node = {
@@ -800,7 +802,7 @@ export function PersonalMindMapInner(props: any) {
             border: '1px solid rgba(255,255,255,0.1)'
           }}
         >
-          <i className="fas fa-plus mr-1.5" /> Добавить мысль
+          <i className="fas fa-plus mr-1.5" /> {t('mindMaps.addNode', 'Добавить мысль')}
         </button>
         <button 
           onClick={() => setIsDrawingMode(!isDrawingMode)}
@@ -815,7 +817,7 @@ export function PersonalMindMapInner(props: any) {
             border: '1px solid rgba(255, 152, 0, 0.4)'
           }}
         >
-          <i className="fas fa-pencil-alt mr-1.5" /> {isDrawingMode ? 'Закончить рисовать' : 'Рисовать'}
+          <i className="fas fa-pencil-alt mr-1.5" /> {isDrawingMode ? t('mindMaps.stopDraw', 'Закончить рисовать') : t('mindMaps.draw', 'Рисовать')}
         </button>
         <button 
           onClick={addPostNode}
@@ -830,7 +832,7 @@ export function PersonalMindMapInner(props: any) {
             border: '1px solid rgba(33, 150, 243, 0.4)'
           }}
         >
-          <i className="fas fa-file-alt mr-1.5" /> Добавить пост
+          <i className="fas fa-file-alt mr-1.5" /> {t('mindMaps.addPost', 'Добавить пост')}
         </button>
         <button 
           onClick={addMediaNode}
@@ -845,7 +847,7 @@ export function PersonalMindMapInner(props: any) {
             border: '1px solid rgba(255, 152, 0, 0.4)'
           }}
         >
-          <i className="fas fa-play mr-1.5" /> Медиа
+          <i className="fas fa-play mr-1.5" /> {t('mindMaps.media', 'Медиа')}
         </button>
         <button 
           onClick={onLayout}
@@ -860,7 +862,7 @@ export function PersonalMindMapInner(props: any) {
             border: '1px solid rgba(76, 175, 80, 0.4)'
           }}
         >
-          <i className="fas fa-magic mr-1.5" /> Упорядочить
+          <i className="fas fa-magic mr-1.5" /> {t('mindMaps.organize', 'Упорядочить')}
         </button>
         <button 
           onClick={deleteSelected}
@@ -877,7 +879,7 @@ export function PersonalMindMapInner(props: any) {
           }}
           className="hover:bg-[rgba(244,67,54,0.25)]"
         >
-          <i className="fas fa-trash-alt mr-1.5" /> Удалить выбранное
+          <i className="fas fa-trash-alt mr-1.5" /> {t('mindMaps.deleteSelected', 'Удалить выбранное')}
         </button>
         {mapId && <DeleteMindMapButton mapId={mapId} mapTitle="эту карту" redirectOnDelete={true} />}
         <button 
@@ -894,7 +896,7 @@ export function PersonalMindMapInner(props: any) {
           }}
           className="btn-glow hover:bg-[rgba(156,39,176,0.3)] transition-colors"
         >
-          <i className="fas fa-globe mr-1.5" /> Сфера
+          <i className="fas fa-shapes mr-1.5" /> {t('mindMaps.room', 'Комната')}
         </button>
         <button 
           onClick={toggleFullscreen}
@@ -909,7 +911,7 @@ export function PersonalMindMapInner(props: any) {
             border: '1px solid rgba(255, 255, 255, 0.2)'
           }}
         >
-          <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'} mr-1.5`} /> {isFullscreen ? 'Свернуть' : 'На весь экран'}
+          <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'} mr-1.5`} /> {isFullscreen ? t('mindMaps.collapse', 'Свернуть') : t('mindMaps.fullscreen', 'На весь экран')}
         </button>
       </div>
     </div>

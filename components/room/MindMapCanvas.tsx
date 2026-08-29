@@ -27,6 +27,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -538,6 +539,7 @@ const initialNodes: Node[] = [
 const initialEdges: Edge[] = [];
 
 export function MindMapInner() {
+  const { t } = useTranslation();
   const [nodes, setNodes] = useNodesState(initialNodes);
   const [edges, setEdges] = useEdgesState(initialEdges);
   const { fitView, screenToFlowPosition } = useReactFlow();
@@ -655,7 +657,7 @@ export function MindMapInner() {
       id: crypto.randomUUID(),
       type: 'custom',
       position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
-      data: { label: `Новая идея`, bgColor: 'rgba(20, 20, 25, 0.6)' },
+      data: { label: t('mindMaps.newIdea', 'Новая мысль'), bgColor: 'rgba(20, 20, 25, 0.6)' },
     };
     setNodes((nds) => {
       const next = [...nds, newNode];
@@ -665,7 +667,7 @@ export function MindMapInner() {
   };
 
   const addPostNode = () => {
-    const input = window.prompt('Вставьте ссылку на пост или ID поста Roominate:');
+    const input = window.prompt(t('mindMaps.promptPost', 'Вставьте ссылку на пост или ID поста Roominate:'));
     if (!input) return;
 
     // Пытаемся вытащить UUID поста из любой вставленной ссылки/строки
@@ -687,7 +689,7 @@ export function MindMapInner() {
   };
 
   const addMediaNode = () => {
-    const url = window.prompt('Вставьте ссылку на картинку или YouTube видео:');
+    const url = window.prompt(t('mindMaps.promptMedia', 'Вставьте ссылку на картинку или YouTube видео:'));
     if (!url) return;
 
     const newNode: Node = {
@@ -747,8 +749,7 @@ export function MindMapInner() {
   useEffect(() => {
     const t = setInterval(() => {
       setCursors({}); // Clears everyone off-screen periodically to prevent ghosts
-      // In a real app we'd track timestamp of last move per ID
-    }, 5000);
+    }, 10000);
     return () => clearInterval(t);
   }, []);
 
@@ -788,17 +789,17 @@ export function MindMapInner() {
     <div 
       ref={containerRef} 
       style={{ width: '100%', height: '100%', position: 'relative', background: 'rgba(0,0,0,0.3)', borderRadius: isFullscreen ? 0 : 'var(--radius-xl)', overflow: 'hidden' }}
-      onPointerMove={onGlobalPointerMove}
-      onPointerDown={onGlobalPointerDown}
-      onPointerUp={onGlobalPointerUp}
-      onPointerLeave={onGlobalPointerUp}
     >
       
-      {isDrawingMode && (
-        <div 
-          style={{ position: 'absolute', inset: 0, zIndex: 5, cursor: 'crosshair', touchAction: 'none' }}
-        />
-      )}
+      {/* Live Pointer Tracking / Drawing Capture */}
+      <div 
+        style={{ position: 'absolute', inset: 0, zIndex: isDrawingMode ? 5 : 0, cursor: isDrawingMode ? 'crosshair' : 'default', touchAction: 'none', pointerEvents: isDrawingMode ? 'auto' : 'none' }}
+        onPointerDown={onGlobalPointerDown}
+        onPointerMove={onGlobalPointerMove}
+        onPointerUp={onGlobalPointerUp}
+        onPointerCancel={onGlobalPointerUp}
+        onPointerLeave={onGlobalPointerUp}
+      />
 
       <ReactFlow
         nodes={nodes}
@@ -849,7 +850,7 @@ export function MindMapInner() {
             border: '1px solid rgba(255,255,255,0.1)'
           }}
         >
-          <i className="fas fa-plus mr-1.5" /> Добавить мысль
+          <i className="fas fa-plus mr-1.5" /> {t('mindMaps.addNode', 'Добавить мысль')}
         </button>
         <button 
           onClick={() => setIsDrawingMode(!isDrawingMode)}
@@ -864,7 +865,7 @@ export function MindMapInner() {
             border: '1px solid rgba(255, 152, 0, 0.4)'
           }}
         >
-          <i className="fas fa-pencil-alt mr-1.5" /> {isDrawingMode ? 'Закончить рисовать' : 'Рисовать'}
+          <i className="fas fa-pencil-alt mr-1.5" /> {isDrawingMode ? t('mindMaps.stopDraw', 'Закончить рисовать') : t('mindMaps.draw', 'Рисовать')}
         </button>
         <button 
           onClick={addPostNode}
@@ -879,7 +880,7 @@ export function MindMapInner() {
             border: '1px solid rgba(33, 150, 243, 0.4)'
           }}
         >
-          <i className="fas fa-file-alt mr-1.5" /> Добавить пост
+          <i className="fas fa-file-alt mr-1.5" /> {t('mindMaps.addPost', 'Добавить пост')}
         </button>
         <button 
           onClick={addMediaNode}
@@ -894,7 +895,7 @@ export function MindMapInner() {
             border: '1px solid rgba(255, 152, 0, 0.4)'
           }}
         >
-          <i className="fas fa-play mr-1.5" /> Медиа
+          <i className="fas fa-play mr-1.5" /> {t('mindMaps.media', 'Медиа')}
         </button>
         <button 
           onClick={onLayout}
@@ -909,7 +910,7 @@ export function MindMapInner() {
             border: '1px solid rgba(76, 175, 80, 0.4)'
           }}
         >
-          <i className="fas fa-magic mr-1.5" /> Упорядочить
+          <i className="fas fa-magic mr-1.5" /> {t('mindMaps.organize', 'Упорядочить')}
         </button>
         <button 
           onClick={deleteSelected}
@@ -926,7 +927,7 @@ export function MindMapInner() {
           }}
           className="hover:bg-[rgba(244,67,54,0.25)]"
         >
-          <i className="fas fa-trash-alt mr-1.5" /> Удалить выбранное
+          <i className="fas fa-trash-alt mr-1.5" /> {t('mindMaps.deleteSelected', 'Удалить выбранное')}
         </button>
         <button 
           onClick={toggleFullscreen}
@@ -941,7 +942,7 @@ export function MindMapInner() {
             border: '1px solid rgba(255, 255, 255, 0.2)'
           }}
         >
-          <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'} mr-1.5`} /> {isFullscreen ? 'Свернуть' : 'На весь экран'}
+          <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'} mr-1.5`} /> {isFullscreen ? t('mindMaps.collapse', 'Свернуть') : t('mindMaps.fullscreen', 'На весь экран')}
         </button>
       </div>
     </div>

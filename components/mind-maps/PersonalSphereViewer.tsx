@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslation } from '@/components/i18n/LanguageProvider';
 
 export function PersonalSphereViewer({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const [url, setUrl] = useState('/universes');
   const [inputVal, setInputVal] = useState('/universes');
 
@@ -26,7 +28,7 @@ export function PersonalSphereViewer({ onClose }: { onClose: () => void }) {
             type="text" 
             value={inputVal}
             onChange={e => setInputVal(e.target.value)}
-            placeholder="Сфера (/universes/xxx)"
+            placeholder={t('mindMaps.roomPlaceholder', 'Комната (/universes/xxx)')}
             style={{
               flex: 1,
               padding: '6px 12px',
@@ -51,7 +53,7 @@ export function PersonalSphereViewer({ onClose }: { onClose: () => void }) {
         <iframe 
           src={url}
           style={{ width: '100%', height: '100%', border: 'none' }}
-          title="Сфера"
+          title={t('mindMaps.room', 'Комната')}
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
         />
       </div>
