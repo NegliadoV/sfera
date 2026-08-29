@@ -43,10 +43,9 @@ export function MindMapsPageClient({ mapsList }: MindMapsPageClientProps) {
         <div className="platform-card flex flex-col items-center justify-center p-12 text-center border border-dashed border-white/20 bg-white/5">
           <i className="fa-solid fa-project-diagram text-4xl mb-4 opacity-50 text-[var(--studio-ctrl-icon)]" aria-hidden />
           <h2 className="text-xl font-semibold mb-2 text-white">{t('mindMaps.empty', 'У вас пока нет ментальных карт')}</h2>
-          <p className="text-sm opacity-70 mb-6">
+          <p className="text-sm opacity-70">
             {t('mindMaps.emptyDesc', 'Создайте свою первую карту для мозгового штурма и планирования. Вы сможете добавлять текстовые узлы и вставлять полноценные публикации из ленты.')}
           </p>
-          <MindMapCreateButton />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
