@@ -26,7 +26,7 @@ export function ContentPageClient({ slug, name, universeId, hasSession, contentL
       <div className="platform-breadcrumb mb-6">
         <Link href="/"><i className="fa-solid fa-shapes" style={{ marginRight: 4 }} /> Roominate</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <Link href="/">{t('rooms.knowledgeRooms', 'Комнаты знаний')}</Link>
+        <Link href="/rooms">{t('rooms.knowledgeRooms', 'Комнаты')}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <Link href={`/universes/${slug}`}>{name}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
@@ -35,7 +35,7 @@ export function ContentPageClient({ slug, name, universeId, hasSession, contentL
 
       <div className="platform-card mb-6">
         <h1 className="platform-hero-title" style={{ fontSize: '1.75rem', marginBottom: 8 }}>
-          {t('rooms.feed', 'Лента контента')}: {name}
+          {t('rooms.feed', 'Лента')}: {name}
         </h1>
         <p className="platform-card-desc">
           {t('rooms.feedDesc', 'Материалы из источников и добавленные вручную.')}

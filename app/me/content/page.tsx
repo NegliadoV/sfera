@@ -48,7 +48,7 @@ export default function MeContentPage() {
 
       <div className="platform-card mb-6">
         <h1 className="platform-hero-title" style={{ fontSize: '1.75rem', marginBottom: 8 }}>
-          {t('content.feedTitle', 'Лента контента')}
+          {t('content.feedTitle', 'Лента')}
         </h1>
         <p className="platform-card-desc">
           {t('content.feedDesc', 'Агрегированный контент из ваших источников. Добавляйте источники в панели «Сборка» и делитесь постами в сферы.')}

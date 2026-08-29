@@ -59,7 +59,7 @@ export default async function AggregatorSettingsPage({
         )}
         <p className="platform-card-desc mt-6">
           <Link href={`/universes/${slug}/content`} style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
-            Лента контента сферы
+            Лента комнаты
           </Link>
         </p>
       </div>
