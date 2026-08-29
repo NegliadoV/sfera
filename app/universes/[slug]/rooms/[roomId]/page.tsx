@@ -93,11 +93,11 @@ export default async function RoomPage({
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
-        <Link href="/">Сферы</Link>
+        <Link href="/rooms">Комнаты</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <Link href={`/universes/${slug}`}>{u.name}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <Link href={`/universes/${slug}/rooms`}>Комнаты просмотра</Link>
+        <Link href={`/universes/${slug}/rooms`}>Сессии</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <span>{room.title}</span>
       </div>

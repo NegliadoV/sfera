@@ -181,33 +181,32 @@ export default async function UniverseContentPage({
       .where(eq(contentPollVotes.pollId, pollData.id));
   }
 
+  const [universe] = await db
+    .select({ name: universes.name, ownerId: universes.ownerId })
+    .from(universes)
+    .where(eq(universes.id, contentRow.universeId))
+    .limit(1);
+
   let canDelete = false;
   let canEdit = false;
   let canPin = false;
-  if (session?.user?.id) {
-    const [universe] = await db
-      .select({ ownerId: universes.ownerId })
-      .from(universes)
-      .where(eq(universes.id, contentRow.universeId))
-      .limit(1);
-    if (universe) {
-      const isOwner = universe.ownerId === session.user.id;
-      const isSid = session.user.name === 'Сид';
-      const [member] = await db
-        .select({ role: universeMembers.role })
-        .from(universeMembers)
-        .where(
-          and(
-            eq(universeMembers.universeId, contentRow.universeId),
-            eq(universeMembers.userId, session.user.id)
-          )
+  if (session?.user?.id && universe) {
+    const isOwner = universe.ownerId === session.user.id;
+    const isSid = session.user.name === 'Сид';
+    const [member] = await db
+      .select({ role: universeMembers.role })
+      .from(universeMembers)
+      .where(
+        and(
+          eq(universeMembers.universeId, contentRow.universeId),
+          eq(universeMembers.userId, session.user.id)
         )
-        .limit(1);
-      const isModerator = member?.role === 'moderator' || member?.role === 'owner';
-      canDelete = isOwner || isModerator || isSid;
-      canEdit = contentRow.authorId === session.user.id || isModerator || isSid;
-      canPin = isModerator || isSid;
-    }
+      )
+      .limit(1);
+    const isModerator = member?.role === 'moderator' || member?.role === 'owner';
+    canDelete = isOwner || isModerator || isSid;
+    canEdit = contentRow.authorId === session.user.id || isModerator || isSid;
+    canPin = isModerator || isSid;
   }
 
   const displayAuthor = contentRow.externalAuthor || contentRow.authorName || 'Участник';
@@ -244,9 +243,9 @@ export default async function UniverseContentPage({
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
-        <Link href="/">Сферы</Link>
+        <Link href="/rooms">Комнаты</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
-        <Link href={`/universes/${slug}/content`}>Сфера</Link>
+        <Link href={`/universes/${slug}/content`}>{universe?.name || slug}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <span>{contentRow.title}</span>
       </div>

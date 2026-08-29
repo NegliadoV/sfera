@@ -60,7 +60,7 @@ export default async function UniverseRoomsPage({
   return (
     <div className="platform-page">
       <div className="platform-breadcrumb mb-6">
-        <Link href="/">Сферы</Link>
+        <Link href="/rooms">Комнаты</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
         <Link href={`/universes/${slug}`}>{u.name}</Link>
         <i className="fa-solid fa-chevron-right" style={{ fontSize: '0.65rem' }} aria-hidden />
@@ -73,7 +73,7 @@ export default async function UniverseRoomsPage({
           <span className="platform-tag" style={{ marginLeft: 'auto' }}>Синхронный просмотр</span>
         </div>
         <p className="platform-card-desc mb-0">
-          Сфера: <strong style={{ color: 'white' }}>{u.name}</strong>. Создайте комнату по теме или присоединяйтесь к существующим.
+          Комната: <strong style={{ color: 'white' }}>{u.name}</strong>. Создайте комнату по теме или присоединяйтесь к существующим.
         </p>
         {session?.user?.id ? (
           <RoomsList
