@@ -1,25 +1,64 @@
 'use client';
 
-import { useState, useRef, MouseEvent, CSSProperties } from 'react';
+import { useState, MouseEvent, CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 
 type ImageLightboxProps = {
   src: string;
-  /** Исходный URL для открытия в новой вкладке / прокси-fallback */
   originalSrc?: string | null;
   alt?: string;
   className?: string;
   style?: CSSProperties;
-  /** Вызывается когда изображение не удалось загрузить вообще */
   onError?: () => void;
 };
 
-/**
- * Возвращает URL через наш прокси — используется как fallback при ошибке загрузки.
- * Только клиентский код, не влияет на SSR.
- */
-function getProxyUrl(url: string): string {
-  return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+/** Красивая заглушка когда картинка не загрузилась */
+function ImagePlaceholder({ alt, className, style }: { alt: string; className?: string; style?: CSSProperties }) {
+  return (
+    <div
+      className={className}
+      style={{
+        ...style,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.08) 100%)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 12,
+        color: 'rgba(255,255,255,0.3)',
+        fontSize: 12,
+        letterSpacing: '0.03em',
+        textAlign: 'center',
+        padding: '12px 8px',
+        minHeight: 80,
+        overflow: 'hidden',
+        position: 'relative',
+      }}
+      aria-label={alt}
+    >
+      {/* Декоративный паттерн */}
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ opacity: 0.5 }}
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21 15 16 10 5 21" />
+      </svg>
+      <span style={{ opacity: 0.6, maxWidth: 120, lineHeight: 1.3 }}>
+        {alt && alt.length > 40 ? alt.slice(0, 40) + '…' : alt || 'Изображение недоступно'}
+      </span>
+    </div>
+  );
 }
 
 export function ImageLightbox({
@@ -32,29 +71,12 @@ export function ImageLightbox({
 }: ImageLightboxProps) {
   const [open, setOpen] = useState(false);
   const [failed, setFailed] = useState(false);
-  // Попробовали ли мы уже прокси
-  const triedProxy = useRef(false);
+  const [loaded, setLoaded] = useState(false);
 
   const handleClick = (e: MouseEvent<HTMLImageElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (!failed) setOpen(true);
-  };
-
-  const handleError = (e: MouseEvent<HTMLImageElement> | React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.target as HTMLImageElement;
-    const srcToProxy = originalSrc ?? src;
-
-    // Первая попытка: пробуем прокси
-    if (!triedProxy.current && srcToProxy && !img.src.includes('/api/proxy-image')) {
-      triedProxy.current = true;
-      img.src = getProxyUrl(srcToProxy);
-      return;
-    }
-
-    // Обе попытки провалились — скрываем
-    setFailed(true);
-    onErrorProp?.();
   };
 
   const overlay =
@@ -66,7 +88,8 @@ export function ImageLightbox({
                 position: 'fixed',
                 inset: 0,
                 zIndex: 2147483646,
-                background: 'rgba(0,0,0,0.7)',
+                background: 'rgba(0,0,0,0.8)',
+                backdropFilter: 'blur(8px)',
               }}
               onClick={() => setOpen(false)}
               aria-hidden
@@ -85,14 +108,14 @@ export function ImageLightbox({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={src}
+                src={originalSrc ?? src}
                 alt={alt}
                 referrerPolicy="no-referrer"
                 style={{
                   maxWidth: '95vw',
                   maxHeight: '95vh',
                   borderRadius: 12,
-                  boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
+                  boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
                 }}
                 onClick={(e) => e.stopPropagation()}
               />
@@ -103,7 +126,7 @@ export function ImageLightbox({
       : null;
 
   if (failed) {
-    return null;
+    return <ImagePlaceholder alt={alt} className={className} style={style} />;
   }
 
   return (
@@ -112,15 +135,21 @@ export function ImageLightbox({
       <img
         src={src}
         alt={alt}
-        className={`${className} img-lazy-fade`}
-        style={style}
+        className={className}
+        style={{
+          ...style,
+          opacity: loaded ? 1 : 0,
+          transition: 'opacity 0.3s ease',
+        }}
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
-        onLoad={(e) => {
-          (e.target as HTMLImageElement).setAttribute('data-loaded', 'true');
+        suppressHydrationWarning
+        onLoad={() => setLoaded(true)}
+        onError={() => {
+          setFailed(true);
+          onErrorProp?.();
         }}
-        onError={handleError}
         onClick={handleClick}
       />
       {overlay}
