@@ -79,20 +79,14 @@ export function ImageLightbox({ src, originalSrc, alt = '', className = '', styl
       <img
         src={src}
         alt={alt}
-        className={className}
-        style={{
-          ...style,
-          // Скрываем до загрузки — убирает broken-image placeholder
-          opacity: 0,
-          transition: 'opacity 0.3s ease',
-        }}
+        className={`${className} img-lazy-fade`}
+        style={style}
+        data-loaded="false"
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
-        // style меняется после onLoad — suppressHydrationWarning предотвращает лишние предупреждения
-        suppressHydrationWarning
         onLoad={(e) => {
-          (e.target as HTMLImageElement).style.opacity = '1';
+          (e.target as HTMLImageElement).setAttribute('data-loaded', 'true');
         }}
         onError={() => {
           setFailed(true);
