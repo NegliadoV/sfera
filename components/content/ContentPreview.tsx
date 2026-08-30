@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { getYouTubeVideoId } from '@/lib/youtube';
 import { isDirectVideoUrl } from '@/lib/video-url';
+import { getProxiedImageSrc } from '@/lib/proxy-image';
 import { ImageLightbox } from '@/components/ImageLightbox';
 
 export interface ContentPreviewProps {
@@ -48,7 +49,7 @@ export function ContentPreview({ url, imageUrl, type, title, contentHref }: Cont
         />
       ) : imageUrl ? (
         <ImageLightbox
-          src={imageUrl}
+          src={getProxiedImageSrc(imageUrl) ?? imageUrl}
           originalSrc={imageUrl}
           alt={title}
           className="content-preview-image"
