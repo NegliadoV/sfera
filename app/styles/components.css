@@ -6030,3 +6030,18 @@ i[class*="fa-"], .fas, .far, .fal, .fab, .fa-solid, .fa-regular {
 [data-theme="light"] .rich-editor-root {
   background: var(--studio-panel-bg);
 }
+
+/* =====================================================
+   IMAGE LAZY FADE — CSS-only approach (no inline style)
+   Используем data-атрибут вместо inline-style чтобы
+   избежать Hydration Mismatch между SSR и клиентом.
+   ===================================================== */
+.img-lazy-fade {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.img-lazy-fade[data-loaded='true'] {
+  opacity: 1;
+}
+
