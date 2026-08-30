@@ -78,12 +78,21 @@ export function ImageLightbox({ src, originalSrc, alt = '', className = '', styl
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
-        alt={alt}
+        alt=""
         className={className}
-        style={style}
+        style={{
+          ...style,
+          // Скрываем изображение пока оно не загружено — браузер не рисует broken-img placeholder
+          opacity: 0,
+          transition: 'opacity 0.3s ease',
+        }}
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
+        onLoad={(e) => {
+          // Показываем плавно только после успешной загрузки
+          (e.target as HTMLImageElement).style.opacity = '1';
+        }}
         onError={() => {
           setFailed(true);
           onErrorProp?.();
