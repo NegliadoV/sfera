@@ -1,27 +1,60 @@
 'use client';
 
-import { useState, MouseEvent, CSSProperties } from 'react';
+import { useState, useRef, MouseEvent, CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 
 type ImageLightboxProps = {
   src: string;
-  /** Исходный URL для ссылки «Открыть в новой вкладке» при ошибке загрузки */
+  /** Исходный URL для открытия в новой вкладке / прокси-fallback */
   originalSrc?: string | null;
   alt?: string;
   className?: string;
   style?: CSSProperties;
-  /** Вызывается когда изображение не удалось загрузить */
+  /** Вызывается когда изображение не удалось загрузить вообще */
   onError?: () => void;
 };
 
-export function ImageLightbox({ src, originalSrc, alt = '', className = '', style, onError: onErrorProp }: ImageLightboxProps) {
+/**
+ * Возвращает URL через наш прокси — используется как fallback при ошибке загрузки.
+ * Только клиентский код, не влияет на SSR.
+ */
+function getProxyUrl(url: string): string {
+  return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+}
+
+export function ImageLightbox({
+  src,
+  originalSrc,
+  alt = '',
+  className = '',
+  style,
+  onError: onErrorProp,
+}: ImageLightboxProps) {
   const [open, setOpen] = useState(false);
   const [failed, setFailed] = useState(false);
+  // Попробовали ли мы уже прокси
+  const triedProxy = useRef(false);
 
   const handleClick = (e: MouseEvent<HTMLImageElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (!failed) setOpen(true);
+  };
+
+  const handleError = (e: MouseEvent<HTMLImageElement> | React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.target as HTMLImageElement;
+    const srcToProxy = originalSrc ?? src;
+
+    // Первая попытка: пробуем прокси
+    if (!triedProxy.current && srcToProxy && !img.src.includes('/api/proxy-image')) {
+      triedProxy.current = true;
+      img.src = getProxyUrl(srcToProxy);
+      return;
+    }
+
+    // Обе попытки провалились — скрываем
+    setFailed(true);
+    onErrorProp?.();
   };
 
   const overlay =
@@ -81,22 +114,16 @@ export function ImageLightbox({ src, originalSrc, alt = '', className = '', styl
         alt={alt}
         className={`${className} img-lazy-fade`}
         style={style}
-        data-loaded="false"
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
         onLoad={(e) => {
           (e.target as HTMLImageElement).setAttribute('data-loaded', 'true');
         }}
-        onError={() => {
-          setFailed(true);
-          onErrorProp?.();
-        }}
+        onError={handleError}
         onClick={handleClick}
       />
       {overlay}
     </>
   );
 }
-
-
