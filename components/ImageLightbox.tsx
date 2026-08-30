@@ -78,19 +78,20 @@ export function ImageLightbox({ src, originalSrc, alt = '', className = '', styl
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
-        alt=""
+        alt={alt}
         className={className}
         style={{
           ...style,
-          // Скрываем изображение пока оно не загружено — браузер не рисует broken-img placeholder
+          // Скрываем до загрузки — убирает broken-image placeholder
           opacity: 0,
           transition: 'opacity 0.3s ease',
         }}
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
+        // style меняется после onLoad — suppressHydrationWarning предотвращает лишние предупреждения
+        suppressHydrationWarning
         onLoad={(e) => {
-          // Показываем плавно только после успешной загрузки
           (e.target as HTMLImageElement).style.opacity = '1';
         }}
         onError={() => {
@@ -103,4 +104,5 @@ export function ImageLightbox({ src, originalSrc, alt = '', className = '', styl
     </>
   );
 }
+
 
