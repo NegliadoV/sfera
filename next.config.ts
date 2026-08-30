@@ -49,7 +49,6 @@ function buildPageCSP(): string {
 const nextConfig: NextConfig = {
   // Skip type checking during build — runs separately in CI / saves RAM on low-memory servers
   typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
   compress: true,
   images: {
     formats: ["image/avif", "image/webp"],
