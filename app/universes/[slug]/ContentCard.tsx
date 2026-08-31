@@ -304,8 +304,38 @@ export function ContentCard({
                 <span className="font-bold text-xs">{savesCount}</span>
               </div>
             )}
-            {sourceId && (
-              <span>{t('contentCard.aggregated', 'Агрегировано')}</span>
+            {sourceId && url && (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title={t('contentCard.readAtSource', 'Читать в источнике')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  color: 'var(--accent-primary)',
+                  fontSize: '0.78rem',
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  borderRadius: 4,
+                  padding: '2px 6px',
+                  background: 'rgba(var(--accent-primary-rgb, 139,92,246), 0.08)',
+                  border: '1px solid rgba(var(--accent-primary-rgb, 139,92,246), 0.2)',
+                  transition: 'background 0.15s',
+                  flexShrink: 0,
+                }}
+              >
+                <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.65rem' }} aria-hidden />
+                {t('contentCard.readAtSource', 'Читать в источнике')}
+              </a>
+            )}
+            {sourceId && !url && (
+              <span style={{ fontSize: '0.78rem', opacity: 0.6 }}>
+                <i className="fa-solid fa-rss" style={{ fontSize: '0.65rem' }} aria-hidden />{' '}
+                {t('contentCard.aggregated', 'Агрегировано')}
+              </span>
             )}
             {hasLinks && links.length > 0 && (
               <span>{links.length} {t('contentCard.connections', 'связей')}</span>
