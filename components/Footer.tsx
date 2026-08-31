@@ -24,6 +24,14 @@ export function Footer() {
         <i className="fas fa-scale-balanced" aria-hidden />
         Правила сообщества
       </Link>
+      <Link href="/terms" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <i className="fas fa-file-contract" aria-hidden />
+        Условия использования
+      </Link>
+      <Link href="/dmca" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <i className="fas fa-copyright" aria-hidden />
+        Правообладателям
+      </Link>
       <span className="footer-status" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <span
           style={{
