@@ -1,8 +1,7 @@
 import { db, universes, universeTracking } from '@/lib/db';
-import { desc, eq, sql } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import '@/scripts/copy-icons';
 import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import { UniversesHubClient } from '@/app/universes/UniversesHubClient';
 
 export const metadata = {
@@ -17,17 +16,7 @@ export default async function UniversesHubPage() {
     session = await auth();
   } catch {}
 
-  // Новый пользователь без подписок — показываем онбординг
-  if (session?.user?.id) {
-    try {
-      const [trackCount] = (await db.execute(
-        sql`SELECT COUNT(*)::int as cnt FROM universe_tracking WHERE user_id = ${session.user.id}`
-      )) as unknown as [{ cnt: number }];
-      if (!trackCount || trackCount.cnt === 0) {
-        redirect('/onboarding');
-      }
-    } catch {}
-  }
+  // (no redirect to onboarding — users can browse all rooms freely)
 
   // Загружаем список всех комнат
   const allUniverses = await db

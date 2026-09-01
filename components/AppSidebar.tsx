@@ -649,26 +649,51 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
       <div style={{ width: 260, minWidth: 260, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '16px 14px', borderBottom: '1px solid var(--studio-panel-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <span className="sidebar-nav-label" style={{ marginBottom: 0 }}>{t('rooms.title', 'Комнаты')}</span>
-          <button
-            type="button"
-            onClick={() => setSpheresOpen(false)}
-            aria-label={t('common.hide', 'Скрыть')}
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              border: '1px solid var(--border-color)',
-              background: 'transparent',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.9rem',
-            }}
-          >
-            <i className="fas fa-times" />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Link
+              href="/universes"
+              onClick={() => setSpheresOpen(false)}
+              title={t('rooms.allKnowledgeRooms', 'Все комнаты')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--accent-primary)',
+                textDecoration: 'none',
+                padding: '4px 8px',
+                borderRadius: 6,
+                border: '1px solid rgba(var(--accent-primary-rgb, 139,92,246), 0.3)',
+                background: 'rgba(var(--accent-primary-rgb, 139,92,246), 0.08)',
+                transition: 'background 0.15s',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <i className="fa-solid fa-shapes" style={{ fontSize: '0.65rem' }} />
+              {t('rooms.allRoomsSection', 'Все')}
+            </Link>
+            <button
+              type="button"
+              onClick={() => setSpheresOpen(false)}
+              aria-label={t('common.hide', 'Скрыть')}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                border: '1px solid var(--border-color)',
+                background: 'transparent',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.9rem',
+              }}
+            >
+              <i className="fas fa-times" />
+            </button>
+          </div>
         </div>
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--studio-panel-border)', flexShrink: 0 }}>
@@ -708,12 +733,12 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
                     {t('rooms.noTrackedRooms', 'Вы пока не отслеживаете ни одной комнаты')}
                   </p>
                   <Link
-                    href="/explore"
+                    href="/universes"
                     onClick={() => setSpheresOpen(false)}
                     className="platform-btn platform-btn-sm"
                     style={{ fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
                   >
-                    <i className="fa-solid fa-compass" /> {t('nav.feed', 'Найти в Ленте')}
+                    <i className="fa-solid fa-shapes" /> {t('rooms.allKnowledgeRooms', 'Все комнаты')}
                   </Link>
                 </div>
               )
@@ -760,6 +785,32 @@ export function AppSidebar({ session = null }: { session?: Session | null }) {
                 })}
               </ul>
             )}
+          </div>
+          {/* Футер — ссылка на все комнаты */}
+          <div style={{ padding: '10px 14px', borderTop: '1px solid var(--studio-panel-border)', flexShrink: 0 }}>
+            <Link
+              href="/universes"
+              onClick={() => setSpheresOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: 'var(--accent-primary)',
+                textDecoration: 'none',
+                padding: '8px 12px',
+                borderRadius: 8,
+                border: '1px solid rgba(var(--accent-primary-rgb, 139,92,246), 0.25)',
+                background: 'rgba(var(--accent-primary-rgb, 139,92,246), 0.06)',
+                transition: 'background 0.15s',
+              }}
+            >
+              <i className="fa-solid fa-shapes" style={{ fontSize: '0.7rem' }} />
+              {t('rooms.allKnowledgeRooms', 'Все комнаты знаний')}
+              <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.65rem', opacity: 0.7 }} />
+            </Link>
           </div>
         </div>
       </div>
