@@ -401,4 +401,33 @@ export interface TranslationSchema {
     alignRight: string;
     uploadMedia: string;
   };
+  landing: {
+    badge: string;
+    heroTitle1: string;
+    heroTitle2: string;
+    heroSubtitle: string;
+    ctaRegister: string;
+    ctaLogin: string;
+    statsUsers: string;
+    statsPosts: string;
+    statsSpheres: string;
+    featuresTitle: string;
+    featuresSubtitle: string;
+    featureRoomsTitle: string;
+    featureRoomsDesc: string;
+    featureShortsTitle: string;
+    featureShortsDesc: string;
+    featureLiveTitle: string;
+    featureLiveDesc: string;
+    featureMindMapsTitle: string;
+    featureMindMapsDesc: string;
+    spheresTitle: string;
+    spheresSubtitle: string;
+    readyTitle: string;
+    readySubtitle: string;
+    readyCta: string;
+    footer: string;
+    navLogin: string;
+    navRegister: string;
+  };
 }
