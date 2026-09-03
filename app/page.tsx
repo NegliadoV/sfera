@@ -116,14 +116,9 @@ export default async function HomePage() {
         <span style={{ fontWeight: 800, fontSize: 20, letterSpacing: '-0.03em', background: 'linear-gradient(130deg,#fff,#60a5fa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           Roominate
         </span>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Link href="/auth/signin" style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, textDecoration: 'none', padding: '6px 14px', borderRadius: 8, transition: 'color .2s' }}>
-            {L.navLogin}
-          </Link>
-          <Link href="/auth/register" style={{ background: '#2563eb', color: '#fff', fontSize: 14, fontWeight: 600, textDecoration: 'none', padding: '8px 18px', borderRadius: 10, transition: 'background .2s' }}>
-            {L.navRegister}
-          </Link>
-        </div>
+        <Link href="/auth/signin" style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: 500, textDecoration: 'none', padding: '8px 18px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)', transition: 'background .2s' }}>
+          {L.navLogin}
+        </Link>
       </nav>
 
       {/* ── HERO ────────────────────────────────────────────────────── */}
