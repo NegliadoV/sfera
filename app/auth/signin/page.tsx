@@ -33,7 +33,9 @@ export default async function SignInPage({
     Boolean(process.env.AUTH_GOOGLE_ID) && Boolean(process.env.AUTH_GOOGLE_SECRET);
   const hasGitHubOAuth =
     Boolean(process.env.AUTH_GITHUB_ID) && Boolean(process.env.AUTH_GITHUB_SECRET);
-  const hasOAuth = hasGoogleOAuth || hasGitHubOAuth;
+  const hasFacebookOAuth =
+    Boolean(process.env.AUTH_FACEBOOK_ID) && Boolean(process.env.AUTH_FACEBOOK_SECRET);
+  const hasOAuth = hasGoogleOAuth || hasGitHubOAuth || hasFacebookOAuth;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full px-4 py-12">
@@ -46,8 +48,8 @@ export default async function SignInPage({
         </h1>
         <p className="text-center mb-8" style={{ color: 'var(--text-secondary)' }}>
           {hasOAuth
-            ? 'Войдите через Google или GitHub, либо по email и паролю.'
-            : 'Войдите по email и паролю или используйте dev-вход.'}
+            ? 'Войдите через соцсети или по email и паролю.'
+            : 'Войдите по email и паролю.'}
         </p>
 
         {hasGoogleOAuth && (
@@ -61,6 +63,20 @@ export default async function SignInPage({
             <button type="submit" className="glass-icon-btn w-full flex items-center justify-center py-3">
               <i className="fa-brands fa-google mr-3 text-lg" aria-hidden />
               <span>Войти через Google</span>
+            </button>
+          </form>
+        )}
+        {hasFacebookOAuth && (
+          <form
+            action={async () => {
+              'use server';
+              await signIn('facebook', { redirectTo: '/universes' });
+            }}
+            className="w-full mb-3"
+          >
+            <button type="submit" className="glass-icon-btn w-full flex items-center justify-center py-3" style={{ background: 'rgba(24,119,242,0.12)', borderColor: 'rgba(24,119,242,0.3)' }}>
+              <i className="fa-brands fa-facebook mr-3 text-lg" style={{ color: '#1877F2' }} aria-hidden />
+              <span>Войти через Facebook</span>
             </button>
           </form>
         )}
