@@ -153,9 +153,6 @@ export default async function HomePage() {
             <i className="fa-solid fa-rocket" />
             {L.ctaRegister}
           </Link>
-          <Link href="/auth/signin" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', textDecoration: 'none', padding: '14px 32px', borderRadius: 14, fontWeight: 600, fontSize: 16, transition: 'background .2s' }}>
-            {L.ctaLogin}
-          </Link>
         </div>
 
         {/* Статистика */}
