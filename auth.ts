@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import GitHub from 'next-auth/providers/github';
+import Facebook from 'next-auth/providers/facebook';
 import Credentials from 'next-auth/providers/credentials';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { db } from '@/lib/db';
@@ -41,6 +42,12 @@ const hasGitHubOAuth =
   process.env.AUTH_GITHUB_SECRET != null &&
   process.env.AUTH_GITHUB_SECRET !== '';
 
+const hasFacebookOAuth =
+  process.env.AUTH_FACEBOOK_ID != null &&
+  process.env.AUTH_FACEBOOK_ID !== '' &&
+  process.env.AUTH_FACEBOOK_SECRET != null &&
+  process.env.AUTH_FACEBOOK_SECRET !== '';
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db, {
     usersTable: user,
@@ -63,6 +70,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           GitHub({
             clientId: process.env.AUTH_GITHUB_ID!,
             clientSecret: process.env.AUTH_GITHUB_SECRET!,
+          }),
+        ]
+      : []),
+    ...(hasFacebookOAuth
+      ? [
+          Facebook({
+            clientId: process.env.AUTH_FACEBOOK_ID!,
+            clientSecret: process.env.AUTH_FACEBOOK_SECRET!,
+            allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),
