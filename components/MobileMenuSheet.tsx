@@ -76,60 +76,91 @@ export function MobileMenuSheet({
             </div>
           )}
 
-          {/* Tools Grid */}
-          <div className="grid grid-cols-2 gap-3 mb-6 shrink-0 relative">
-            {/* Navigational Links */}
-            <Link href="/me/content" onClick={onClose} className="mobile-sheet-btn group">
-              <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)] group-active:bg-[color-mix(in_srgb,var(--accent-primary)_25%,transparent)] transition-colors">
-                <i className="fas fa-rss text-xl text-[var(--accent-primary)] drop-shadow-[0_0_8px_var(--accent-primary)]" />
-              </div>
-              <span className="text-[15px] font-semibold tracking-wide">{t('nav.collection', 'Сборка')}</span>
-              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">{t('nav.mySources', 'RSS и авторы')}</span>
-            </Link>
+          {session?.user ? (
+            <>
+              {/* Tools Grid */}
+              <div className="grid grid-cols-2 gap-3 mb-6 shrink-0 relative">
+                {/* Navigational Links */}
+                <Link href="/me/content" onClick={onClose} className="mobile-sheet-btn group">
+                  <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)] group-active:bg-[color-mix(in_srgb,var(--accent-primary)_25%,transparent)] transition-colors">
+                    <i className="fas fa-rss text-xl text-[var(--accent-primary)] drop-shadow-[0_0_8px_var(--accent-primary)]" />
+                  </div>
+                  <span className="text-[15px] font-semibold tracking-wide">{t('nav.collection', 'Сборка')}</span>
+                  <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">{t('nav.mySources', 'RSS и авторы')}</span>
+                </Link>
 
-            <Link href="/me/mind-maps" onClick={onClose} className="mobile-sheet-btn group">
-              <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,var(--accent-purple)_15%,transparent)] group-active:bg-[color-mix(in_srgb,var(--accent-purple)_25%,transparent)] transition-colors">
-                <i className="fas fa-project-diagram text-xl text-[var(--accent-purple)] drop-shadow-[0_0_8px_var(--accent-purple)]" />
-              </div>
-              <span className="text-[15px] font-semibold tracking-wide">{t('nav.mindMaps', 'Карты')}</span>
-              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">{t('rooms.mindMap', 'База знаний')}</span>
-            </Link>
+                <Link href="/me/mind-maps" onClick={onClose} className="mobile-sheet-btn group">
+                  <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,var(--accent-purple)_15%,transparent)] group-active:bg-[color-mix(in_srgb,var(--accent-purple)_25%,transparent)] transition-colors">
+                    <i className="fas fa-project-diagram text-xl text-[var(--accent-purple)] drop-shadow-[0_0_8px_var(--accent-purple)]" />
+                  </div>
+                  <span className="text-[15px] font-semibold tracking-wide">{t('nav.mindMaps', 'Карты')}</span>
+                  <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">{t('rooms.mindMap', 'База знаний')}</span>
+                </Link>
 
-            <Link href="/digest" onClick={onClose} className="mobile-sheet-btn group">
-              <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,#10b981_15%,transparent)] group-active:bg-[color-mix(in_srgb,#10b981_25%,transparent)] transition-colors">
-                <i className="fas fa-newspaper text-xl text-[#10b981] drop-shadow-[0_0_8px_#10b981]" />
-              </div>
-              <span className="text-[15px] font-semibold tracking-wide">{t('nav.digest', 'Дайджест')}</span>
-              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Главное за день</span>
-            </Link>
+                <Link href="/digest" onClick={onClose} className="mobile-sheet-btn group">
+                  <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,#10b981_15%,transparent)] group-active:bg-[color-mix(in_srgb,#10b981_25%,transparent)] transition-colors">
+                    <i className="fas fa-newspaper text-xl text-[#10b981] drop-shadow-[0_0_8px_#10b981]" />
+                  </div>
+                  <span className="text-[15px] font-semibold tracking-wide">{t('nav.digest', 'Дайджест')}</span>
+                  <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Главное за день</span>
+                </Link>
 
-            <Link href="/contacts" onClick={onClose} className="mobile-sheet-btn group">
-              <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,#3b82f6_15%,transparent)] group-active:bg-[color-mix(in_srgb,#3b82f6_25%,transparent)] transition-colors">
-                <i className="fas fa-users text-xl text-[#3b82f6] drop-shadow-[0_0_8px_#3b82f6]" />
+                <Link href="/contacts" onClick={onClose} className="mobile-sheet-btn group">
+                  <div className="w-12 h-12 rounded-full mb-3 flex items-center justify-center bg-[color-mix(in_srgb,#3b82f6_15%,transparent)] group-active:bg-[color-mix(in_srgb,#3b82f6_25%,transparent)] transition-colors">
+                    <i className="fas fa-users text-xl text-[#3b82f6] drop-shadow-[0_0_8px_#3b82f6]" />
+                  </div>
+                  <span className="text-[15px] font-semibold tracking-wide">{t('nav.contacts', 'Контакты')}</span>
+                  <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Поиск друзей</span>
+                </Link>
+                
+                <Link href="/settings" onClick={onClose} className="mobile-sheet-btn col-span-2 flex-row justify-start py-4 px-5 gap-4 h-auto mt-2">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[color-mix(in_srgb,var(--text-secondary)_15%,transparent)]">
+                    <i className="fas fa-gear text-[17px] text-[var(--text-secondary)]" />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-[15px] font-semibold tracking-wide">{t('nav.settings', 'Настройки')}</span>
+                    <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">{t('settings.appearance', 'Тема, приватность, язык')}</span>
+                  </div>
+                  <i className="fas fa-chevron-right ml-auto text-[var(--border-color)] text-sm" />
+                </Link>
               </div>
-              <span className="text-[15px] font-semibold tracking-wide">{t('nav.contacts', 'Контакты')}</span>
-              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">Поиск друзей</span>
-            </Link>
-            
-            <Link href="/settings" onClick={onClose} className="mobile-sheet-btn col-span-2 flex-row justify-start py-4 px-5 gap-4 h-auto mt-2">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[color-mix(in_srgb,var(--text-secondary)_15%,transparent)]">
-                <i className="fas fa-gear text-[17px] text-[var(--text-secondary)]" />
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="text-[15px] font-semibold tracking-wide">{t('nav.settings', 'Настройки')}</span>
-                <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">{t('settings.appearance', 'Тема, приватность, язык')}</span>
-              </div>
-              <i className="fas fa-chevron-right ml-auto text-[var(--border-color)] text-sm" />
-            </Link>
-          </div>
 
-          {/* Выбор языка в мобильном меню */}
-          <div className="pt-3 border-t border-[var(--studio-panel-border)]">
-            <div style={{ marginBottom: 8, fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              {t('settings.language', 'Язык интерфейса / Language')}
+              {/* Выбор языка в мобильном меню */}
+              <div className="pt-3 border-t border-[var(--studio-panel-border)]">
+                <div style={{ marginBottom: 8, fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  {t('settings.language', 'Язык интерфейса / Language')}
+                </div>
+                <LanguageBar />
+              </div>
+            </>
+          ) : (
+            /* Guest: sign-in prompt */
+            <div className="flex flex-col items-center gap-5 py-8">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[color-mix(in_srgb,var(--accent-primary)_12%,transparent)]">
+                <i className="fas fa-lock text-2xl text-[var(--accent-primary)] opacity-70" />
+              </div>
+              <p className="text-center text-[var(--text-secondary)] text-sm leading-relaxed px-4">
+                {t('auth.signInPrompt', 'Войдите, чтобы получить доступ к комнатам, сообщениям и контактам')}
+              </p>
+              <Link
+                href="/auth/signin"
+                onClick={onClose}
+                className="platform-btn flex items-center gap-2"
+                style={{ fontSize: '0.95rem', padding: '10px 28px' }}
+              >
+                <i className="fas fa-sign-in-alt" />
+                {t('nav.login', 'Войти')}
+              </Link>
+
+              {/* Язык доступен и гостям */}
+              <div className="w-full pt-5 mt-2 border-t border-[var(--studio-panel-border)]">
+                <div style={{ marginBottom: 8, fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  {t('settings.language', 'Язык интерфейса / Language')}
+                </div>
+                <LanguageBar />
+              </div>
             </div>
-            <LanguageBar />
-          </div>
+          )}
         </div>
       </div>
     </>
