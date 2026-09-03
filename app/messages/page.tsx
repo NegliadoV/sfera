@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { CreateGroupModal } from '@/components/CreateGroupModal';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 type ConversationItem = {
   userId: string;
@@ -28,6 +29,7 @@ type GroupItem = {
 };
 
 export default function MessagesPage() {
+  const { isReady } = useAuthGuard();
   const searchParams = useSearchParams();
   const shareContent = searchParams.get('shareContent');
   const shareTitle = searchParams.get('shareTitle');
@@ -40,6 +42,8 @@ export default function MessagesPage() {
   const [groups, setGroups] = useState<GroupItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
+
+  if (!isReady) return null;
 
   useEffect(() => {
     let cancelled = false;

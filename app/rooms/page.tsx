@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/components/i18n/LanguageProvider';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 type Space = {
   id: string;
@@ -15,6 +16,7 @@ type Space = {
 
 export default function GlobalRoomsPage() {
   const { t } = useTranslation();
+  const { isReady } = useAuthGuard();
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,6 +26,17 @@ export default function GlobalRoomsPage() {
   const [newDesc, setNewDesc] = useState('');
   const [isOpenMic, setIsOpenMic] = useState(false);
   const router = useRouter();
+
+  if (!isReady) {
+    return (
+      <div className="platform-page flex items-center justify-center min-h-[60vh]">
+        <div className="text-center text-[var(--text-muted)]">
+          <i className="fas fa-spinner fa-spin text-2xl mb-3 block" />
+          <p>{t('common.loading', 'Загрузка…')}</p>
+        </div>
+      </div>
+    );
+  }
 
   const fetchSpaces = async () => {
     try {
