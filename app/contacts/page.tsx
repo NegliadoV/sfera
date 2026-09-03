@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 type Contact = { id: string; name: string | null; email: string | null; image: string | null; isContact?: boolean; isOutgoing?: boolean };
 type RequestObj = { id: string; fromUser?: Contact; toUser?: Contact; status: string; createdAt: string };
 
 export default function ContactsPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { session, isReady } = useAuthGuard();
   
   const [activeTab, setActiveTab] = useState<'contacts' | 'search'>('contacts');
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,6 +21,8 @@ export default function ContactsPage() {
   const [searchResults, setSearchResults] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
+
+  if (!isReady) return null;
 
   const fetchContactsAndRequests = async () => {
     setLoading(true);
