@@ -93,25 +93,6 @@ export default async function SignInPage({
             Зарегистрироваться
           </Link>
         </p>
-
-        <div className="w-full mt-8 pt-6 flex flex-col items-center" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <p className="text-sm font-medium mb-4" style={{ color: 'var(--text-muted)' }}>Dev: вход как seed-пользователь</p>
-          <form
-            className="w-full"
-            action={async () => {
-              'use server';
-              await signIn('credentials', {
-                email: 'seed@horizon.local',
-                password: 'dev',
-                redirectTo: callbackUrl,
-              });
-            }}
-          >
-            <button type="submit" className="glass-icon-btn w-full flex items-center justify-center py-3">
-              Войти как seed-пользователь
-            </button>
-          </form>
-        </div>
       </div>
     </div>
   );
