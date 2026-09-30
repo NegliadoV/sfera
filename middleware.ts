@@ -6,21 +6,37 @@ const LIVEKIT_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://localhost:7880
 
 const isProd = process.env.NODE_ENV === 'production';
 
-function corsHeaders(origin: string | null): Record<string, string> {
+function corsHeaders(origin: string | null, userAgent: string | null): Record<string, string> {
   let isAllowed: boolean;
+
+  // Определяем, является ли запрос от мобильного приложения
+  const isMobileApp = userAgent && (
+    userAgent.includes('Roominate-iOS') ||
+    userAgent.includes('Roominate-Android') ||
+    userAgent.includes('Expo') || // React Native Expo
+    userAgent.includes('ReactNative')
+  );
+
   if (isProd) {
-    isAllowed = origin === PRODUCTION_ORIGIN;
+    // В production разрешаем наш домен + мобильные приложения
+    isAllowed = origin === PRODUCTION_ORIGIN || isMobileApp;
   } else {
-    isAllowed = !!origin && /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+)(:\d+)?$/.test(origin);
+    // В dev разрешаем localhost + локальные IP (для тестирования на физических устройствах)
+    isAllowed = !!origin && /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/.test(origin);
   }
-  const allowOrigin = isAllowed && origin ? origin : (isProd ? PRODUCTION_ORIGIN : 'http://localhost:8081');
+
+  // Для мобильных приложений разрешаем любой origin (они не имеют origin в традиционном смысле)
+  const allowOrigin = isMobileApp
+    ? '*'
+    : (isAllowed && origin ? origin : (isProd ? PRODUCTION_ORIGIN : 'http://localhost:8081'));
 
   return {
     'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Credentials': isMobileApp ? 'false' : 'true', // Mobile apps не используют cookies
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie, x-csrf-token',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie, x-csrf-token, X-App-Version, X-Device-Id',
     'Access-Control-Max-Age': '86400',
+    'Access-Control-Expose-Headers': 'X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset',
   };
 }
 
@@ -100,8 +116,10 @@ const SECURITY_HEADERS: Record<string, string> = {
 
 export function middleware(req: NextRequest) {
   const origin = req.headers.get('origin');
-  const headers = { ...corsHeaders(origin), ...SECURITY_HEADERS };
+  const userAgent = req.headers.get('user-agent');
+  const headers = { ...corsHeaders(origin, userAgent), ...SECURITY_HEADERS };
 
+  // Preflight requests для мобильных приложений
   if (req.method === 'OPTIONS') {
     return new NextResponse(null, { status: 200, headers });
   }

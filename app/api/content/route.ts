@@ -151,24 +151,50 @@ export async function GET(req: NextRequest) {
       conditions.push(inArray(content.id, contentIdsWithLinks));
     }
 
-    // Упрощённый запрос - сначала получаем контент, потом добавляем метаданные
+    // Оптимизированный запрос с subqueries (устраняет N+1 query problem)
     const list = await db
       .select({
         id: content.id,
         universeId: content.universeId,
         authorId: content.authorId,
         authorName: user.name,
+        authorImage: user.image,
         type: content.type,
         title: content.title,
         url: content.url,
         body: content.body,
+        imageUrl: content.imageUrl,
         createdAt: content.createdAt,
         pinnedAt: content.pinnedAt,
+        savesCount: content.savesCount,
         // Фаза 2: метаданные
         sourceId: content.sourceId,
         publishedAt: content.publishedAt,
         externalAuthor: content.externalAuthor,
         tags: content.tags,
+
+        // Подсчёты через subqueries (выполняются в одном запросе, а не в цикле JS)
+        commentCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM comments
+          WHERE comments.content_id = ${content.id}
+        )`.as('comment_count'),
+
+        hasLinks: sql<boolean>`EXISTS(
+          SELECT 1
+          FROM content_links
+          WHERE content_links.from_content_id = ${content.id}
+        )`.as('has_links'),
+
+        pollData: sql<any>`(
+          SELECT json_build_object(
+            'id', cp.id,
+            'options', cp.options
+          )
+          FROM content_polls cp
+          WHERE cp.content_id = ${content.id}
+          LIMIT 1
+        )`.as('poll_data'),
       })
       .from(content)
       .leftJoin(user, eq(content.authorId, user.id))
@@ -177,42 +203,32 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .offset(offset);
 
-    // Добавляем подсчёты комментариев и проверку связей для каждого элемента
-    const enrichedList = await Promise.all(
-      list.map(async (item) => {
-        const [commentCountResult] = await db
-          .select({ count: sql<number>`count(*)::int` })
-          .from(comments)
-          .where(eq(comments.contentId, item.id));
+    // Batch-загрузка голосов для всех опросов одним запросом
+    const pollIds = list
+      .filter((item) => item.pollData)
+      .map((item) => item.pollData.id);
 
-        const [hasLinksResult] = await db
-          .select({ exists: sql<boolean>`true` })
-          .from(contentLinks)
-          .where(eq(contentLinks.fromContentId, item.id))
-          .limit(1);
+    let pollVotesMap: Record<string, any[]> = {};
+    if (pollIds.length > 0) {
+      const allVotes = await db
+        .select()
+        .from(contentPollVotes)
+        .where(inArray(contentPollVotes.pollId, pollIds));
 
-        const [pollData] = await db
-          .select({ id: contentPolls.id, options: contentPolls.options })
-          .from(contentPolls)
-          .where(eq(contentPolls.contentId, item.id))
-          .limit(1);
+      pollVotesMap = allVotes.reduce((acc, vote) => {
+        if (!acc[vote.pollId]) acc[vote.pollId] = [];
+        acc[vote.pollId].push(vote);
+        return acc;
+      }, {} as Record<string, any[]>);
+    }
 
-        let initialPollVotes: any[] = [];
-        if (pollData) {
-          initialPollVotes = await db
-            .select()
-            .from(contentPollVotes)
-            .where(eq(contentPollVotes.pollId, pollData.id));
-        }
-
-        return {
-          ...item,
-          commentCount: commentCountResult?.count || 0,
-          hasLinks: !!hasLinksResult,
-          poll: pollData ? { ...pollData, votes: initialPollVotes } : null,
-        };
-      })
-    );
+    // Формируем финальный список с poll votes
+    const enrichedList = list.map((item) => ({
+      ...item,
+      poll: item.pollData
+        ? { ...item.pollData, votes: pollVotesMap[item.pollData.id] || [] }
+        : null,
+    }));
 
     // Повторная сортировка для most_discussed и controversial
     if (sortBy === 'most_discussed' || sortBy === 'controversial') {

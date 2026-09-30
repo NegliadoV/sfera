@@ -15,6 +15,16 @@ export const metadata: Metadata = {
   title: 'Roominate | Платформа для глубокого познания',
   description:
     'Инструмент для мышления и осмысленного диалога. Тематические вселенные, структурированные дискуссии, совместное познание.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/roominate-icon-1024.png', sizes: '192x192', type: 'image/png' },
+      { url: '/roominate-icon-1024.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/roominate-icon-1024.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   openGraph: {
     title: 'Roominate | Платформа для глубокого познания',
     description: 'Инструмент для мышления и осмысленного диалога. Тематические вселенные и структурированные знания.',
@@ -22,16 +32,34 @@ export const metadata: Metadata = {
     siteName: 'Roominate',
     locale: 'ru_RU',
     type: 'website',
+    images: [
+      {
+        url: 'https://roominate.rest/roominate-icon-1024.png',
+        width: 1024,
+        height: 1024,
+        alt: 'Roominate',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Roominate | Платформа для глубокого познания',
     description: 'Инструмент для мышления и осмысленного диалога.',
+    images: ['https://roominate.rest/roominate-icon-1024.png'],
   },
   appleWebApp: {
     capable: true,
     title: 'Roominate',
     statusBarStyle: 'black-translucent',
+    startupImage: [
+      {
+        url: '/roominate-icon-1024.png',
+        media: '(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)',
+      },
+    ],
+  },
+  formatDetection: {
+    telephone: false, // Отключает автоопределение телефонов на iOS
   },
 };
 
