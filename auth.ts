@@ -99,20 +99,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .where(eq(user.email, email.trim().toLowerCase()))
           .limit(1);
 
-        if (!found) return null;
+        let targetUser = found;
+        const isDev = process.env.NODE_ENV !== 'production' || process.env.ENABLE_DEV_LOGIN === 'true';
+
+        if (!targetUser && isDev && email.trim().toLowerCase() === 'seed@horizon.local') {
+          try {
+            const [created] = await db
+              .insert(user)
+              .values({
+                id: '00000000-0000-0000-0000-000000000001',
+                email: 'seed@horizon.local',
+                name: 'Сид-пользователь',
+                userTag: 'seed_user',
+              })
+              .onConflictDoNothing()
+              .returning({ id: user.id, email: user.email, name: user.name, image: user.image, passwordHash: user.passwordHash });
+
+            if (created) {
+              targetUser = created;
+            } else {
+              const [rechecked] = await db
+                .select({ id: user.id, email: user.email, name: user.name, image: user.image, passwordHash: user.passwordHash })
+                .from(user)
+                .where(eq(user.email, 'seed@horizon.local'))
+                .limit(1);
+              targetUser = rechecked;
+            }
+          } catch (err) {
+            console.error('Failed to auto-create seed user:', err);
+          }
+        }
+
+        if (!targetUser) return null;
 
         // Dev: seed-пользователь — вход без пароля (только в dev-окружении)
-        if (process.env.NODE_ENV !== 'production' && found.email === 'seed@horizon.local') {
-          return { id: found.id, email: found.email, name: found.name, image: found.image };
+        if (isDev && targetUser.email === 'seed@horizon.local') {
+          return { id: targetUser.id, email: targetUser.email, name: targetUser.name, image: targetUser.image };
         }
 
         // Вход по email: проверка пароля
-        if (!found.passwordHash) return null;
+        if (!targetUser.passwordHash) return null;
         if (!password) return null;
-        const ok = await verifyPassword(password, found.passwordHash);
+        const ok = await verifyPassword(password, targetUser.passwordHash);
         if (!ok) return null;
 
-        return { id: found.id, email: found.email, name: found.name, image: found.image };
+        return { id: targetUser.id, email: targetUser.email, name: targetUser.name, image: targetUser.image };
       },
     }),
   ],

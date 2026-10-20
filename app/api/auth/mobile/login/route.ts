@@ -33,26 +33,62 @@ export async function POST(req: NextRequest) {
       .where(eq(user.email, email.toLowerCase()))
       .limit(1);
 
-    if (!found) {
-      if (email === 'seed@horizon.local') {
-        return NextResponse.json(
-          { error: 'Seed-пользователь не найден в базе. В корне проекта выполните: npm run db:seed' },
-          { status: 404 }
-        );
+    let target = found;
+    const isDev = process.env.NODE_ENV !== 'production' || process.env.ENABLE_DEV_LOGIN === 'true';
+
+    if (!target) {
+      if (email.toLowerCase() === 'seed@horizon.local') {
+        if (isDev) {
+          try {
+            const [created] = await db
+              .insert(user)
+              .values({
+                id: '00000000-0000-0000-0000-000000000001',
+                email: 'seed@horizon.local',
+                name: 'Сид-пользователь',
+                userTag: 'seed_user',
+              })
+              .onConflictDoNothing()
+              .returning();
+            if (created) {
+              target = { ...created, passwordHash: null };
+            } else {
+              const [rechecked] = await db
+                .select({
+                  id: user.id,
+                  email: user.email,
+                  name: user.name,
+                  image: user.image,
+                  passwordHash: user.passwordHash,
+                })
+                .from(user)
+                .where(eq(user.email, 'seed@horizon.local'))
+                .limit(1);
+              target = rechecked;
+            }
+          } catch {}
+        }
+        if (!target) {
+          return NextResponse.json(
+            { error: 'Seed-пользователь не найден в базе. В корне проекта выполните: npm run db:seed' },
+            { status: 404 }
+          );
+        }
+      } else {
+        return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
       }
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
     // Dev: seed user — no password check
-    if (found.email === 'seed@horizon.local') {
-      const token = await createJWT(found.id);
+    if (isDev && target.email === 'seed@horizon.local') {
+      const token = await createJWT(target.id);
       return NextResponse.json({
         token,
         user: {
-          id: found.id,
-          email: found.email,
-          name: found.name,
-          image: found.image,
+          id: target.id,
+          email: target.email,
+          name: target.name,
+          image: target.image,
         },
       });
     }

@@ -19,7 +19,7 @@ function corsHeaders(origin: string | null, userAgent: string | null): Record<st
 
   if (isProd) {
     // В production разрешаем наш домен + мобильные приложения
-    isAllowed = origin === PRODUCTION_ORIGIN || isMobileApp;
+    isAllowed = origin === PRODUCTION_ORIGIN || Boolean(isMobileApp);
   } else {
     // В dev разрешаем localhost + локальные IP (для тестирования на физических устройствах)
     isAllowed = !!origin && /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/.test(origin);
